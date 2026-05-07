@@ -2,6 +2,12 @@
   publish = "."
   functions = "netlify/functions"
 
+# Serve index.html na raiz
+[[redirects]]
+  from = "/"
+  to   = "/index.html"
+  status = 200
+
 [functions]
   node_bundler = "esbuild"
 
