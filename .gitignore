@@ -1,0 +1,30 @@
+# Credenciais e configs locais
+*.env
+.env*
+meta_ads_config.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Backups (pesados, ficam só local)
+Backup/
+
+# Arquivos temporários de criativo
+creative_tmp_*.json
+
+# Node
+node_modules/
+.netlify/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log

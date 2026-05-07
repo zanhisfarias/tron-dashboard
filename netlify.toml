@@ -1,0 +1,29 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/data"
+  to   = "/.netlify/functions/data"
+  status = 200
+
+[[redirects]]
+  from = "/api/status"
+  to   = "/.netlify/functions/status"
+  status = 200
+
+[[redirects]]
+  from = "/api/refresh"
+  to   = "/.netlify/functions/refresh"
+  status = 200
+
+[[redirects]]
+  from = "/api/budget"
+  to   = "/.netlify/functions/budget"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "20"
