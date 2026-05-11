@@ -34,7 +34,7 @@ except ImportError:
 # ─────────────────────────────────────────────────────────
 
 ENV_FILE = r"C:\Users\Marketing\.claude\meta_ads_config.env"
-DASHBOARD_HTML = r"C:\Users\Marketing\Desktop\Dashboard\dashboard.html"
+DASHBOARD_HTML = r"C:\Users\Marketing\Desktop\Dashboard\index.html"
 API_BASE = "https://graph.facebook.com/v21.0"
 
 # Carrega variáveis do .env
