@@ -1,14 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" }
-  ],
   "routes": [
     { "src": "/api/data",    "dest": "/api/data.js" },
     { "src": "/api/status",  "dest": "/api/status.js" },
     { "src": "/api/refresh", "dest": "/api/refresh.js" },
     { "src": "/api/budget",  "dest": "/api/budget.js" },
-    { "src": "/(.*)",        "dest": "/index.html" }
+    { "src": "/(.*)",        "dest": "/$1" }
   ]
 }
