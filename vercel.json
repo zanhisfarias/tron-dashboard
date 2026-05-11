@@ -1,10 +1,3 @@
 {
-  "version": 2,
-  "routes": [
-    { "src": "/api/data",    "dest": "/api/data.js" },
-    { "src": "/api/status",  "dest": "/api/status.js" },
-    { "src": "/api/refresh", "dest": "/api/refresh.js" },
-    { "src": "/api/budget",  "dest": "/api/budget.js" },
-    { "src": "/(.*)",        "dest": "/$1" }
-  ]
+  "version": 2
 }
