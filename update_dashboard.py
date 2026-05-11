@@ -14,6 +14,7 @@ import time
 import warnings
 import calendar
 from datetime import date, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Força UTF-8 no terminal do Windows
 if sys.stdout.encoding != "utf-8":
@@ -450,7 +451,7 @@ def fetch_nectar_leadboard():
     # A paginação correta é pelo parâmetro page=N (não displayStart).
     PAGE_SIZE = 15
     MAX_PAGES = 300  # ~4500 registros por status
-    PAGE_DELAY = 0.4  # delay entre páginas para evitar rate-limit
+    PAGE_DELAY = 0.15  # delay entre páginas para evitar rate-limit
 
     # Session reutiliza conexão TCP e reduz drops
     nectar_session = requests.Session()
@@ -545,7 +546,6 @@ def fetch_nectar_leadboard():
                             perdidas_mes += 1
 
                 # Extrai receita de camposListagem para TODOS os status
-                # (o time preenche o valor na etapa de Agendamento, antes de fechar)
                 campos = o.get("camposListagem") or []
                 data_ref = (
                     o.get("dataConclusao") or
