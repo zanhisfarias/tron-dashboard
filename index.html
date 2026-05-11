@@ -2285,7 +2285,19 @@ function applyLiveData(json) {
   // Nesse caso fazemos merge para preservar o histórico já embutido no HTML.
   if (d.all_data) {
     if (d.partial) {
-      Object.keys(d.all_data).forEach(function(dt) { ALL_DATA[dt] = d.all_data[dt]; });
+      // Só substitui a entrada de uma data se a API tiver MAIS gasto que o snapshot
+      // estático (evita que dados em tempo real zerem o histórico já gravado).
+      Object.keys(d.all_data).forEach(function(dt) {
+        var incoming = d.all_data[dt];
+        var existing = ALL_DATA[dt];
+        if (!existing || Object.keys(existing).length === 0) {
+          ALL_DATA[dt] = incoming;
+        } else {
+          var existSpend = Object.values(existing).reduce(function(s, c) { return s + (c && c.spend ? c.spend : 0); }, 0);
+          var newSpend   = Object.values(incoming).reduce(function(s, c) { return s + (c && c.spend ? c.spend : 0); }, 0);
+          if (newSpend > existSpend) ALL_DATA[dt] = incoming;
+        }
+      });
     } else {
       ALL_DATA    = d.all_data;
       if (d.all_dates) ALL_DATES = d.all_dates;
