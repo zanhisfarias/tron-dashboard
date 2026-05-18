@@ -2025,17 +2025,14 @@ function renderVerbaProduto() {
       if (!prodObj.statePct) return '';
       var rows =
         '<div class="flex items-center gap-1 py-[2px] mb-1" style="border-bottom:1px solid #2A2D3E;padding-bottom:4px">' +
-        '<span style="width:28px;font-size:9px;color:#6B7280;font-weight:600">UF</span>' +
+        '<span style="width:26px;font-size:9px;color:#6B7280;font-weight:600">UF</span>' +
         '<div class="flex-1"></div>' +
-        '<span style="width:34px;text-align:right;font-size:9px;color:#6B7280">%</span>' +
-        '<span style="width:58px;text-align:right;font-size:9px;color:#6B7280">Meta</span>' +
-        '<span style="width:58px;text-align:right;font-size:9px;color:#6B7280">Gasto</span>' +
-        '<span style="width:36px;text-align:right;font-size:9px;color:#6B7280">Leads</span>' +
-        '<span style="width:50px;text-align:right;font-size:9px;color:#6B7280">CPL</span>' +
+        '<span style="width:54px;text-align:right;font-size:9px;color:#6B7280">Gasto</span>' +
+        '<span style="width:32px;text-align:right;font-size:9px;color:#6B7280">Leads</span>' +
+        '<span style="width:48px;text-align:right;font-size:9px;color:#6B7280">CPL</span>' +
         '</div>';
       STATE_LIST.forEach(function(s) {
         var spct        = prodObj.statePct[s] || 0;
-        var sval        = metaVal * spct / 100;
         var sSpend      = pdataEntry ? (pdataEntry.statesSpend[s] || 0) : 0;
         var sLeads      = pdataEntry ? Math.round(pdataEntry.statesLeads[s] || 0) : 0;
         var sCpl        = sLeads > 0 ? sSpend / sLeads : null;
@@ -2043,15 +2040,13 @@ function renderVerbaProduto() {
         var spendColor  = sSpend > 0 ? prodObj.color : '#4B5563';
         rows +=
           '<div class="flex items-center gap-1 py-[3px]">' +
-          '<span style="width:28px;font-size:10px;font-weight:' + (isHl ? '700' : '500') + ';color:' + (isHl ? '#fff' : '#9CA3AF') + ';flex-shrink:0">' + s + '</span>' +
-          '<div class="flex-1 rounded-full overflow-hidden" style="height:4px;background:#2A2D3E">' +
+          '<span style="width:26px;font-size:10px;font-weight:' + (isHl ? '700' : '500') + ';color:' + (isHl ? '#fff' : '#9CA3AF') + ';flex-shrink:0">' + s + '</span>' +
+          '<div class="flex-1 rounded-full overflow-hidden" style="height:3px;background:#2A2D3E">' +
           '<div style="height:100%;width:' + spct.toFixed(1) + '%;background:' + prodObj.color + (isHl ? '' : 'aa') + ';border-radius:9999px"></div>' +
           '</div>' +
-          '<span style="width:34px;text-align:right;font-size:10px;font-weight:' + (isHl ? '700' : '500') + ';color:' + (isHl ? '#fff' : '#9CA3AF') + '">' + spct.toFixed(1) + '%</span>' +
-          '<span style="width:58px;text-align:right;font-size:10px;color:#6B7280;flex-shrink:0">' + fmtVerba(sval) + '</span>' +
-          '<span style="width:58px;text-align:right;font-size:10px;font-weight:600;color:' + spendColor + ';flex-shrink:0">' + fmtVerba(sSpend) + '</span>' +
-          '<span style="width:36px;text-align:right;font-size:10px;font-weight:' + (sLeads > 0 ? '600' : '400') + ';color:' + (sLeads > 0 ? '#E5E7EB' : '#4B5563') + ';flex-shrink:0">' + (sLeads > 0 ? sLeads : '—') + '</span>' +
-          '<span style="width:50px;text-align:right;font-size:10px;font-weight:' + (sCpl ? '600' : '400') + ';color:' + (sCpl ? (sCpl <= 80 ? '#10B981' : sCpl <= 150 ? '#F59E0B' : '#EF4444') : '#4B5563') + ';flex-shrink:0">' + (sCpl ? 'R$\u00a0' + Math.round(sCpl) : '—') + '</span>' +
+          '<span style="width:54px;text-align:right;font-size:10px;font-weight:600;color:' + spendColor + ';flex-shrink:0">' + fmtVerba(sSpend) + '</span>' +
+          '<span style="width:32px;text-align:right;font-size:10px;font-weight:' + (sLeads > 0 ? '600' : '400') + ';color:' + (sLeads > 0 ? '#E5E7EB' : '#4B5563') + ';flex-shrink:0">' + (sLeads > 0 ? sLeads : '—') + '</span>' +
+          '<span style="width:48px;text-align:right;font-size:10px;font-weight:' + (sCpl ? '600' : '400') + ';color:' + (sCpl ? (sCpl <= 80 ? '#10B981' : sCpl <= 150 ? '#F59E0B' : '#EF4444') : '#4B5563') + ';flex-shrink:0">' + (sCpl ? 'R$\u00a0' + Math.round(sCpl) : '—') + '</span>' +
           '</div>';
       });
       return rows;
