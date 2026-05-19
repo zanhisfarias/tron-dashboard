@@ -26,5 +26,10 @@ node_modules/
 Thumbs.db
 desktop.ini
 
-# Logs
+# Logs e cache local
 *.log
+update_log.txt
+run_output.txt
+adsets_cache.json
+tron-dashboard/
+Prompt/

@@ -118,6 +118,31 @@ async function fetchAdsets(token) {
   return adsets;
 }
 
+async function fetchActiveAdsCount(token) {
+  const campIds = new Set(Object.values(CAMPAIGN_IDS));
+  let count  = 0;
+  let cursor = null;
+
+  while (true) {
+    const params = { fields: 'id,effective_status,campaign_id', limit: '200' };
+    if (cursor) params.after = cursor;
+
+    try {
+      const resp = await apiGet(`${ACCOUNT}/ads`, params, token);
+      for (const a of (resp.data || [])) {
+        if (a.effective_status === 'ACTIVE' && campIds.has(a.campaign_id)) count++;
+      }
+      if (!resp.paging?.next) break;
+      cursor = resp.paging?.cursors?.after || null;
+    } catch (e) {
+      console.warn('[data] Ads count:', e.message);
+      break;
+    }
+  }
+
+  return count;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
@@ -128,8 +153,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const adsets             = await fetchAdsets(TOKEN);
-    const { today, allData } = await fetchTodayInsights(TOKEN);
+    const [adsets, activeAdsCount, { today, allData }] = await Promise.all([
+      fetchAdsets(TOKEN),
+      fetchActiveAdsCount(TOKEN),
+      fetchTodayInsights(TOKEN),
+    ]);
 
     const totalBudget = adsets
       .filter(a => a.status === 'active')
@@ -153,6 +181,7 @@ module.exports = async (req, res) => {
         all_data:           allData,
         all_dates:          [today],
         adsets_raw:         adsets,
+        active_ads_count:   activeAdsCount,
         total_daily_budget: totalBudget,
         partial:            true,
       },

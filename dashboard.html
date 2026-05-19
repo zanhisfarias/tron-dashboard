@@ -486,6 +486,7 @@ var CREATIVES = [{"id":"120238524414800686","name":"SISTEMA TRON","camp":"C00","
 var NECTAR_LEADBOARD = {"pipeline":{"Contatos":30,"Qualificação":46,"Agendamento":0,"Qualificada":0,"Vendida":4},"vendidas_mes":4,"perdidas_mes":1,"historico_mes":{"2026-04":{"vendidas":1,"perdidas":3},"2026-05":{"vendidas":4,"perdidas":1}},"receita_avulso_mes":9800.0,"mrr_mes":1450.0,"receita_avulso_total":14376.1,"mrr_total":2235.01,"receita_historico":{"2026-04":{"avulso":4576.1,"mrr":785.01},"2026-05":{"avulso":9800.0,"mrr":1450.0}}};
 
 var TOTAL_DAILY_BUDGET = 0;
+var ACTIVE_ADS_COUNT   = null;
 
 var RV_DATA = {"campaigns":{"CONT_RV":{"label":"Contábil RV","color":"#06B6D4","spend":268.02,"leads":1,"cpl":268.02,"impressions":5627,"clicks":47,"ctr":0.8352585747289852,"budget":66},"EMP_RV":{"label":"Empresarial RV","color":"#F97316","spend":124.08,"leads":0,"cpl":null,"impressions":2625,"clicks":23,"ctr":0.8761904761904762,"budget":33}},"adsets":[{"id":"120247320348320700","camp":"CONT_RV","name":"Conjunto 05 - Interesses Amplos","budget":33,"status":"paused","metrics":{}},{"id":"120247320346970700","camp":"CONT_RV","name":"Conjunto 04 - Lookalike 1% Nectar","budget":33,"status":"paused","metrics":{}},{"id":"120247320344590700","camp":"CONT_RV","name":"Conjunto 03 - Comportamento PME","budget":33,"status":"paused","metrics":{}},{"id":"120247073792430700","camp":"CONT_RV","name":"Conjunto 02 - Ordix","budget":33,"status":"active","metrics":{"7":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84},"14":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84},"30":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84},"2026-05":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84}}},{"id":"120247073788900700","camp":"CONT_RV","name":"Conjunto 01 - Box","budget":33,"status":"active","metrics":{"7":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null},"14":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null},"30":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null},"2026-05":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null}}},{"id":"120247320345750700","camp":"EMP_RV","name":"Conjunto 02 - Comportamento PME","budget":33,"status":"paused","metrics":{}},{"id":"120247073796860700","camp":"EMP_RV","name":"Conjunto 01 - Tron DP","budget":33,"status":"active","metrics":{"7":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null},"14":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null},"30":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null},"2026-05":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null}}}],"adset_metrics":{"120247073788900700":{"7":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null},"14":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null},"30":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null},"2026-05":{"spend":136.18,"impressions":3048,"clicks":22,"leads":0,"ctr":0.7217847769028871,"cpc":6.19,"cpm":44.678477690288716,"cpl":null}},"120247073792430700":{"7":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84},"14":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84},"30":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84},"2026-05":{"spend":131.84,"impressions":2579,"clicks":25,"leads":1,"ctr":0.9693679720822024,"cpc":5.2736,"cpm":51.12058937572703,"cpl":131.84}},"120247073796860700":{"7":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null},"14":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null},"30":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null},"2026-05":{"spend":124.08,"impressions":2625,"clicks":23,"leads":0,"ctr":0.8761904761904762,"cpc":5.394782608695652,"cpm":47.268571428571434,"cpl":null}}},"totals":{"spend":392.09999999999997,"leads":1,"cpl":392.09999999999997,"budget":99}};
 
@@ -957,7 +958,7 @@ function renderKPIs() {
   var agg   = aggregate();
   var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
   var activeAdsets = ADSETS_RAW.filter(function(a) { return camps.includes(a.camp) && a.status === 'active'; }).length;
-  var activeAds    = Math.round(activeAdsets * 1.5);
+  var activeAds    = ACTIVE_ADS_COUNT !== null ? ACTIVE_ADS_COUNT : null;
   // Verba diária: total da conta (todos adsets) quando 'all', ou soma da campanha filtrada
   var dailyBudget = state.camp === 'all'
     ? (TOTAL_DAILY_BUDGET || camps.reduce(function(s, c) { return s + (CAMPAIGNS[c] ? CAMPAIGNS[c].budget : 0); }, 0))
@@ -1078,7 +1079,7 @@ function renderKPIs() {
       '<div class="text-muted text-base font-light mb-0.5">/</div>' +
       '<div>' +
         '<div class="text-[8px] text-muted mb-0.5">An\u00fancios</div>' +
-        '<div class="text-sm md:text-xl font-bold" style="color:#8B5CF6">' + activeAds + '</div>' +
+        '<div class="text-sm md:text-xl font-bold" style="color:#8B5CF6">' + (activeAds !== null ? activeAds : '\u2014') + '</div>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -2245,11 +2246,12 @@ function applyLiveData(json) {
       if (d.all_dates) ALL_DATES = d.all_dates;
     }
   }
-  if (d.adsets_raw)         ADSETS_RAW         = d.adsets_raw;
-  if (d.adset_metrics)      ADSET_METRICS      = d.adset_metrics;
-  if (d.creatives)          CREATIVES          = d.creatives;
-  if (d.nectar_leadboard)   NECTAR_LEADBOARD   = d.nectar_leadboard;
-  if (d.total_daily_budget) TOTAL_DAILY_BUDGET = d.total_daily_budget;
+  if (d.adsets_raw)              ADSETS_RAW         = d.adsets_raw;
+  if (d.adset_metrics)           ADSET_METRICS      = d.adset_metrics;
+  if (d.creatives)               CREATIVES          = d.creatives;
+  if (d.nectar_leadboard)        NECTAR_LEADBOARD   = d.nectar_leadboard;
+  if (d.total_daily_budget)      TOTAL_DAILY_BUDGET = d.total_daily_budget;
+  if (d.active_ads_count != null) ACTIVE_ADS_COUNT  = d.active_ads_count;
   if (d.rv_data)            RV_DATA            = d.rv_data;
   renderAll();
 }

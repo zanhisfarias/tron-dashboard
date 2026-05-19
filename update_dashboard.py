@@ -366,7 +366,7 @@ def fetch_creatives():
         cursor = None
         while True:
             params = {
-                "fields": "id,name,status,creative{thumbnail_url}",
+                "fields": "id,name,status,effective_status,creative{thumbnail_url}",
                 "limit": "50",
             }
             if cursor:
@@ -388,7 +388,7 @@ def fetch_creatives():
                     "id":        aid,
                     "name":      ad.get("name", ""),
                     "camp":      code,
-                    "status":    "active" if ad.get("status") == "ACTIVE" else "paused",
+                    "status":    "active" if ad.get("effective_status") == "ACTIVE" else "paused",
                     "thumbnail": thumbnail,
                     "spend":     ins.get("spend", 0),
                     "leads":     ins.get("leads", 0),
@@ -807,12 +807,13 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 
     total_budget_js = f"var TOTAL_DAILY_BUDGET = {total_budget};"
 
+    active_ads_count = sum(1 for c in creatives if c.get("status") == "active")
+    active_ads_js = f"var ACTIVE_ADS_COUNT = {active_ads_count};"
+
     # RIO VERDE
     rv_data_js = "var RV_DATA = " + json.dumps(rv_data or {}, ensure_ascii=False, separators=(',', ':')) + ";"
 
-    block = f"""// ─────────────────────────────────────────────────────────
-// 1. DADOS — atualizado automaticamente pelo update_dashboard.py
-// DATA:START
+    block = f"""// DATA:START
 // Última atualização: {updated_at}
 // ─────────────────────────────────────────────────────────
 
@@ -830,6 +831,7 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 {nectar_js}
 
 {total_budget_js}
+{active_ads_js}
 
 {rv_data_js}
 
@@ -879,8 +881,19 @@ def main():
     all_dates, all_data = fetch_daily_data()
 
     print("\n[2/7] Buscando adsets...")
+    ADSETS_CACHE_FILE = os.path.join(os.path.dirname(__file__), "adsets_cache.json")
     adsets = fetch_adsets()
-    print(f"      {len(adsets)} adsets encontrados.")
+    if adsets:
+        with open(ADSETS_CACHE_FILE, "w", encoding="utf-8") as _f:
+            json.dump(adsets, _f, ensure_ascii=False, indent=2)
+        print(f"      {len(adsets)} adsets encontrados. Cache salvo.")
+    else:
+        if os.path.exists(ADSETS_CACHE_FILE):
+            with open(ADSETS_CACHE_FILE, encoding="utf-8") as _f:
+                adsets = json.load(_f)
+            print(f"      API sem dados — usando cache ({len(adsets)} adsets).")
+        else:
+            print(f"      API sem dados e sem cache disponível.")
 
     print("\n[3/7] Buscando métricas por adset (7d / 14d / 30d)...")
     adset_metrics = fetch_adset_metrics()

@@ -1,17 +1,13 @@
 @echo off
-title Tron — Atualizando Dashboard Meta Ads
-cd /d "C:\Users\Marketing\Desktop"
-python update_dashboard.py
+cd /d "C:\Users\Marketing\Desktop\Dashboard"
+set LOG=C:\Users\Marketing\Desktop\Dashboard\update_log.txt
+echo. >> "%LOG%"
+echo ============================================================ >> "%LOG%"
+echo Execucao: %DATE% %TIME% >> "%LOG%"
+echo ============================================================ >> "%LOG%"
+python update_dashboard.py >> "%LOG%" 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo.
-    echo ERRO ao atualizar o dashboard. Verifique o Python e as credenciais.
-    pause
-    exit /b 1
+    echo ERRO na atualizacao - veja update_log.txt
+) else (
+    echo OK - Dashboard atualizado em %DATE% %TIME%
 )
-echo.
-echo Copiando para pasta tron-dashboard...
-copy /y "dashboard.html" "tron-dashboard\index.html" >nul
-echo.
-echo Pronto! Arraste a pasta tron-dashboard para netlify.com/drop para publicar.
-echo.
-pause
