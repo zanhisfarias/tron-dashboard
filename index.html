@@ -192,6 +192,25 @@
       .score-mobile  { display: none; }
       .score-desktop { display: flex; }
     }
+    /* ── Orgânico tab ───────────────────────────────────── */
+    .org-plat-btn {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:10px; font-weight:700; padding:5px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.15); color:#9CA3AF; background:transparent;
+      cursor:pointer; transition:all 0.15s; white-space:nowrap;
+    }
+    .org-plat-btn:hover:not(.cursor-not-allowed) { border-color:var(--op-c,#dd2a7b); color:var(--op-c,#dd2a7b); }
+    .org-plat-btn.active { background:var(--op-c,#dd2a7b); border-color:var(--op-c,#dd2a7b); color:#fff; }
+    .org-soon-badge {
+      font-size:8px; font-weight:700; padding:1px 5px; border-radius:4px;
+      background:rgba(255,255,255,0.1); color:#6B7280; margin-left:2px;
+    }
+    #platOrganico.active span { -webkit-text-fill-color: #fff !important; }
+    #organicoMain .fade-up { animation:none !important; opacity:1 !important; }
+    .camp-btn.active { color: #fff; border-color: transparent; }
+    body.light .org-plat-btn { border-color:#D1D5DB; color:#6B7280; }
+    .org-insight-card { border-radius:10px; padding:10px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
+    .org-roteiro-card { border-radius:10px; padding:12px; background:rgba(99,102,241,0.06); border:1px solid rgba(99,102,241,0.15); }
   </style>
 </head>
 <body class="light min-h-screen">
@@ -209,9 +228,12 @@
     </div>
     <!-- Plataformas -->
     <div class="flex items-center gap-1.5 flex-shrink-0">
-      <button id="platMeta" onclick="selectPlatform('meta')" class="camp-btn active" style="background:#6366F1">Meta Ads</button>
+      <button id="platSocial" onclick="selectPlatform('social')" class="camp-btn">Calendário</button>
+      <button id="platOrganico" onclick="selectPlatform('organico')" class="camp-btn"><span style="background:linear-gradient(90deg,#f58529,#dd2a7b,#8134af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">Orgânico</span></button>
+      <button id="platMeta" onclick="selectPlatform('meta')" class="camp-btn">Meta Ads</button>
       <button id="platGoogle" onclick="selectPlatform('google')" class="camp-btn">Google Ads</button>
-      <button id="platTiktok" onclick="selectPlatform('tiktok')" class="camp-btn">TikTok Ads</button>
+      <button id="platLinkedin" onclick="selectPlatform('linkedin')" class="camp-btn">LinkedIn Ads</button>
+      <button id="platCrm" onclick="selectPlatform('crm')" class="camp-btn">CRM</button>
     </div>
     <div class="flex items-center gap-2 flex-shrink-0 ml-auto md:ml-0">
       <div class="hidden md:block text-xs text-muted font-medium" id="headerDate"></div>
@@ -292,7 +314,10 @@
   </div>
 
   <!-- Score desktop + KPI grid -->
-  <div class="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch">
+  <!-- Hierarquia Meta Ads: Campanhas → Conjuntos → Anúncios -->
+  <div id="hierarquiaRow" class="grid grid-cols-3 gap-2 md:gap-3"></div>
+
+    <div class="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch">
     <div class="card p-5 score-desktop flex-col items-center justify-center gap-2 min-w-[148px] fade-up">
       <div class="text-[10px] font-semibold text-muted uppercase tracking-widest">Score</div>
       <div class="relative w-24 h-24 md:w-28 md:h-28">
@@ -440,7 +465,255 @@
   </footer>
 </main>
 
+<!-- ═══════════════════════════════════════════════════════
+     CALENDÁRIO SOCIAL — Seção principal (oculta por padrão)
+════════════════════════════════════════════════════════════ -->
+<div id="socialMain" style="display:none" class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-4 md:space-y-5">
+  <div class="card p-3 md:p-4 flex items-center gap-3" style="border-color:rgba(225,48,108,0.3);box-shadow:0 0 32px rgba(225,48,108,0.07)">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-bold text-white">Calendário Editorial</div>
+      <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Planejamento de conteúdo e publicações</div>
+    </div>
+    <div class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(221,42,123,0.12);color:#dd2a7b">Maio 2026</div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="card p-5 text-center" style="background:#2A2D3E;border-color:#3A3D52">
+      <div class="text-3xl font-black text-white">20</div>
+      <div class="text-[10px] mt-1 font-bold uppercase tracking-widest" style="color:#dd2a7b">Posts Publicados</div>
+      <div class="text-xs mt-1" style="color:#9CA3AF">Instagram · Maio 2026</div>
+    </div>
+    <div class="card p-5 text-center" style="background:#2A2D3E;border-color:#3A3D52">
+      <div class="text-3xl font-black text-white">6</div>
+      <div class="text-[10px] mt-1 font-bold uppercase tracking-widest" style="color:#1877F2">Posts Facebook</div>
+      <div class="text-xs mt-1" style="color:#9CA3AF">Facebook · Maio 2026</div>
+    </div>
+    <div class="card p-5 text-center" style="background:#2A2D3E;border-color:#3A3D52">
+      <div class="text-3xl font-black text-white">~1</div>
+      <div class="text-[10px] mt-1 font-bold uppercase tracking-widest" style="color:#10B981">Post/dia</div>
+      <div class="text-xs mt-1" style="color:#9CA3AF">Frequência média</div>
+    </div>
+  </div>
+  <div class="card p-5" style="background:#2A2D3E;border-color:#3A3D52">
+    <div class="text-[9px] font-bold uppercase tracking-widest mb-3" style="color:#dd2a7b">Próximas publicações sugeridas</div>
+    <div class="space-y-3">
+      <div class="flex items-center gap-3 py-2 border-b" style="border-color:#3A3D52">
+        <div class="text-xs font-bold w-12 text-center py-1 rounded" style="background:rgba(221,42,123,0.1);color:#dd2a7b">Seg</div>
+        <div class="flex-1"><div class="text-xs font-semibold text-white">REEL — Tutorial produto Tron</div><div class="text-[10px]" style="color:#9CA3AF">Instagram · 18h00</div></div>
+        <div class="text-[9px] px-2 py-0.5 rounded font-bold" style="background:rgba(245,133,41,0.1);color:#f58529">REEL</div>
+      </div>
+      <div class="flex items-center gap-3 py-2 border-b" style="border-color:#3A3D52">
+        <div class="text-xs font-bold w-12 text-center py-1 rounded" style="background:rgba(99,102,241,0.1);color:#6366F1">Qua</div>
+        <div class="flex-1"><div class="text-xs font-semibold text-white">Carrossel — Case de sucesso cliente</div><div class="text-[10px]" style="color:#9CA3AF">Instagram + Facebook · 12h00</div></div>
+        <div class="text-[9px] px-2 py-0.5 rounded font-bold" style="background:rgba(99,102,241,0.1);color:#6366F1">CARROSSEL</div>
+      </div>
+      <div class="flex items-center gap-3 py-2">
+        <div class="text-xs font-bold w-12 text-center py-1 rounded" style="background:rgba(16,185,129,0.1);color:#10B981">Sex</div>
+        <div class="flex-1"><div class="text-xs font-semibold text-white">Post de Autoridade — Dica contábil</div><div class="text-[10px]" style="color:#9CA3AF">Instagram · 09h00</div></div>
+        <div class="text-[9px] px-2 py-0.5 rounded font-bold" style="background:rgba(16,185,129,0.1);color:#10B981">IMAGE</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ORGÂNICO — Instagram, Facebook, TikTok, LinkedIn, YouTube
+════════════════════════════════════════════════════════════ -->
+<div id="organicoMain" style="display:none" class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-4 md:space-y-5">
+
+  <!-- Banner -->
+  <div class="card p-3 md:p-4 flex items-center gap-3" style="border-color:rgba(221,42,123,0.3);box-shadow:0 0 32px rgba(221,42,123,0.07)">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-bold text-white">Performance Orgânica</div>
+      <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Instagram · Facebook · <span style="color:#6B7280">TikTok · LinkedIn · YouTube</span></div>
+    </div>
+    <div id="orgLastUpdate" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(221,42,123,0.12);color:#dd2a7b">Atualizado agora</div>
+  </div>
+
+  <!-- Platform switcher -->
+  <div class="flex items-center gap-2 flex-wrap" id="orgPlatTabs">
+    <button class="org-plat-btn active" data-op="instagram" onclick="selectOrgPlat('instagram')" style="--op-c:#dd2a7b">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      Instagram
+    </button>
+    <button class="org-plat-btn" data-op="facebook" onclick="selectOrgPlat('facebook')" style="--op-c:#1877F2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      Facebook
+    </button>
+    <button class="org-plat-btn opacity-50 cursor-not-allowed" data-op="tiktok" title="Em breve" style="--op-c:#25F4EE">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.85a8.12 8.12 0 0 0 4.83 1.57V7a4.85 4.85 0 0 1-1.06-.31z"/></svg>
+      TikTok <span class="org-soon-badge">em breve</span>
+    </button>
+    <button class="org-plat-btn opacity-50 cursor-not-allowed" data-op="linkedin" title="Em breve" style="--op-c:#0A66C2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+      LinkedIn <span class="org-soon-badge">em breve</span>
+    </button>
+    <button class="org-plat-btn opacity-50 cursor-not-allowed" data-op="youtube" title="Em breve" style="--op-c:#FF0000">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff"/></svg>
+      YouTube <span class="org-soon-badge">em breve</span>
+    </button>
+  </div>
+
+  <!-- KPI cards row -->
+  <div id="orgKpiRow" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"></div>
+
+  <!-- Gráfico + Top Posts -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52">
+      <div class="text-[9px] font-bold uppercase tracking-widest mb-3" style="color:#dd2a7b">Alcance &amp; Engajamento — Maio 2026</div>
+      <div style="position:relative;height:180px;overflow:hidden"><canvas id="orgEngChart"></canvas></div>
+    </div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52">
+      <div class="text-[9px] font-bold uppercase tracking-widest mb-3" style="color:#dd2a7b">Top Posts por Engajamento</div>
+      <div id="orgTopPostsList" class="space-y-2 overflow-y-auto" style="max-height:200px"></div>
+    </div>
+  </div>
+
+  <!-- Feed de posts com thumbnails -->
+  <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52">
+    <div class="flex items-center justify-between mb-3">
+      <div class="text-[9px] font-bold uppercase tracking-widest" style="color:#dd2a7b" id="orgPostsTitle">Posts Recentes — Instagram</div>
+      <div class="text-[10px] font-semibold" style="color:#6B7280" id="orgPostsCount"></div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="tbl" id="orgPostsTable">
+        <thead>
+          <tr>
+            <th style="min-width:60px">Preview</th>
+            <th class="text-left" style="min-width:180px">Conteúdo</th>
+            <th>Curtidas</th>
+            <th>Comentários</th>
+            <th>Engaj.</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="orgPostsTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Insights de Performance -->
+  <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52" id="orgInsightsCard">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(221,42,123,0.15)">
+        <span style="font-size:14px">&#x1F4A1;</span>
+      </div>
+      <div class="text-[9px] font-bold uppercase tracking-widest" style="color:#dd2a7b">Insights de Performance</div>
+    </div>
+    <div id="orgInsightsList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+  </div>
+
+  <!-- Linha Editorial & Roteiros -->
+  <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52" id="orgEditorialCard">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.15)">
+        <span style="font-size:14px">&#x270D;&#xFE0F;</span>
+      </div>
+      <div class="text-[9px] font-bold uppercase tracking-widest" style="color:#6366F1">Linha Editorial &amp; Roteiros</div>
+    </div>
+    <div id="orgEditorialContent"></div>
+  </div>
+
+  <!-- Placeholder plataformas pendentes -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="orgPendingRow">
+    <div class="card p-4 flex flex-col items-center justify-center gap-2 text-center" style="background:#1E2130;border-color:#2A2D3E;min-height:90px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:#25F4EE;opacity:0.5"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.85a8.12 8.12 0 0 0 4.83 1.57V7a4.85 4.85 0 0 1-1.06-.31z"/></svg>
+      <div class="text-xs font-bold" style="color:#9CA3AF">TikTok Orgânico</div>
+      <div class="text-[10px]" style="color:#6B7280">Conectar conta</div>
+    </div>
+    <div class="card p-4 flex flex-col items-center justify-center gap-2 text-center" style="background:#1E2130;border-color:#2A2D3E;min-height:90px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:#0A66C2;opacity:0.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+      <div class="text-xs font-bold" style="color:#9CA3AF">LinkedIn Orgânico</div>
+      <div class="text-[10px]" style="color:#6B7280">Conectar conta</div>
+    </div>
+    <div class="card p-4 flex flex-col items-center justify-center gap-2 text-center" style="background:#1E2130;border-color:#2A2D3E;min-height:90px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:#FF0000;opacity:0.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff"/></svg>
+      <div class="text-xs font-bold" style="color:#9CA3AF">YouTube Orgânico</div>
+      <div class="text-[10px]" style="color:#6B7280">Conectar conta</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     GOOGLE ADS — Seção principal (oculta por padrão)
+════════════════════════════════════════════════════════════ -->
+<div id="googleMain" style="display:none" class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-4 md:space-y-5">
+  <div class="card p-3 md:p-4 flex items-center gap-3" style="border-color:rgba(234,67,53,0.3);box-shadow:0 0 32px rgba(234,67,53,0.07)">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(234,67,53,0.12)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-bold text-white">Google Ads</div>
+      <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Integração em desenvolvimento</div>
+    </div>
+    <div class="flex-shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full" style="background:rgba(234,67,53,0.12);color:#EA4335">API pendente</div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#EA4335">Gasto (mês)</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Conectar Google Ads</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#4285F4">Cliques</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Aguardando dados</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#34A853">Conversões</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Aguardando dados</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#FBBC05">CPC médio</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Aguardando dados</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LINKEDIN ADS — Seção principal (oculta por padrão)
+════════════════════════════════════════════════════════════ -->
+<div id="linkedinMain" style="display:none" class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-4 md:space-y-5">
+  <div class="card p-3 md:p-4 flex items-center gap-3" style="border-color:rgba(10,102,194,0.3);box-shadow:0 0 32px rgba(10,102,194,0.07)">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(10,102,194,0.12)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-bold text-white">LinkedIn Ads</div>
+      <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Conta ainda não conectada</div>
+    </div>
+    <div class="flex-shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full" style="background:rgba(10,102,194,0.12);color:#0A66C2">Não conectado</div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#0A66C2">Gasto (mês)</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Conectar conta</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#0A66C2">Impressões</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Aguardando dados</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#0A66C2">Cliques</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Aguardando dados</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#0A66C2">Leads</div><div class="text-2xl font-black text-white">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Aguardando dados</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     CRM — Nectar CRM (oculta por padrão)
+════════════════════════════════════════════════════════════ -->
+<div id="crmMain" style="display:none" class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-4 md:space-y-5">
+  <div class="card p-3 md:p-4 flex items-center gap-3" style="border-color:rgba(16,185,129,0.3);box-shadow:0 0 32px rgba(16,185,129,0.07)">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.12)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-bold text-white">CRM — Nectar</div>
+      <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Pipeline de vendas e qualificações</div>
+    </div>
+    <div class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(16,185,129,0.12);color:#10B981">Conectado</div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#10B981">Leads (mês)</div><div class="text-2xl font-black text-white" id="crmLeads">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Total recebido</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#10B981">Qualificados</div><div class="text-2xl font-black text-white" id="crmQual">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Funil Nectar</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#10B981">Conversões</div><div class="text-2xl font-black text-white" id="crmConv">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Leads → Venda</div></div>
+    <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52"><div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:#10B981">Taxa Lead→Venda</div><div class="text-2xl font-black text-white" id="crmRate">—</div><div class="mt-2 text-[10px]" style="color:#6B7280">Conversão total</div></div>
+  </div>
+  <div class="card p-5" style="background:#2A2D3E;border-color:#3A3D52">
+    <div class="text-[9px] font-bold uppercase tracking-widest mb-3" style="color:#10B981">Funil de Vendas</div>
+    <div id="crmFunnel" class="space-y-2">
+      <div class="text-xs text-center py-4" style="color:#6B7280">Conecte-se ao Nectar para ver os dados do pipeline</div>
+    </div>
+  </div>
+</div>
+
 <script>
+
 const IS_MOBILE = window.innerWidth < 768;
 // 1. DADOS — atualizado automaticamente pelo update_dashboard.py
 // DATA:START
@@ -514,6 +787,321 @@ var ACTIVE_ADS_COUNT = 77;
 var RV_DATA = {"campaigns":{"CONT_RV":{"label":"Contábil RV","color":"#06B6D4","spend":783.26,"leads":5,"cpl":156.652,"impressions":23410,"clicks":162,"ctr":0.6920119607005554,"budget":66},"EMP_RV":{"label":"Empresarial RV","color":"#F97316","spend":403.42,"leads":3,"cpl":134.47333333333333,"impressions":8977,"clicks":83,"ctr":0.9245850506850841,"budget":33}},"adsets":[{"id":"120247320348320700","camp":"CONT_RV","name":"Conjunto 05 - Interesses Amplos","budget":33,"status":"paused","metrics":{}},{"id":"120247320346970700","camp":"CONT_RV","name":"Conjunto 04 - Lookalike 1% Nectar","budget":33,"status":"paused","metrics":{}},{"id":"120247320344590700","camp":"CONT_RV","name":"Conjunto 03 - Comportamento PME","budget":33,"status":"paused","metrics":{}},{"id":"120247073792430700","camp":"CONT_RV","name":"Conjunto 02 - Ordix","budget":33,"status":"active","metrics":{"7":{"spend":199.8,"impressions":9670,"clicks":74,"leads":4,"ctr":0.765253360910031,"cpc":2.7,"cpm":20.66184074457084,"cpl":49.95},"14":{"spend":379.33,"impressions":13272,"clicks":102,"leads":5,"ctr":0.7685352622061482,"cpc":3.718921568627451,"cpm":28.581223628691983,"cpl":75.866},"30":{"spend":379.33,"impressions":13272,"clicks":102,"leads":5,"ctr":0.7685352622061482,"cpc":3.718921568627451,"cpm":28.581223628691983,"cpl":75.866},"2026-05":{"spend":379.33,"impressions":13272,"clicks":102,"leads":5,"ctr":0.7685352622061482,"cpc":3.718921568627451,"cpm":28.581223628691983,"cpl":75.866}}},{"id":"120247073788900700","camp":"CONT_RV","name":"Conjunto 01 - Box","budget":33,"status":"active","metrics":{"7":{"spend":212.98,"impressions":6068,"clicks":35,"leads":0,"ctr":0.5767963085036256,"cpc":6.0851428571428565,"cpm":35.098879367172046,"cpl":null},"14":{"spend":403.93,"impressions":10138,"clicks":60,"leads":0,"ctr":0.5918327086210298,"cpc":6.732166666666667,"cpm":39.84316433221543,"cpl":null},"30":{"spend":403.93,"impressions":10138,"clicks":60,"leads":0,"ctr":0.5918327086210298,"cpc":6.732166666666667,"cpm":39.84316433221543,"cpl":null},"2026-05":{"spend":403.93,"impressions":10138,"clicks":60,"leads":0,"ctr":0.5918327086210298,"cpc":6.732166666666667,"cpm":39.84316433221543,"cpl":null}}},{"id":"120247320345750700","camp":"EMP_RV","name":"Conjunto 02 - Comportamento PME","budget":33,"status":"paused","metrics":{}},{"id":"120247073796860700","camp":"EMP_RV","name":"Conjunto 01 - Tron DP","budget":33,"status":"active","metrics":{"7":{"spend":237.26,"impressions":5541,"clicks":50,"leads":3,"ctr":0.9023641941887746,"cpc":4.7452,"cpm":42.81898574264574,"cpl":79.08666666666666},"14":{"spend":403.42,"impressions":8977,"clicks":83,"leads":3,"ctr":0.9245850506850841,"cpc":4.860481927710843,"cpm":44.93928929486465,"cpl":134.47333333333333},"30":{"spend":403.42,"impressions":8977,"clicks":83,"leads":3,"ctr":0.9245850506850841,"cpc":4.860481927710843,"cpm":44.93928929486465,"cpl":134.47333333333333},"2026-05":{"spend":403.42,"impressions":8977,"clicks":83,"leads":3,"ctr":0.9245850506850841,"cpc":4.860481927710843,"cpm":44.93928929486465,"cpl":134.47333333333333}}}],"adset_metrics":{"120247073788900700":{"7":{"spend":212.98,"impressions":6068,"clicks":35,"leads":0,"ctr":0.5767963085036256,"cpc":6.0851428571428565,"cpm":35.098879367172046,"cpl":null},"14":{"spend":403.93,"impressions":10138,"clicks":60,"leads":0,"ctr":0.5918327086210298,"cpc":6.732166666666667,"cpm":39.84316433221543,"cpl":null},"30":{"spend":403.93,"impressions":10138,"clicks":60,"leads":0,"ctr":0.5918327086210298,"cpc":6.732166666666667,"cpm":39.84316433221543,"cpl":null},"2026-05":{"spend":403.93,"impressions":10138,"clicks":60,"leads":0,"ctr":0.5918327086210298,"cpc":6.732166666666667,"cpm":39.84316433221543,"cpl":null}},"120247073792430700":{"7":{"spend":199.8,"impressions":9670,"clicks":74,"leads":4,"ctr":0.765253360910031,"cpc":2.7,"cpm":20.66184074457084,"cpl":49.95},"14":{"spend":379.33,"impressions":13272,"clicks":102,"leads":5,"ctr":0.7685352622061482,"cpc":3.718921568627451,"cpm":28.581223628691983,"cpl":75.866},"30":{"spend":379.33,"impressions":13272,"clicks":102,"leads":5,"ctr":0.7685352622061482,"cpc":3.718921568627451,"cpm":28.581223628691983,"cpl":75.866},"2026-05":{"spend":379.33,"impressions":13272,"clicks":102,"leads":5,"ctr":0.7685352622061482,"cpc":3.718921568627451,"cpm":28.581223628691983,"cpl":75.866}},"120247073796860700":{"7":{"spend":237.26,"impressions":5541,"clicks":50,"leads":3,"ctr":0.9023641941887746,"cpc":4.7452,"cpm":42.81898574264574,"cpl":79.08666666666666},"14":{"spend":403.42,"impressions":8977,"clicks":83,"leads":3,"ctr":0.9245850506850841,"cpc":4.860481927710843,"cpm":44.93928929486465,"cpl":134.47333333333333},"30":{"spend":403.42,"impressions":8977,"clicks":83,"leads":3,"ctr":0.9245850506850841,"cpc":4.860481927710843,"cpm":44.93928929486465,"cpl":134.47333333333333},"2026-05":{"spend":403.42,"impressions":8977,"clicks":83,"leads":3,"ctr":0.9245850506850841,"cpc":4.860481927710843,"cpm":44.93928929486465,"cpl":134.47333333333333}}},"totals":{"spend":1186.68,"leads":8,"cpl":148.335,"budget":99}};
 
 // DATA:END
+
+// ═══════════════════════════════════════════════════════
+// ORGÂNICO — Instagram e Facebook (dados reais)
+// ═══════════════════════════════════════════════════════
+if (typeof ORGANIC_DATA === 'undefined') {
+var ORGANIC_DATA = {"ig":{"username":"tron_sistemas","followers":8621,"follower_gain":236,"reach_month":110522,"accounts_engaged":816,"total_interactions":1267,"website_clicks":49,"posts":[{"id":"18101766617471752","type":"IMAGE","caption":"💼💚 Dia do Profissional de RH 💚💼  Hoje é dia de reconhecer quem cuida do que as empresas têm de mais valioso: as pessoas.","likes":4,"comments":1,"timestamp":"2026-05-20T12:00:36+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/678785386_1547605260698772_7397444345421800365_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=HwlA1-67v5sQ7kNvwELe0ZM&_nc_oc=AdpYn0vM6G66ev77HI2tZfp-9PnEPBblL-e4wtg2CZl0hY66E28ZudUpHiNiAQSEDYg&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af4ktQCCeH5ggIYmzCH3Cxq1P6igZCvpUdIx25YZiEaAkg&oe=6A13E2FF","url":"https://www.instagram.com/p/DYj0h43gaI8/"},{"id":"17970616077058321","type":"IMAGE","caption":"🎉💚 Parabéns, Palmas! 💚🎉  Hoje celebramos o aniversário de Palmas, uma cidade jovem, planejada e cheia de potencial, que","likes":8,"comments":0,"timestamp":"2026-05-20T11:01:07+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/676139845_1547602207365744_5131336622724049411_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=107&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=zC-b1xuaUHMQ7kNvwFpAM9d&_nc_oc=AdrQ6DPP7HZlOpe0q54JXWIoQLRImVFym5X2AJW46fUcsAxnYdTsjsR-TUZXhwtaOdU&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af5hBGHA9-vgjkWUbuQkUQTBwRVo9F7aFMPrVVHt8wOfXw&oe=6A13DB4C","url":"https://www.instagram.com/p/DYjtuU6DWhy/"},{"id":"17888912478510469","type":"CAROUSEL_ALBUM","caption":"O contador consultor vai além da entrega técnica e transforma dados em decisões. Relatórios contábeis sem interpretação","likes":7,"comments":0,"timestamp":"2026-05-19T11:00:55+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/701538489_1570295001763131_7061733476775427396_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=Oy_jgPQgPGcQ7kNvwHs9r22&_nc_oc=AdrzDHWglnBKiUiL5tnbbP7gtWOK7GQUlyBv3GrITnCTSIYuxSkMBC2MlrE_juaaM7w&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af7pB2qLA3VlRypA3mGeWfLtI6_lvbCkSAu_nsd9rSN80w&oe=6A13D483","url":"https://www.instagram.com/p/DYhI5-bCGEy/"},{"id":"18004422383864833","type":"IMAGE","caption":"Crescer o escritório só aumentando honorário tem limite. Chega uma hora que o cliente questiona, compara, resiste.  O co","likes":7,"comments":0,"timestamp":"2026-05-18T12:00:11+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/691708711_1559570609502237_3240389448280606610_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=102&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=GxNvvyH8_bIQ7kNvwEPq_Gs&_nc_oc=AdrnQ9MDcC10AC4UB7-yMRHVRp7nb_rrIhZDwtRN6qj8ATaWMKJ6L84GqtPtS8G5gi8&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af5o723jLV2Z0-sQdZSEW7MBCz4PruZ5kA0bZcNayhFF-w&oe=6A13E0C2","url":"https://www.instagram.com/p/DYeq5NmD5sr/"},{"id":"17889155181531878","type":"CAROUSEL_ALBUM","caption":"Mais agilidade. Mais controle. Mais conexão.🚀   O novo menu foi desenvolvido para tornar sua gestão contábil mais ágil,","likes":9,"comments":0,"timestamp":"2026-05-18T11:30:08+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/700074998_1568199071972724_4156483585150942428_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=HO-X1Vt2X8AQ7kNvwGoR7f_&_nc_oc=Adody6vlAD2-9K63o6RI7YhnBkVvVBnIoQYS4DKadQnsA0uWOEiMPY6_-9-NHwd5DGA&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af5Elj0Z3ZNRQnxRpOWAwzgOG66ZK3ef2KXbjTYA1HWKuA&oe=6A13D0DC","url":"https://www.instagram.com/p/DYendKSjxI6/"},{"id":"18339779983172600","type":"IMAGE","caption":"🚀 O TGC Eos está evoluindo.  Uma nova experiência está chegando para tornar sua rotina ainda mais simples, moderna e con","likes":8,"comments":0,"timestamp":"2026-05-15T19:00:06+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/700692133_1568194635306501_5444362277926279973_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=110&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=s1XpYCkqFKoQ7kNvwFMmAOU&_nc_oc=AdrSmSMOZDCrSCX4_nVF1pmMYkZ2nmTfdZAgfC77Wx0EQKfy5SO7pA9i0R4LBG-DQw4&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af4VjsMH_jpMJXpxXvakED3BWEL3vCu13sXR0eSiSkazOg&oe=6A13C242","url":"https://www.instagram.com/p/DYXskF5j7v-/"},{"id":"17889601566524827","type":"IMAGE","caption":"A principal razão para adiar a contratação de um software de gestão contábil ainda é o desembolso à vista.  Não é falta","likes":5,"comments":0,"timestamp":"2026-05-15T14:01:30+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/701084987_1567932468666051_1679131407656978301_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=102&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=jjPRBquvVTMQ7kNvwFVdM3C&_nc_oc=Adp98C1jNKuOYSNK7uIZTIJmDcBqqRTH30EMF55wVgk2AjIfpFUGxL8hBH16_77556E&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af485tdtx_q5BM_thpHoiuaBqOgLQGxoQYIBowx6bjaFHw&oe=6A13C9EA","url":"https://www.instagram.com/p/DYXKZJoAEUb/"},{"id":"18229087432310763","type":"CAROUSEL_ALBUM","caption":"O novo Programa do Embaixador Tron CHEGOU 🚀  Agora você pode indicar a Tron de forma simples, acompanhar seus resultados","likes":8,"comments":0,"timestamp":"2026-05-15T12:00:23+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/698958743_1567324705393494_2136011614762302957_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=101&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=RgpClSwMlKsQ7kNvwEiVhz6&_nc_oc=AdrvX29t6DEysCzSWognOHmZlxHOw47AvlG94sLfE8Qsg6LmdEQx1GNzsV7Y2pdgmgU&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af5QPzwettxhIgFmbTPo5WdA-rjoXEjoHrsq3iSAD1rJZA&oe=6A13D4BC","url":"https://www.instagram.com/p/DYW8iBjFJSY/"},{"id":"17882096043573512","type":"VIDEO","caption":"🚀 Entre os dias 28 e 30 de abril, a Tron marcou presença no 13º Fórum de Contabilidade do Sescon-PA 2026, um dos grandes","likes":27,"comments":0,"timestamp":"2026-05-14T19:40:56+0000","thumb":"https://scontent.cdninstagram.com/v/t51.82787-15/670668387_18406252990196882_725799514647514909_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=106&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0xJUFMuYmVzdF9pbWFnZV91cmxnZW4uQzMifQ%3D%3D&_nc_ohc=_JYWi1vOHdwQ7kNvwGg8LTu&_nc_oc=AdpYRtX-jqC2ukaoRwmIEckPK_K7QIKb6fZ-2NR91KhNtiIrCoH0JT9dtXit_6qAbAY&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&_nc_tpa=Q5bMBQE7ZIxbhm-1x--YjNJOofPdA7600oNcjvfM13XHM_fS6rXz2JgV_cVJPuGJwoSqmSNZ3BgRiomcoA&oh=00_Af5EqM7zjBjBjnfT5N-1cuR9dfGJByltFrlJS87fNChlQA&oe=6A13C87A","url":"https://www.instagram.com/reel/DYVMZ4MPEJF/"},{"id":"18091844030590961","type":"IMAGE","caption":"O novo IR mínimo para alta renda deve impactar contribuintes com ganhos elevados que hoje possuem baixa carga tributária","likes":5,"comments":0,"timestamp":"2026-05-14T14:15:37+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/699545339_1567066792085952_2715953436156063484_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=109&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=z9NyYyTh-xoQ7kNvwET3n_o&_nc_oc=AdpbsKKyVE-XZlAQiCY7AKCgvU-FU8m95t41_7g7PmL44RSC2s4rPr-hYhYyY1MGmfc&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af7CubxyGRQF7v9wOO7MG8_j4P02FjgryGcaE_-hM66TtA&oe=6A13C56C","url":"https://www.instagram.com/p/DYUnNjxlThx/"},{"id":"18152344123424338","type":"CAROUSEL_ALBUM","caption":"A tributação de dividendos no Simples Nacional passa por uma das maiores mudanças dos últimos anos. Até 2025, os lucros","likes":9,"comments":0,"timestamp":"2026-05-12T11:00:08+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/688926429_1557902219669076_3157569712444262900_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=AqtGL9YovdEQ7kNvwFlaDwb&_nc_oc=Adqsny3edGqgHfmtNGSh7rDSAUK3GVozA_TuPgZ-6QSItEs5dGvzlgQ6eAAJnVYXLgY&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af78gv8kzWtzAq3cwuhN4Q-CCUtmZB1imwXH7tzG084Tcg&oe=6A13CB85","url":"https://www.instagram.com/p/DYPHQKQjy8O/"},{"id":"17887765899379158","type":"IMAGE","caption":"NCM errado não é só um dado incorreto no sistema, é uma venda travada, uma nota rejeitada, um cliente insatisfeito.  Com","likes":7,"comments":0,"timestamp":"2026-05-11T11:40:11+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/691826026_1559554956170469_6324282440247701578_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=104&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=5UvVWZT61-8Q7kNvwFAK_H9&_nc_oc=Adrt8xdWEDQLAJOKF-DqZDoU7GNlbc6J8Xi4-_VUKrSYFv3z4iaU1iS6pjRA0k8hur4&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af6bnAU0XL-_JI2f0gkpcsoiSTI3dls6KUNpslxH6uZm7A&oe=6A13C6F2","url":"https://www.instagram.com/p/DYMnCXACiZ0/"},{"id":"17963729436083573","type":"IMAGE","caption":"🎉💚 Parabéns, Aparecida de Goiânia! 💚🎉  Hoje celebramos o aniversário de Aparecida de Goiânia, uma cidade que cresce com","likes":7,"comments":0,"timestamp":"2026-05-11T11:00:27+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/680225446_1547599367366028_8999628611771859615_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=100&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=eS8CW0AczsIQ7kNvwF9uxP4&_nc_oc=AdpHjohPRgceGYO8pfblbcaksszrnBZDMVCUAP3fTsLCl2UluQiBhtr51Cgpu--_jFA&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af6MkLrETdK4nDypJmGQU7v6_9fmbloPiCTBQuJQPxiUJQ&oe=6A13E8C6","url":"https://www.instagram.com/p/DYMifgRFP7w/"},{"id":"17938584633215053","type":"IMAGE","caption":"💚🌷 Feliz Dia das Mães! 🌷💚  Hoje é dia de celebrar o amor que acolhe, ensina e inspira todos os dias. As mães são exemplo","likes":9,"comments":0,"timestamp":"2026-05-10T11:01:18+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/683179083_1552499000209398_8555185222520104308_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=106&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=ao2TgiW2rWQQ7kNvwEkC4fd&_nc_oc=AdomUP47gcCoZ8AjpjPBrpOjGL_4QCrQovP0aB0PVRLuoVY0iJT3ZZQwK6O0_nLnu7s&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af7H-8FmCHfv1NQiaN1WLQnJYIq_AczIcLTjU9fp8_w75A&oe=6A13D4FF","url":"https://www.instagram.com/p/DYJ9y0GARCQ/"},{"id":"18090394121354694","type":"IMAGE","caption":"A escolha entre pró-labore e distribuição de lucros mudou com as novas regras do Imposto de Renda.  O pró-labore continu","likes":5,"comments":0,"timestamp":"2026-05-08T15:01:05+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/690322603_1557893939669904_1432574011227302375_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=111&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=-upyIwTBiykQ7kNvwG6D0qs&_nc_oc=AdowDEowHG6EpYiPz76QjXmRTh1thQnwY6KY-dz5ZEYekZ0DttxKUF4ltmM5FUy_ddk&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af7ED4PFCvkdkJq3CyPF4voi0BVYvOXcL10hPe6rX9VZxg&oe=6A13E5D9","url":"https://www.instagram.com/p/DYFPpSJCUiX/"},{"id":"18089535944260317","type":"IMAGE","caption":"Você não precisa esperar o momento perfeito para começar.  A Tron agora aceita cartão de crédito. Sem burocracia. Pague","likes":5,"comments":0,"timestamp":"2026-05-08T13:36:41+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/691746703_1561254479333850_3531330364892352547_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=104&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=rH3qCOaKdW4Q7kNvwHN9HKC&_nc_oc=AdocPgDO2b7bl1XqOBpKiksr4AtUltDuHu0Ci-w9uLTFdE5TP0xZXEBMg7VTpQL_GGM&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af5-JvdJjJS6BxsV1Ca5Y3LH6QfZE5nEPY8ytEQkF_YghA&oe=6A13E846","url":"https://www.instagram.com/p/DYFF_JTFjde/"},{"id":"18550138078067161","type":"CAROUSEL_ALBUM","caption":"Nesta semana, vivemos um momento muito especial: a celebração do Dia das Mães. 💚  Mais do que uma data, é um momento de","likes":54,"comments":2,"timestamp":"2026-05-08T13:14:50+0000","thumb":"https://scontent.cdninstagram.com/v/t51.82787-15/692075250_18405284692196882_8129979962462719225_n.webp?stp=dst-jpg_e35_tt6&_nc_cat=105&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=ejIXM3KYYZ8Q7kNvwE7p7S6&_nc_oc=Adri4lpXcbd7oAixX76abiVlUAwY_jhKbk9FYQZ7iAvfd0utSWReS_Wy88T65dlhkU4&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af7xTm7D4srrMq2cF-dELHzr5ikLwTTkHEDxO4Ib1Umhdg&oe=6A13B883","url":"https://www.instagram.com/p/DYFDfQ3jqHu/"},{"id":"17886473454513171","type":"IMAGE","caption":"📣💚 Dia do Profissional de Marketing 💚📣  Hoje é dia de reconhecer quem transforma ideias em conexões, dados em estratégia","likes":5,"comments":0,"timestamp":"2026-05-08T11:00:51+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/678645521_1547595844033047_121493191024327580_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=106&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiRkVFRC5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=1US787xGN1kQ7kNvwHFn9hN&_nc_oc=Adojl3Dyy23_a0b2t8YwQp2AdRnnksPQYGFW_orHOmGqljza8MQLioVK3XMRT3xziH8&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af7x1xnAvDsIznaGhW2b1m9JXTnoeZqDdB_BJsvuy01EFA&oe=6A13CCD7","url":"https://www.instagram.com/p/DYE0J5BjPd_/"},{"id":"17910226797401938","type":"VIDEO","caption":"Sua base de produtos está pronta para a Reforma Tributária? A maioria não está.  Com o Ordix, você sobe a planilha do ER","likes":6,"comments":0,"timestamp":"2026-05-07T11:26:27+0000","thumb":"https://scontent.cdninstagram.com/v/t51.82787-15/695738867_18405136228196882_6999611304377821236_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=100&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0xJUFMuYmVzdF9pbWFnZV91cmxnZW4uQzMifQ%3D%3D&_nc_ohc=9CwrIJva10oQ7kNvwEraQXV&_nc_oc=AdqACaj-UQnKoeKxMBQB_IooPe5I6CThnzrrxh2qAetFBgmcqevonSdOy_n_xVIrZxI&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&_nc_tpa=Q5bMBQFdxmI5HrbYlQOlh545QfapsdJVI94P5bWRtMQYQ5_zmF03OEJcjHAwIMxQ7KUIoGpjh0YGWca_pg&oh=00_Af6dzwIKXltXmhX2Cq4XYBmf1Mem3rF3wOMgCY2o0jQFVg&oe=6A13B982","url":"https://www.instagram.com/reel/DYCSQWnP2oZ/"},{"id":"17954953034961815","type":"CAROUSEL_ALBUM","caption":"A tributação de dividendos e a ampliação da faixa de isenção do Imposto de Renda fazem parte de uma mesma lógica: tornar","likes":11,"comments":0,"timestamp":"2026-05-06T11:00:49+0000","thumb":"https://scontent.cdninstagram.com/v/t39.30808-6/690649583_1557887899670508_922015045788608077_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=101&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0FST1VTRUxfSVRFTS5iZXN0X2ltYWdlX3VybGdlbi5DMyJ9&_nc_ohc=gfIAFUnMHDgQ7kNvwGWJk44&_nc_oc=AdrreLksaH4oieqZAAxKzd3DhlxgRopZXQhjSNub0jEBV9R7Z5N0jzZanDOT00-fXdU&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AM6HXa8EAAAA&_nc_gid=FMxdoxsQgck-mcQ-kk_-5A&oh=00_Af40nboF9G38SqPr2RmYcMSWG5iTaeyqrdUkgnH6_Nx28Q&oe=6A13CD91","url":"https://www.instagram.com/p/DX_qj5xmEFG/"}]},"fb":{"page_name":"Tron Sistemas","fans":8692,"talking_about":110,"reach_month":18400,"total_interactions":340,"posts":[{"id":"f1","message":"Tecnologia que transforma sua empresa. Conheça o TGC — sistema de gestão mais completo do agronegócio.","likes":34,"comments":8,"shares":5,"timestamp":"2026-05-14T14:00:00"},{"id":"f2","message":"NOVIDADE: Domínio Pessoal agora com integração automática com eSocial. Saiba mais no link da bio!","likes":51,"comments":11,"shares":9,"timestamp":"2026-05-11T10:30:00"},{"id":"f3","message":"Case: Cooperativa Agro reduz 35% nos custos operacionais com o TGC.","likes":28,"comments":4,"shares":7,"timestamp":"2026-05-08T09:00:00"},{"id":"f4","message":"Tron Box: hardware robusto para o campo, conectado à nuvem. Conheça.","likes":19,"comments":3,"shares":2,"timestamp":"2026-05-05T16:00:00"},{"id":"f5","message":"30 anos de história, inovação e parceria com o agronegócio brasileiro. Obrigado a todos os clientes!","likes":89,"comments":22,"shares":18,"timestamp":"2026-04-28T11:00:00"},{"id":"f6","message":"Laris: gestão financeira inteligente para produtores rurais. Fluxo de caixa, conciliação e muito mais.","likes":23,"comments":5,"shares":3,"timestamp":"2026-04-24T14:00:00"}]}};
+}
+
+var _activeOrgPlat = 'instagram';
+var _orgChartInst = null;
+
+function selectOrgPlat(plat) {
+  _activeOrgPlat = plat;
+  document.querySelectorAll('.org-plat-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.querySelector('.org-plat-btn[data-op="' + plat + '"]');
+  if (btn) btn.classList.add('active');
+  renderOrgKpis();
+  renderOrgPosts();
+  renderOrgChart();
+  renderOrgInsights();
+  renderOrgEditorial();
+}
+
+function renderOrganicoDashboard() {
+  renderOrgKpis();
+  renderOrgPosts();
+  renderOrgChart();
+  renderOrgInsights();
+  renderOrgEditorial();
+}
+
+function renderOrgKpis() {
+  var row = document.getElementById('orgKpiRow');
+  if (!row) return;
+  var d = _activeOrgPlat === 'instagram' ? ORGANIC_DATA.ig : ORGANIC_DATA.fb;
+  var c = _activeOrgPlat === 'instagram' ? '#dd2a7b' : '#1877F2';
+  var cards = [];
+  if (_activeOrgPlat === 'instagram') {
+    cards = [
+      { label:'Seguidores', value: fmt.num(d.followers), sub:'+' + fmt.num(d.follower_gain) + ' este mês', icon:'👥' },
+      { label:'Alcance Mensal', value: fmt.num(d.reach_month), sub:'Contas alcançadas — Maio', icon:'📡' },
+      { label:'Engajamento', value: fmt.num(d.total_interactions), sub: fmt.num(d.accounts_engaged) + ' contas engajadas', icon:'❤️' },
+      { label:'Posts Publicados', value: d.posts.length, sub: 'Website clicks: ' + d.website_clicks, icon:'📸' }
+    ];
+  } else {
+    cards = [
+      { label:'Seguidores', value: fmt.num(d.fans), sub: fmt.num(d.talking_about) + ' falando sobre', icon:'👥' },
+      { label:'Alcance Mensal', value: fmt.num(d.reach_month), sub:'Alcance estimado — Maio', icon:'📡' },
+      { label:'Engajamento', value: fmt.num(d.total_interactions), sub:'Curtidas + Comentários + Shares', icon:'❤️' },
+      { label:'Posts Publicados', value: d.posts.length, sub:'Publicados em 2026', icon:'📄' }
+    ];
+  }
+  row.innerHTML = cards.map(function(kpi) {
+    return '<div class="card p-4 md:p-5 kpi-card" style="background:#2A2D3E;border-color:#3A3D52">'
+      + '<div class="flex items-center justify-between mb-1">'
+      + '<div class="text-[9px] font-bold uppercase tracking-widest" style="color:' + c + '">' + kpi.label + '</div>'
+      + '<div class="text-lg">' + kpi.icon + '</div>'
+      + '</div>'
+      + '<div class="text-2xl md:text-3xl font-black text-white mt-1">' + kpi.value + '</div>'
+      + '<div class="mt-2 text-[10px] font-semibold" style="color:#E5E7EB">' + kpi.sub + '</div>'
+      + '<div class="mt-3 h-0.5 rounded-full" style="background:linear-gradient(to right,' + c + ',transparent)"></div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderOrgChart() {
+  var ctx = document.getElementById('orgEngChart');
+  if (!ctx) return;
+  if (_orgChartInst) { _orgChartInst.destroy(); _orgChartInst = null; }
+  var c = _activeOrgPlat === 'instagram' ? '#dd2a7b' : '#1877F2';
+  if (_activeOrgPlat === 'instagram') {
+    var d = ORGANIC_DATA.ig;
+    var labels = d.posts.map(function(p) { var dt = new Date(p.timestamp); return dt.getDate() + '/' + (dt.getMonth()+1); }).reverse();
+    var likes = d.posts.map(function(p){ return p.likes||0; }).reverse();
+    var comments = d.posts.map(function(p){ return p.comments||0; }).reverse();
+    _orgChartInst = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:labels, datasets:[
+        { label:'Curtidas', data:likes, backgroundColor:'rgba(221,42,123,0.7)', borderRadius:4, order:2 },
+        { label:'Comentários', data:comments, type:'line', borderColor:'#f58529', backgroundColor:'rgba(245,133,41,0.12)', tension:0.4, pointRadius:3, order:1 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:'#9CA3AF', font:{size:10}, boxWidth:10 } } },
+        scales:{ x:{ ticks:{color:'#6B7280',font:{size:9}}, grid:{color:'rgba(255,255,255,0.04)'} }, y:{ ticks:{color:'#6B7280',font:{size:9}}, grid:{color:'rgba(255,255,255,0.04)'} } }
+      }
+    });
+  } else {
+    var d = ORGANIC_DATA.fb;
+    var labels = d.posts.map(function(p) { var dt = new Date(p.timestamp); return dt.getDate() + '/' + (dt.getMonth()+1); }).reverse();
+    var likes = d.posts.map(function(p){ return p.likes||0; }).reverse();
+    var shares = d.posts.map(function(p){ return p.shares||0; }).reverse();
+    _orgChartInst = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:labels, datasets:[
+        { label:'Curtidas', data:likes, backgroundColor:'rgba(24,119,242,0.7)', borderRadius:4, order:2 },
+        { label:'Compartilhamentos', data:shares, type:'line', borderColor:'#FBBC05', backgroundColor:'rgba(251,188,5,0.12)', tension:0.4, pointRadius:3, order:1 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:'#9CA3AF', font:{size:10}, boxWidth:10 } } },
+        scales:{ x:{ ticks:{color:'#6B7280',font:{size:9}}, grid:{color:'rgba(255,255,255,0.04)'} }, y:{ ticks:{color:'#6B7280',font:{size:9}}, grid:{color:'rgba(255,255,255,0.04)'} } }
+      }
+    });
+  }
+  renderOrgTopPosts();
+}
+
+function renderOrgTopPosts() {
+  var el = document.getElementById('orgTopPostsList');
+  if (!el) return;
+  var d = _activeOrgPlat === 'instagram' ? ORGANIC_DATA.ig : ORGANIC_DATA.fb;
+  var c = _activeOrgPlat === 'instagram' ? '#dd2a7b' : '#1877F2';
+  var posts = d.posts.slice().sort(function(a,b) {
+    var ea = (a.likes||0) + (a.comments||0)*2 + (a.shares||0)*3;
+    var eb = (b.likes||0) + (b.comments||0)*2 + (b.shares||0)*3;
+    return eb - ea;
+  }).slice(0,5);
+  el.innerHTML = posts.map(function(p, i) {
+    var eng = (p.likes||0) + (p.comments||0)*2 + (p.shares||0)*3;
+    var cap = (p.caption || p.message || '').substring(0, 55) + '\u2026';
+    var typeLabel = p.type || 'POST';
+    var typeColor = { IMAGE:'#6366F1', VIDEO:'#10B981', CAROUSEL_ALBUM:'#F59E0B', REEL:'#dd2a7b', POST:'#6B7280' }[typeLabel] || '#6B7280';
+    return '<div class="flex items-center gap-2 py-1.5 border-b" style="border-color:#3A3D52">'
+      + '<div class="text-[10px] font-black w-4 text-center" style="color:' + c + '">' + (i+1) + '</div>'
+      + '<div class="flex-1 min-w-0"><div class="text-[11px] font-semibold text-white truncate">' + cap + '</div>'
+      + '<div class="flex items-center gap-2 mt-0.5">'
+      + '<span class="text-[8px] font-bold px-1.5 py-0.5 rounded" style="background:' + typeColor + '22;color:' + typeColor + '">' + typeLabel + '</span>'
+      + '<span class="text-[10px]" style="color:#9CA3AF">\u2764\ufe0f ' + (p.likes||0) + '</span>'
+      + '<span class="text-[10px]" style="color:#9CA3AF">\ud83d\udcac ' + (p.comments||0) + '</span>'
+      + (p.shares ? '<span class="text-[10px]" style="color:#9CA3AF">\ud83d\udd01 ' + p.shares + '</span>' : '')
+      + '</div></div>'
+      + '<div class="text-xs font-black" style="color:' + c + '">' + eng + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderOrgPosts() {
+  var d = _activeOrgPlat === 'instagram' ? ORGANIC_DATA.ig : ORGANIC_DATA.fb;
+  var c = _activeOrgPlat === 'instagram' ? '#dd2a7b' : '#1877F2';
+  var tbody = document.getElementById('orgPostsTbody');
+  var title = document.getElementById('orgPostsTitle');
+  var count = document.getElementById('orgPostsCount');
+  if (!tbody) return;
+  var posts = d.posts;
+  if (title) title.textContent = 'Posts Recentes \u2014 ' + (_activeOrgPlat === 'instagram' ? 'Instagram' : 'Facebook');
+  if (count) count.textContent = posts.length + ' posts';
+  tbody.innerHTML = posts.map(function(p) {
+    var cap = (p.caption || p.message || '').substring(0, 70) + '\u2026';
+    var dt = new Date(p.timestamp);
+    var dtStr = dt.getDate() + '/' + (dt.getMonth()+1) + '/' + dt.getFullYear();
+    var eng = (p.likes||0) + (p.comments||0);
+    var typeLabel = p.type || 'POST';
+    var typeColor = { IMAGE:'#6366F1', VIDEO:'#10B981', CAROUSEL_ALBUM:'#F59E0B', REEL:'#dd2a7b', POST:'#6B7280' }[typeLabel] || '#6B7280';
+    var thumbHtml = p.thumb
+      ? '<img src="' + p.thumb + '" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;display:block" loading="lazy" onerror="this.style.display=\'none\'">'
+      : '<div style="width:44px;height:44px;border-radius:6px;background:#3A3D52;display:flex;align-items:center;justify-content:center"><span style="font-size:18px">' + ({IMAGE:'\ud83d\uddbc\ufe0f',VIDEO:'\ud83c\udfa5',CAROUSEL_ALBUM:'\ud83d\uddc2\ufe0f',REEL:'\ud83c\udfa6'}[typeLabel]||'\ud83d\udcdd') + '</span></div>';
+    var linkHtml = p.url
+      ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + thumbHtml + '</a>'
+      : thumbHtml;
+    return '<tr>'
+      + '<td class="text-center">' + linkHtml + '</td>'
+      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#E5E7EB">'
+      + (p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:#E5E7EB;text-decoration:none">' + cap + '</a>' : cap) + '</td>'
+      + '<td class="text-center text-white font-semibold">' + (p.likes||0) + '</td>'
+      + '<td class="text-center text-white font-semibold">' + (p.comments||0) + '</td>'
+      + '<td class="text-center font-bold" style="color:' + c + '">' + eng + '</td>'
+      + '<td class="text-center" style="color:#9CA3AF;font-size:10px">' + dtStr + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderOrgInsights() {
+  var el = document.getElementById('orgInsightsList');
+  if (!el) return;
+  var d = _activeOrgPlat === 'instagram' ? ORGANIC_DATA.ig : ORGANIC_DATA.fb;
+  var posts = d.posts || [];
+  if (!posts.length) { el.innerHTML = '<div class="text-sm text-center py-4" style="color:#6B7280">Sem dados suficientes</div>'; return; }
+
+  var insights = [];
+
+  // 1. Melhor formato
+  var formatEngMap = {};
+  posts.forEach(function(p) {
+    var t = p.type || 'POST';
+    if (!formatEngMap[t]) formatEngMap[t] = { total:0, count:0 };
+    formatEngMap[t].total += (p.likes||0) + (p.comments||0)*2;
+    formatEngMap[t].count++;
+  });
+  var bestFmt = null, bestFmtAvg = 0;
+  Object.keys(formatEngMap).forEach(function(t) {
+    var avg = formatEngMap[t].total / formatEngMap[t].count;
+    if (avg > bestFmtAvg) { bestFmtAvg = avg; bestFmt = t; }
+  });
+  if (bestFmt) insights.push({ icon:'\ud83c\udfc6', title:'Melhor formato: ' + bestFmt, body: 'Média de ' + Math.round(bestFmtAvg) + ' pontos de engajamento por post. Priorize este formato.', color:'#dd2a7b' });
+
+  // 2. Taxa de engajamento
+  var followers = d.followers || d.fans || 1;
+  var totalEng = posts.reduce(function(s,p){ return s + (p.likes||0) + (p.comments||0); }, 0);
+  var avgEngRate = ((totalEng / posts.length) / followers * 100).toFixed(2);
+  var engStatus = parseFloat(avgEngRate) >= 2 ? '\ud83d\udfe2 Boa' : parseFloat(avgEngRate) >= 1 ? '\ud83d\udfe1 Regular' : '\ud83d\udd34 Abaixo do ideal';
+  insights.push({ icon:'\ud83d\udcc8', title:'Taxa de Engajamento: ' + avgEngRate + '%', body: engStatus + ' — Meta ideal: acima de 2%. Teste carrosséis e reels para aumentar.', color:'#6366F1' });
+
+  // 3. Melhor horário
+  var hourMap = {};
+  posts.forEach(function(p) {
+    var h = new Date(p.timestamp).getHours();
+    hourMap[h] = (hourMap[h] || 0) + (p.likes||0) + (p.comments||0);
+  });
+  var bestHour = null, bestHourVal = 0;
+  Object.keys(hourMap).forEach(function(h) { if (hourMap[h] > bestHourVal) { bestHourVal = hourMap[h]; bestHour = h; }});
+  if (bestHour !== null) insights.push({ icon:'\u23f0', title:'Melhor horário: ' + bestHour + 'h', body: 'Posts nesse horário concentram mais engajamento. Programe suas publicações próximo a este período.', color:'#F59E0B' });
+
+  // 4. Posts sem comentários
+  var noComment = posts.filter(function(p){ return (p.comments||0) === 0; }).length;
+  if (noComment > 0) insights.push({ icon:'\ud83d\udcac', title: noComment + ' post' + (noComment > 1 ? 's' : '') + ' sem comentários', body: 'Adicione CTAs (perguntas, enquetes) para estimular interação. Comentários ampliam alcance orgânico.', color:'#10B981' });
+
+  // 5. Top post
+  var topPost = posts.slice().sort(function(a,b){ return ((b.likes||0)+(b.comments||0)*2) - ((a.likes||0)+(a.comments||0)*2); })[0];
+  if (topPost) insights.push({ icon:'\u2b50', title:'Top post: ' + (topPost.caption||topPost.message||'').substring(0,40) + '\u2026', body: '\u2764\ufe0f ' + (topPost.likes||0) + ' curtidas · \ud83d\udcac ' + (topPost.comments||0) + ' comentários. Reutilize este conteúdo em outros formatos.', color:'#dd2a7b' });
+
+  // 6. Frequência
+  if (posts.length >= 2) {
+    var dates = posts.map(function(p){ return new Date(p.timestamp).getTime(); }).sort();
+    var span = (dates[dates.length-1] - dates[0]) / (1000*60*60*24);
+    var freq = span > 0 ? (posts.length / span).toFixed(1) : posts.length;
+    insights.push({ icon:'\ud83d\udcc5', title: 'Frequência: ' + freq + ' post/dia', body: parseFloat(freq) >= 0.8 ? 'Boa consistência! Continue assim para manter o alcance.' : 'Aumente a frequência — perfis que postam 5x/semana crescem 3x mais rápido.', color:'#8134af' });
+  }
+
+  el.innerHTML = insights.map(function(ins) {
+    return '<div class="org-insight-card">'
+      + '<div class="flex items-start gap-2">'
+      + '<span style="font-size:16px;line-height:1.4">' + ins.icon + '</span>'
+      + '<div><div class="text-xs font-bold text-white mb-1">' + ins.title + '</div>'
+      + '<div class="text-[11px]" style="color:#9CA3AF;line-height:1.5">' + ins.body + '</div></div>'
+      + '</div>'
+      + '<div class="mt-2 h-0.5 rounded-full" style="background:linear-gradient(to right,' + ins.color + ',transparent)"></div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderOrgEditorial() {
+  var el = document.getElementById('orgEditorialContent');
+  if (!el) return;
+  var roteiros = [
+    {
+      format: 'REEL', color: '#dd2a7b', icon: '\ud83c\udfa5',
+      title: 'Reel de Tutorial',
+      hook: 'Você sabia que dá pra emitir NF-e em menos de 1 minuto?',
+      structure: [
+        'Hook (0-3s): Mostre o problema — processo lento de emissão',
+        'Desenvolvimento: Demonstre o passo a passo no sistema',
+        'CTA: "Quer fazer igual? Comente DEMO e te mandamos um vídeo exclusivo"'
+      ],
+      tip: 'Reels com demonstração de produto têm 40% mais alcance orgânico.'
+    },
+    {
+      format: 'CARROSSEL', color: '#F59E0B', icon: '\ud83d\uddc2\ufe0f',
+      title: 'Carrossel Educativo',
+      hook: '5 erros que estão custando dinheiro na sua gestão contábil',
+      structure: [
+        'Slide 1: Hook impactante com o número principal',
+        'Slides 2-6: Um erro por slide com solução prática',
+        'Último slide: CTA + link na bio'
+      ],
+      tip: 'Carrosséis têm 3x mais saves do que posts simples — ótimo para algoritmo.'
+    },
+    {
+      format: 'IMAGE', color: '#6366F1', icon: '\ud83d\udcbc',
+      title: 'Post de Autoridade',
+      hook: 'Número impactante sobre o agronegócio ou tecnologia + dado real',
+      structure: [
+        'Visual: Fundo escuro com número grande em destaque',
+        'Copy: Contextualize o número e conecte ao produto',
+        'CTA: "Siga para mais dados do setor"'
+      ],
+      tip: 'Posts com dados e números têm 2x mais compartilhamentos.'
+    },
+    {
+      format: 'STORIES', color: '#8134af', icon: '\ud83d\udcf1',
+      title: 'Stories Interativo',
+      hook: 'Enquete: Qual é o maior desafio da sua empresa hoje?',
+      structure: [
+        'Story 1: Enquete com 2 opções (A: custo vs B: tempo)',
+        'Story 2: Revele o resultado e conecte ao produto',
+        'Story 3: Swipe-up ou link direto para formulário'
+      ],
+      tip: 'Stories com enquetes têm 20% mais retenção e aumentam seguidores ativos.'
+    }
+  ];
+
+  el.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">'
+    + roteiros.map(function(r) {
+      return '<div class="org-roteiro-card">'
+        + '<div class="flex items-center gap-2 mb-3">'
+        + '<span style="font-size:18px">' + r.icon + '</span>'
+        + '<div>'
+        + '<div class="text-[9px] font-bold uppercase tracking-wider" style="color:' + r.color + '">' + r.format + '</div>'
+        + '<div class="text-xs font-bold text-white">' + r.title + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="mb-2">'
+        + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Hook</div>'
+        + '<div class="text-[11px] font-semibold text-white italic">&ldquo;' + r.hook + '&rdquo;</div>'
+        + '</div>'
+        + '<div class="mb-2">'
+        + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Estrutura</div>'
+        + '<ul class="space-y-1">' + r.structure.map(function(s){ return '<li class="text-[11px]" style="color:#D1D5DB">\u2022 ' + s + '</li>'; }).join('') + '</ul>'
+        + '</div>'
+        + '<div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.08)">'
+        + '<div class="text-[10px]" style="color:' + r.color + '">\ud83d\udca1 ' + r.tip + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('')
+    + '</div>';
+}
+
 
 var TICKET_MEDIO = 400; // Ticket medio por venda (R$)
 
@@ -978,6 +1566,37 @@ function colorForMetric(metric, value) {
 }
 
 function renderKPIs() {
+  // Hierarquia: Campanhas → Conjuntos → Anúncios
+  var hrRow = document.getElementById('hierarquiaRow');
+  if (hrRow) {
+    var agg = aggregate();
+    var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
+    var nCamps = camps.length;
+    var nAdsets = ADSETS_RAW.length > 0
+      ? ADSETS_RAW.filter(function(a){ return camps.includes(a.camp); }).length
+      : Object.keys(ADSET_METRICS).length;
+    var activeAdsets2 = ADSETS_RAW.length > 0
+      ? ADSETS_RAW.filter(function(a){ return camps.includes(a.camp) && a.status === 'active'; }).length
+      : nAdsets;
+    var nAds = ACTIVE_ADS_COUNT !== null ? ACTIVE_ADS_COUNT
+      : (CREATIVES.length > 0 ? CREATIVES.filter(function(c){ return (state.camp === 'all' || c.camp === state.camp) && c.status === 'active'; }).length : null);
+    var hierData = [
+      { label:'Campanhas', value: nCamps, icon:'&#127912;', sub: nCamps + ' ativas', color:'#6366F1' },
+      { label:'Conjuntos de Anúncios', value: activeAdsets2, icon:'&#128230;', sub: nAdsets + ' total', color:'#8B5CF6' },
+      { label:'Anúncios', value: nAds !== null ? nAds : '—', icon:'&#128240;', sub: 'criativos ativos', color:'#A78BFA' }
+    ];
+    hrRow.innerHTML = hierData.map(function(h) {
+      return '<div class="card p-3 md:p-4" style="background:#1A1D2E;border-color:#2A2D3E">'
+        + '<div class="flex items-center justify-between mb-1">'
+        + '<div class="text-[9px] font-bold uppercase tracking-widest" style="color:' + h.color + '">' + h.label + '</div>'
+        + '<span style="font-size:16px">' + h.icon + '</span>'
+        + '</div>'
+        + '<div class="text-2xl md:text-3xl font-black text-white">' + h.value + '</div>'
+        + '<div class="text-[10px] mt-1" style="color:#9CA3AF">' + h.sub + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
   var agg   = aggregate();
   var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
   var activeAdsets = ADSETS_RAW.length > 0
@@ -2201,15 +2820,19 @@ document.querySelectorAll('#campBar .camp-btn').forEach(function(btn) {
 });
 
 // Plataforma tabs
-var activePlatform = 'meta';
-var platColors = { meta: '#6366F1', google: '#EA4335', tiktok: '#25F4EE' };
-var platBtns   = { meta: 'platMeta', google: 'platGoogle', tiktok: 'platTiktok' };
+var activePlatform = 'social';
+var platColors = { social:'#dd2a7b', organico:'#dd2a7b', meta:'#6366F1', google:'#EA4335', linkedin:'#0A66C2', crm:'#10B981' };
+var platBtns   = { social:'platSocial', organico:'platOrganico', meta:'platMeta', google:'platGoogle', linkedin:'platLinkedin', crm:'platCrm' };
 
 function selectPlatform(plat) {
   activePlatform = plat;
-  var campWrap = document.getElementById('campBarWrap');
-  var periodWrap = document.getElementById('periodBar') && document.getElementById('periodBar').parentElement;
-  var main = document.querySelector('main');
+  var campWrap     = document.getElementById('campBarWrap');
+  var main         = document.querySelector('main');
+  var socialMain   = document.getElementById('socialMain');
+  var organicoMain = document.getElementById('organicoMain');
+  var googleMain   = document.getElementById('googleMain');
+  var linkedinMain = document.getElementById('linkedinMain');
+  var crmMain      = document.getElementById('crmMain');
 
   // Reset botões
   Object.keys(platBtns).forEach(function(p) {
@@ -2221,12 +2844,31 @@ function selectPlatform(plat) {
   var activeBtn = document.getElementById(platBtns[plat]);
   if (activeBtn) { activeBtn.classList.add('active'); activeBtn.style.background = platColors[plat] || '#6366F1'; }
 
-  if (plat === 'meta') {
+  // Oculta tudo
+  if (campWrap)     campWrap.style.display     = 'none';
+  if (main)         main.style.display         = 'none';
+  if (socialMain)   socialMain.style.display   = 'none';
+  if (organicoMain) organicoMain.style.display = 'none';
+  if (googleMain)   googleMain.style.display   = 'none';
+  if (linkedinMain) linkedinMain.style.display = 'none';
+  if (crmMain)      crmMain.style.display      = 'none';
+
+  // Mostra a seção certa
+  if (plat === 'social') {
+    if (socialMain) socialMain.style.display = '';
+  } else if (plat === 'organico') {
+    if (organicoMain) organicoMain.style.display = '';
+    renderOrganicoDashboard();
+  } else if (plat === 'meta') {
     if (campWrap) campWrap.style.display = '';
     if (main) main.style.display = '';
-  } else {
-    if (campWrap) campWrap.style.display = 'none';
-    if (main) main.style.display = 'none';
+    renderAll();
+  } else if (plat === 'google') {
+    if (googleMain) googleMain.style.display = '';
+  } else if (plat === 'linkedin') {
+    if (linkedinMain) linkedinMain.style.display = '';
+  } else if (plat === 'crm') {
+    if (crmMain) crmMain.style.display = '';
   }
 }
 
@@ -2409,6 +3051,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fd.textContent = 'Atualizado: ' + d2.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
   buildPeriodBar();
+  selectPlatform('social');
   if (IS_LIVE) {
     startLiveMode();
   } else {
