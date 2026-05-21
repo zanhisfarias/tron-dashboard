@@ -232,6 +232,11 @@
     body.light .org-plat-btn { border-color:#D1D5DB; color:#6B7280; }
     .org-insight-card { border-radius:10px; padding:10px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
     .org-roteiro-card { border-radius:10px; padding:12px; background:rgba(99,102,241,0.06); border:1px solid rgba(99,102,241,0.15); }
+    /* Modo claro — cards de insight e editorial */
+    body.light .org-insight-card { background:#F8F9FC; border-color:#E5E7EB; }
+    body.light .org-roteiro-card { background:#EEF2FF; border-color:#C7D2FE; }
+    body.light [style*="color:#D1D5DB"] { color:#374151 !important; }
+    body.light [style*="border-top:1px solid rgba(255,255,255,0.08)"] { border-top-color:rgba(0,0,0,0.08) !important; }
   </style>
 </head>
 <body class="light min-h-screen">
@@ -3067,7 +3072,7 @@ function renderCalendario() {
     var day = d.getDate();
     if (!byDay[day]) byDay[day] = [];
     var caption = (p.caption || '').replace(/\n/g,' ').trim();
-    var title   = caption.substring(0, 36) || ('Post IG');
+    var title   = caption.substring(0, 58) || ('Post IG');
     var produto = detectProduto(caption);
     byDay[day].push({ title: title, url: p.url||'', produto: produto });
   });
@@ -3077,7 +3082,7 @@ function renderCalendario() {
     var day = d.getDate();
     if (!byDay[day]) byDay[day] = [];
     var caption = (p.message || '').replace(/\n/g,' ').trim();
-    var title   = caption.substring(0, 36) || 'Post Facebook';
+    var title   = caption.substring(0, 58) || 'Post Facebook';
     var produto = detectProduto(caption);
     byDay[day].push({ title: title, url: '', produto: produto });
   });
