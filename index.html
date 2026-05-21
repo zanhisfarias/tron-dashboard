@@ -171,6 +171,8 @@
     /* Fundos escuros inline */
     body.light [style*="background:#0F1117"] { background: #F8F9FC !important; }
     body.light [style*="background:#1A1D27"] { background: #FFFFFF !important; }
+    body.light [style*="background:#1A1D2E"] { background: #FFFFFF !important; }
+    body.light [style*="background:#12141C"] { background: #F3F4F6 !important; }
     body.light [style*="background:#1E2130"] { background: #F3F4F6 !important; }
     body.light [style*="background:#2A2D3E"] { background: #E5E7EB !important; }
     /* Bordas inline */
@@ -182,6 +184,25 @@
     body.light #headerDate { color: #4B5563 !important; }
     body.light #liveUpdatedAt { color: #4B5563 !important; }
     body.light #refreshBtn { background: #F3F4F6 !important; color: #374151 !important; border-color: #D1D5DB !important; }
+    /* ── Calendário — modo claro ───────────────────────────── */
+    /* Linhas entre semanas: muito suaves no modo claro */
+    body.light #calGrid > div { border-bottom-color: rgba(0,0,0,0.07) !important; }
+    /* Números dos dias: escuros e legíveis */
+    body.light #calGrid [style*="color:#D1D5DB"] { color: #374151 !important; }
+    body.light #calGrid [style*="color:#E5E7EB"] { color: #374151 !important; }
+    body.light #calGrid [style*="color:#374151"] { color: #9CA3AF !important; }
+    /* Pílulas — texto escuro para cada produto no modo claro */
+    body.light #calGrid [style*="color:#67E8F9"] { color: #0E7490 !important; }
+    body.light #calGrid [style*="color:#F9A8D4"] { color: #9D174D !important; }
+    body.light #calGrid [style*="color:#C4B5FD"] { color: #5B21B6 !important; }
+    body.light #calGrid [style*="color:#FCA5A5"] { color: #B91C1C !important; }
+    body.light #calGrid [style*="color:#86EFAC"] { color: #15803D !important; }
+    body.light #calGrid [style*="color:#FDE68A"] { color: #92400E !important; }
+    body.light #calGrid [style*="color:#FDA4AF"] { color: #BE123C !important; }
+    /* Hoje no calendário: bordas visíveis no claro */
+    body.light #calGrid [style*="outline:1.5px solid #EC4899"] { background: rgba(236,72,153,0.05) !important; }
+    /* ── Meta Ads hierarquia — texto no modo claro ─────────── */
+    body.light #hierarquiaRow .card { background: #FFFFFF !important; border-color: #E5E7EB !important; }
     @media (min-width: 768px) {
       .period-btn { padding: 5px 11px; font-size: 12px; }
       .camp-btn   { padding: 5px 12px; font-size: 12px; }
@@ -213,7 +234,7 @@
     .org-roteiro-card { border-radius:10px; padding:12px; background:rgba(99,102,241,0.06); border:1px solid rgba(99,102,241,0.15); }
   </style>
 </head>
-<body class="min-h-screen">
+<body class="light min-h-screen">
 
 <!-- HEADER -->
 <header class="sticky top-0 z-50 border-b border-border" style="background:#0F1117cc;backdrop-filter:blur(12px)">
@@ -245,11 +266,11 @@
       </div>
       <div id="liveUpdatedAt" class="hidden text-[10px] text-muted font-normal"></div>
       <!-- Toggle tema -->
-      <button id="themeToggleBtn" onclick="toggleTheme()" title="Alternar tema" class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all" style="background:#1E2130;color:#9CA3AF;border:1px solid #2A2D3E">
+      <button id="themeToggleBtn" onclick="toggleTheme()" title="Alternar tema" class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all" style="background:#F1F3F9;color:#374151;border:1px solid #D1D5DB">
         <svg id="themeIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
-        <span id="themeLabel" class="hidden md:inline">Luz</span>
+        <span id="themeLabel" class="hidden md:inline">Escuro</span>
       </button>
       <button id="refreshBtn" onclick="triggerRefresh()" title="Atualizar dados" class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all" style="background:#1E2130;color:#9CA3AF;border:1px solid #2A2D3E" onmouseover="this.style.color='#fff';this.style.borderColor='#6366F1'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#2A2D3E'">
         <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -2985,7 +3006,7 @@ function pollStatus() {
 }
 
 // ── Tema claro/escuro ──────────────────────────────────────
-var isLight = false;
+var isLight = true;
 function toggleTheme() {
   isLight = !isLight;
   document.body.classList.toggle('light', isLight);
@@ -3126,7 +3147,7 @@ function renderCalendario() {
 
   // Dias de abril (overflow)
   [26,27,28,29,30].forEach(function(d) {
-    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid #2A2D3E">'
+    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid rgba(99,102,241,0.12)">'
       + '<div class="text-[11px] font-semibold" style="color:#374151">' + d + '</div>'
       + '</div>';
   });
@@ -3138,7 +3159,7 @@ function renderCalendario() {
     var isSat    = ((firstDay + d - 1) % 7 === 6);
     var isToday  = (d === today);
     var numColor = isToday ? '#EC4899' : (isSun||isSat ? '#F87171' : '#D1D5DB');
-    var cellStyle = 'min-height:90px;border-bottom:1px solid #2A2D3E;'
+    var cellStyle = 'min-height:90px;border-bottom:1px solid rgba(99,102,241,0.12);'
       + (isToday ? 'background:rgba(236,72,153,0.06);outline:1.5px solid #EC4899;outline-offset:-1px' : '');
 
     cells += '<div class="p-1.5" style="' + cellStyle + '">'
@@ -3163,7 +3184,7 @@ function renderCalendario() {
   var lastCol   = (firstDay + totalDays - 1) % 7;
   var remaining = lastCol === 6 ? 0 : (6 - lastCol);
   for (var j = 1; j <= remaining; j++) {
-    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid #2A2D3E">'
+    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid rgba(99,102,241,0.12)">'
       + '<div class="text-[11px] font-semibold" style="color:#374151">' + j + '</div>'
       + '</div>';
   }
