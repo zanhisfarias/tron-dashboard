@@ -1584,39 +1584,16 @@ function colorForMetric(metric, value) {
 }
 
 function renderKPIs() {
-  // Hierarquia: Campanhas → Conjuntos → Anúncios
+  // Limpar hierarquiaRow (não usada mais)
   var hrRow = document.getElementById('hierarquiaRow');
-  if (hrRow) {
-    var agg = aggregate();
-    var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
-    var nCamps = camps.length;
-    var nAdsets = ADSETS_RAW.length > 0
-      ? ADSETS_RAW.filter(function(a){ return camps.includes(a.camp); }).length
-      : Object.keys(ADSET_METRICS).length;
-    var activeAdsets2 = ADSETS_RAW.length > 0
-      ? ADSETS_RAW.filter(function(a){ return camps.includes(a.camp) && a.status === 'active'; }).length
-      : nAdsets;
-    var nAds = ACTIVE_ADS_COUNT !== null ? ACTIVE_ADS_COUNT
-      : (CREATIVES.length > 0 ? CREATIVES.filter(function(c){ return (state.camp === 'all' || c.camp === state.camp) && c.status === 'active'; }).length : null);
-    var hierData = [
-      { label:'Campanhas', value: nCamps, icon:'&#127912;', sub: nCamps + ' ativas', color:'#6366F1' },
-      { label:'Conjuntos de Anúncios', value: activeAdsets2, icon:'&#128230;', sub: nAdsets + ' total', color:'#8B5CF6' },
-      { label:'Anúncios', value: nAds !== null ? nAds : '—', icon:'&#128240;', sub: 'criativos ativos', color:'#A78BFA' }
-    ];
-    hrRow.innerHTML = hierData.map(function(h) {
-      return '<div class="card p-3 md:p-4" style="background:#1A1D2E;border-color:#2A2D3E">'
-        + '<div class="flex items-center justify-between mb-1">'
-        + '<div class="text-[9px] font-bold uppercase tracking-widest" style="color:' + h.color + '">' + h.label + '</div>'
-        + '<span style="font-size:16px">' + h.icon + '</span>'
-        + '</div>'
-        + '<div class="text-2xl md:text-3xl font-black text-white">' + h.value + '</div>'
-        + '<div class="text-[10px] mt-1" style="color:#9CA3AF">' + h.sub + '</div>'
-        + '</div>';
-    }).join('');
-  }
+  if (hrRow) hrRow.innerHTML = '';
 
   var agg   = aggregate();
   var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
+  var nCamps   = camps.length;
+  var nAdsets  = ADSETS_RAW.length > 0
+    ? ADSETS_RAW.filter(function(a){ return camps.includes(a.camp); }).length
+    : Object.keys(ADSET_METRICS).length;
   var activeAdsets = ADSETS_RAW.length > 0
     ? ADSETS_RAW.filter(function(a) { return camps.includes(a.camp) && a.status === 'active'; }).length
     : Object.keys(ADSET_METRICS).length;
@@ -1696,23 +1673,25 @@ function renderKPIs() {
   var _prevLabel = prevMonthLabel(filteredDates);
   var grid = document.getElementById('kpiGrid');
 
-  // Card combinado: Adsets + Anúncios Ativos
-  var combinedCard = '<div class="card kpi-card p-3 md:p-4 fade-up" style="animation-delay:0s;min-width:0">' +
-    '<div class="text-[9px] md:text-[10px] font-semibold text-muted uppercase tracking-wider leading-tight mb-2">Adsets / An\u00fancios</div>' +
-    '<div class="flex items-end gap-3">' +
-      '<div>' +
-        '<div class="text-[8px] text-muted mb-0.5">Adsets</div>' +
-        '<div class="text-sm md:text-xl font-bold" style="color:#6366F1">' + activeAdsets + '</div>' +
-      '</div>' +
-      '<div class="text-muted text-base font-light mb-0.5">/</div>' +
-      '<div>' +
-        '<div class="text-[8px] text-muted mb-0.5">An\u00fancios</div>' +
-        '<div class="text-sm md:text-xl font-bold" style="color:#8B5CF6">' + (activeAds !== null ? activeAds : '\u2014') + '</div>' +
-      '</div>' +
+  // Cards de hierarquia redistribuídos no kpiGrid
+  var hierCards =
+    '<div class="card kpi-card p-3 md:p-4 fade-up" style="animation-delay:0s;min-width:0">' +
+      '<div class="text-[9px] md:text-[10px] font-semibold text-muted uppercase tracking-wider leading-tight mb-1">Campanhas</div>' +
+      '<div class="text-sm md:text-xl font-bold" style="color:#6366F1">' + nCamps + '</div>' +
+      '<div class="text-[9px] text-muted mt-0.5">' + nCamps + ' ativas</div>' +
     '</div>' +
-  '</div>';
+    '<div class="card kpi-card p-3 md:p-4 fade-up" style="animation-delay:0.03s;min-width:0">' +
+      '<div class="text-[9px] md:text-[10px] font-semibold text-muted uppercase tracking-wider leading-tight mb-1">Conjuntos</div>' +
+      '<div class="text-sm md:text-xl font-bold" style="color:#8B5CF6">' + activeAdsets + '</div>' +
+      '<div class="text-[9px] text-muted mt-0.5">' + nAdsets + ' total</div>' +
+    '</div>' +
+    '<div class="card kpi-card p-3 md:p-4 fade-up" style="animation-delay:0.06s;min-width:0">' +
+      '<div class="text-[9px] md:text-[10px] font-semibold text-muted uppercase tracking-wider leading-tight mb-1">An\u00fancios</div>' +
+      '<div class="text-sm md:text-xl font-bold" style="color:#A78BFA">' + (activeAds !== null ? activeAds : '\u2014') + '</div>' +
+      '<div class="text-[9px] text-muted mt-0.5">criativos ativos</div>' +
+    '</div>';
 
-  grid.innerHTML = combinedCard + kpis.map(function(k, i) {
+  grid.innerHTML = hierCards + kpis.map(function(k, i) {
     var color  = k.colorFn ? k.colorFn(k.value) : (k.metric ? colorForMetric(k.metric, k.value) : '#E5E7EB');
     var trendHtml = '';
     if (k.trendOverride !== undefined || k.trendMetric) {
