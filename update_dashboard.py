@@ -763,7 +763,7 @@ def fetch_rv_data():
 # 7. GERAÇÃO DO BLOCO JS
 # ─────────────────────────────────────────────────────────
 
-def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, nectar=None, total_budget=0, rv_data=None):
+def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, nectar=None, total_budget=0, rv_data=None, organic=None):
     """Gera o bloco de dados JS para injetar no HTML."""
 
     # CAMPAIGNS com orçamentos reais
@@ -813,6 +813,16 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
     # RIO VERDE
     rv_data_js = "var RV_DATA = " + json.dumps(rv_data or {}, ensure_ascii=False, separators=(',', ':')) + ";"
 
+    # ORGÂNICO
+    _default_organic = {
+        "ig": {"username":"tron_sistemas","followers":8621,"following":412,"follower_gain":236,
+               "reach_month":110522,"profile_views":945,"accounts_engaged":816,
+               "total_interactions":1267,"website_clicks":49,"posts":[]},
+        "fb": {"page_name":"Tron Sistemas","fans":8692,"talking_about":110,
+               "reach_month":18400,"total_interactions":340,"posts":[]},
+    }
+    organic_js = "var ORGANIC_DATA = " + json.dumps(organic or _default_organic, ensure_ascii=False, separators=(',', ':')) + ";"
+
     block = f"""// DATA:START
 // Última atualização: {updated_at}
 // ─────────────────────────────────────────────────────────
@@ -835,9 +845,154 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 
 {rv_data_js}
 
+{organic_js}
+
 // DATA:END"""
 
     return block
+
+# ─────────────────────────────────────────────────────────
+# 5b. DADOS ORGÂNICOS — Instagram e Facebook
+# ─────────────────────────────────────────────────────────
+
+IG_ID   = "17841405906455560"
+FB_PAGE = "183895946291"
+
+def fetch_organic_data():
+    """Busca dados orgânicos do Instagram e Facebook."""
+    today = date.today()
+    mes_inicio = date(today.year, today.month, 1)
+    since_str  = mes_inicio.isoformat()
+    until_str  = today.isoformat()
+
+    result = {
+        "ig": {
+            "username": "tron_sistemas",
+            "followers": 0, "following": 0, "follower_gain": 0,
+            "reach_month": 0, "profile_views": 0, "accounts_engaged": 0,
+            "total_interactions": 0, "website_clicks": 0,
+            "posts": [],
+        },
+        "fb": {
+            "page_name": "Tron Sistemas",
+            "fans": 0, "talking_about": 0,
+            "reach_month": 0, "total_interactions": 0,
+            "posts": [],
+        },
+    }
+
+    # ── Instagram ────────────────────────────────────────
+    try:
+        ig_info = api_get(IG_ID, {"fields": "followers_count,follows_count,username"})
+        result["ig"]["followers"] = ig_info.get("followers_count", 0)
+        result["ig"]["following"] = ig_info.get("follows_count", 0)
+        result["ig"]["username"]  = ig_info.get("username", "tron_sistemas")
+        print(f"  → IG seguidores: {result['ig']['followers']}")
+    except Exception as e:
+        print(f"  ! IG info erro: {e}")
+
+    # IG Insights com metric_type=total_value (alcance, engajamento, etc.)
+    ig_metrics_tv = [
+        "reach", "accounts_engaged", "total_interactions",
+        "profile_views", "website_clicks",
+    ]
+    try:
+        resp = api_get(f"{IG_ID}/insights", {
+            "metric": ",".join(ig_metrics_tv),
+            "metric_type": "total_value",
+            "period": "day",
+            "since": since_str,
+            "until": until_str,
+        })
+        for item in resp.get("data", []):
+            name = item.get("name", "")
+            val  = item.get("total_value", {}).get("value", 0)
+            if name == "reach":                 result["ig"]["reach_month"]       = int(val)
+            elif name == "accounts_engaged":    result["ig"]["accounts_engaged"]   = int(val)
+            elif name == "total_interactions":  result["ig"]["total_interactions"] = int(val)
+            elif name == "profile_views":       result["ig"]["profile_views"]      = int(val)
+            elif name == "website_clicks":      result["ig"]["website_clicks"]     = int(val)
+        print(f"  → IG insights: alcance={result['ig']['reach_month']}, engaj={result['ig']['total_interactions']}")
+    except Exception as e:
+        print(f"  ! IG insights erro: {e}")
+
+    # IG follower gain (via follower_count period=day)
+    try:
+        resp = api_get(f"{IG_ID}/insights", {
+            "metric": "follower_count",
+            "period": "day",
+            "since": since_str,
+            "until": until_str,
+        })
+        values = resp.get("data", [{}])[0].get("values", [])
+        total_gain = sum(v.get("value", 0) for v in values)
+        result["ig"]["follower_gain"] = int(total_gain)
+        print(f"  → IG ganho seguidores: {result['ig']['follower_gain']}")
+    except Exception as e:
+        print(f"  ! IG follower_count erro: {e}")
+
+    # IG posts recentes
+    try:
+        resp = api_get(f"{IG_ID}/media", {
+            "fields": "id,media_type,timestamp,like_count,comments_count,caption,media_url,thumbnail_url,permalink",
+            "limit": "20",
+        })
+        posts_raw = resp.get("data", [])
+        result["ig"]["posts"] = []
+        for p in posts_raw:
+            result["ig"]["posts"].append({
+                "id":        p.get("id", ""),
+                "type":      p.get("media_type", "IMAGE"),
+                "caption":   (p.get("caption") or "")[:120],
+                "likes":     p.get("like_count", 0),
+                "comments":  p.get("comments_count", 0),
+                "timestamp": p.get("timestamp", ""),
+                "thumb":     p.get("thumbnail_url") or p.get("media_url") or "",
+                "url":       p.get("permalink", ""),
+            })
+        print(f"  → IG posts: {len(result['ig']['posts'])} encontrados")
+    except Exception as e:
+        print(f"  ! IG media erro: {e}")
+
+    # ── Facebook ─────────────────────────────────────────
+    try:
+        fb_info = api_get(FB_PAGE, {"fields": "name,fan_count,talking_about_count"})
+        result["fb"]["page_name"]    = fb_info.get("name", "Tron Sistemas")
+        result["fb"]["fans"]         = fb_info.get("fan_count", 0)
+        result["fb"]["talking_about"] = fb_info.get("talking_about_count", 0)
+        print(f"  → FB seguidores: {result['fb']['fans']}")
+    except Exception as e:
+        print(f"  ! FB info erro: {e}")
+
+    # FB posts
+    try:
+        resp = api_get(f"{FB_PAGE}/posts", {
+            "fields": "message,created_time,likes.summary(true),comments.summary(true),shares",
+            "limit": "15",
+        })
+        posts_raw = resp.get("data", [])
+        result["fb"]["posts"] = []
+        total_interact = 0
+        for p in posts_raw:
+            likes    = p.get("likes",    {}).get("summary", {}).get("total_count", 0)
+            comments = p.get("comments", {}).get("summary", {}).get("total_count", 0)
+            shares   = p.get("shares",   {}).get("count", 0)
+            total_interact += likes + comments + shares
+            result["fb"]["posts"].append({
+                "id":        p.get("id", ""),
+                "message":   (p.get("message") or "")[:120],
+                "likes":     likes,
+                "comments":  comments,
+                "shares":    shares,
+                "timestamp": p.get("created_time", ""),
+            })
+        result["fb"]["total_interactions"] = total_interact
+        result["fb"]["reach_month"]        = result["fb"]["fans"]  # estimativa
+        print(f"  → FB posts: {len(result['fb']['posts'])} encontrados | interações: {total_interact}")
+    except Exception as e:
+        print(f"  ! FB posts erro: {e}")
+
+    return result
 
 # ─────────────────────────────────────────────────────────
 # 6. ATUALIZA O HTML
@@ -877,10 +1032,10 @@ def main():
     print(f"Data: {date.today().strftime('%d/%m/%Y')}")
     print("=" * 60)
 
-    print("\n[1/7] Buscando dados diários por campanha (30d)...")
+    print("\n[1/8] Buscando dados diários por campanha (30d)...")
     all_dates, all_data = fetch_daily_data()
 
-    print("\n[2/7] Buscando adsets...")
+    print("\n[2/8] Buscando adsets...")
     ADSETS_CACHE_FILE = os.path.join(os.path.dirname(__file__), "adsets_cache.json")
     adsets = fetch_adsets()
     if adsets:
@@ -895,25 +1050,28 @@ def main():
         else:
             print(f"      API sem dados e sem cache disponível.")
 
-    print("\n[3/7] Buscando métricas por adset (7d / 14d / 30d)...")
+    print("\n[3/8] Buscando métricas por adset (7d / 14d / 30d)...")
     adset_metrics = fetch_adset_metrics()
     print(f"      {len(adset_metrics)} adsets com métricas.")
 
-    print("\n[4/7] Buscando criativos e thumbnails...")
+    print("\n[4/8] Buscando criativos e thumbnails...")
     creatives = fetch_creatives()
 
-    print("\n[5/6] Buscando Leadboard do Nectar CRM...")
+    print("\n[5/8] Buscando Leadboard do Nectar CRM...")
     nectar = fetch_nectar_leadboard()
 
-    print("\n[6/7] Buscando dados da Tron Rio Verde...")
+    print("\n[6/8] Buscando dados da Tron Rio Verde...")
     rv_data = fetch_rv_data()
 
-    print("\n[7/7] Calculando orçamentos e atualizando HTML...")
+    print("\n[7/8] Buscando dados orgânicos (Instagram + Facebook)...")
+    organic = fetch_organic_data()
+
+    print("\n[8/8] Calculando orçamentos e atualizando HTML...")
     camp_budgets = fetch_campaign_budgets()
     budgets = calc_budgets(adsets, camp_budgets)
     total_budget = fetch_total_daily_budget(adsets)
     js_block = build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, nectar,
-                               total_budget=total_budget, rv_data=rv_data)
+                               total_budget=total_budget, rv_data=rv_data, organic=organic)
     update_html(js_block)
 
     print("\n" + "=" * 60)
