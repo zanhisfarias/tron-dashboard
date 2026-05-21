@@ -488,7 +488,7 @@
   <!-- Grade calendário principal -->
   <div class="card overflow-hidden" style="background:#1E2130;border-color:#2A2D3E">
     <!-- Header dias da semana -->
-    <div class="grid grid-cols-7 border-b" style="border-color:transparent">
+    <div class="grid grid-cols-7 border-b" style="border-color:#2A2D3E">
       <div class="py-2 text-center text-[11px] font-bold" style="color:#F87171">DOM</div>
       <div class="py-2 text-center text-[11px] font-bold" style="color:#9CA3AF">SEG</div>
       <div class="py-2 text-center text-[11px] font-bold" style="color:#9CA3AF">TER</div>
@@ -3114,7 +3114,7 @@ function renderCalendario() {
     var numColor = isToday ? '#dd2a7b' : (isWeekend ? '#F87171' : '#E5E7EB');
     var bgStyle = isToday
       ? 'background:rgba(221,42,123,0.06);border:1.5px solid #dd2a7b'
-      : '';
+      : 'border-bottom:1px solid #2A2D3E';
 
     cells += '<div class="p-1.5 relative" style="' + bgStyle + ';min-height:90px">'
       + '<div class="text-[12px] font-bold mb-1.5" style="color:' + numColor + '">' + d + '</div>';
