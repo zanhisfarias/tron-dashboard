@@ -707,7 +707,7 @@
   </div>
 
   <!-- KPIs CRM -->
-  <div id="crmKpiRow" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"></div>
+  <div id="crmKpiRow" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 md:gap-4"></div>
 
   <!-- Funil + Receita -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1690,40 +1690,7 @@ function renderKPIs() {
     { label: 'CPC',             value: agg.cpc,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpc',  trendMetric: 'cpc' },
     { label: 'CPM',             value: agg.cpm,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpm',  trendMetric: 'cpm' },
     { label: 'Cliques',         value: agg.clicks,      fmtFn: function(v) { return fmt.num(v); }, metric: null, trendMetric: 'clicks' },
-    { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr' },
-    { label: 'Receita',         value: receitaMes,
-      fmtFn: function(v) {
-        if (v === null) return '--';
-        return v >= 1000 ? 'R$' + (v/1000).toFixed(1) + 'k' : fmt.brl(v);
-      },
-      metric: null, trendMetric: null,
-      colorFn: function(v) { return v === null ? '#6B7280' : v > 0 ? '#10B981' : '#EF4444'; },
-      trendOverride: receitaTrend, trendLower: false },
-    { label: 'CAC',             value: cac,
-      fmtFn: function(v) { return v !== null ? fmt.brl(v) : '--'; },
-      metric: null, trendMetric: null,
-      colorFn: function(v) {
-        if (v === null) return '#6B7280';
-        return v <= TICKET_MEDIO * 0.5 ? '#10B981' : v <= TICKET_MEDIO ? '#F59E0B' : '#EF4444';
-      },
-      trendOverride: cacAnt !== null && cac !== null ? ((cac - cacAnt) / cacAnt * 100) : null,
-      trendLower: true },
-    { label: 'ROAS',            value: roas,
-      fmtFn: function(v) { return v !== null ? v.toFixed(2) + 'x' : '--'; },
-      metric: null, trendMetric: null,
-      colorFn: function(v) {
-        if (v === null) return '#6B7280';
-        return v >= 3 ? '#10B981' : v >= 1 ? '#F59E0B' : '#EF4444';
-      },
-      trendOverride: roasAnt !== null && roas !== null ? ((roas - roasAnt) / roasAnt * 100) : null,
-      trendLower: false },
-    { label: 'LTV 72 meses',    value: ltv72,
-      fmtFn: function(v) {
-        if (!v) return '--';
-        return v >= 1000 ? 'R$' + (v/1000).toFixed(0) + 'k' : fmt.brl(v);
-      },
-      metric: null, trendMetric: null,
-      colorFn: function(v) { return v > 0 ? '#6366F1' : '#6B7280'; } }
+    { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr' }
   ];
   var filteredDates = getFilteredDates();
   var _prevLabel = prevMonthLabel(filteredDates);
@@ -3205,15 +3172,34 @@ function renderCRM() {
   var taxaConv = contatos > 0 ? (vendidas / contatos * 100).toFixed(1) + '%' : '—';
   var recAvulso = nl.receita_avulso_mes || 0;
   var mrr = nl.mrr_mes || 0;
+  var recTotal = recAvulso + mrr;
+
+  // CAC / ROAS / LTV — calculados com gasto do mês (ADSET_METRICS)
+  var mesAtualCRM = (new Date().getMonth() + 1);
+  var mesStrCRM   = '2026-' + String(mesAtualCRM).padStart(2, '0');
+  var spendMesCRM = (typeof ADSET_METRICS !== 'undefined')
+    ? Object.values(ADSET_METRICS).reduce(function(s, m) { var mv = m[mesStrCRM]; return s + (mv ? mv.spend : 0); }, 0)
+    : 0;
+  var cac  = vendidas > 0 && spendMesCRM > 0 ? spendMesCRM / vendidas : null;
+  var roas = recTotal > 0 && spendMesCRM > 0 ? recTotal / spendMesCRM : null;
+  var ltv72 = (mrr > 0 && vendidas > 0)
+    ? (mrr / vendidas) * 72
+    : ((typeof TICKET_MEDIO !== 'undefined' && TICKET_MEDIO) ? TICKET_MEDIO * 72 : null);
+
+  function fmtBrl(v) { return v !== null ? 'R$\u00a0' + Math.round(v).toLocaleString('pt-BR') : '\u2014'; }
+  function fmtK(v)   { return v !== null ? (v >= 1000 ? 'R$\u00a0' + (v/1000).toFixed(0) + 'k' : fmtBrl(v)) : '\u2014'; }
 
   // KPIs
   var kpiRow = document.getElementById('crmKpiRow');
   if (kpiRow) {
     kpiRow.innerHTML = [
-      { label:'Contatos (mês)', value: contatos, sub:'Leads recebidos', color:'#6366F1' },
-      { label:'Vendas Fechadas', value: vendidas, sub: perdidas + ' perdidas', color:'#10B981' },
-      { label:'Receita Avulso', value: 'R$\u00a0' + recAvulso.toLocaleString('pt-BR'), sub:'Maio 2026', color:'#F59E0B' },
-      { label:'MRR', value: 'R$\u00a0' + mrr.toLocaleString('pt-BR'), sub:'Recorrente mensal', color:'#dd2a7b' }
+      { label:'Contatos (mês)',  value: contatos,                              sub: 'Leads recebidos',           color:'#6366F1' },
+      { label:'Vendas Fechadas', value: vendidas,                              sub: perdidas + ' perdidas',       color:'#10B981' },
+      { label:'Receita Avulso', value: fmtBrl(recAvulso),                     sub: 'Contratos novos',            color:'#F59E0B' },
+      { label:'MRR',             value: fmtBrl(mrr),                           sub: 'Recorrente mensal',          color:'#dd2a7b' },
+      { label:'CAC',             value: fmtBrl(cac),                           sub: 'Custo por cliente',          color: cac !== null && cac <= 300 ? '#10B981' : '#EF4444' },
+      { label:'ROAS',            value: roas !== null ? roas.toFixed(2) + 'x' : '\u2014', sub: 'Retorno sobre ad spend', color: roas !== null && roas >= 3 ? '#10B981' : roas !== null && roas >= 1 ? '#F59E0B' : '#EF4444' },
+      { label:'LTV 72 meses',   value: fmtK(ltv72),                           sub: 'Lifetime value estimado',   color:'#A78BFA' }
     ].map(function(k) {
       return '<div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52">'
         + '<div class="text-[9px] font-bold uppercase tracking-widest mb-2" style="color:' + k.color + '">' + k.label + '</div>'
