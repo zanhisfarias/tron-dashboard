@@ -475,13 +475,14 @@
       <div class="text-lg font-black text-white">Maio 2026</div>
       <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Calendário Editorial — Instagram &amp; Facebook</div>
     </div>
-    <div class="flex items-center gap-3">
-      <span class="flex items-center gap-1.5 text-[11px] font-semibold" style="color:#dd2a7b">
-        <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:#dd2a7b"></span>Instagram
-      </span>
-      <span class="flex items-center gap-1.5 text-[11px] font-semibold" style="color:#38BDF8">
-        <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:#38BDF8"></span>Facebook
-      </span>
+    <div class="flex flex-wrap gap-2 items-center">
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#67E8F9"><span class="inline-block w-2 h-2 rounded-full" style="background:#06B6D4"></span>TGC</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#F9A8D4"><span class="inline-block w-2 h-2 rounded-full" style="background:#EC4899"></span>DP</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#C4B5FD"><span class="inline-block w-2 h-2 rounded-full" style="background:#A855F7"></span>Box</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#FCA5A5"><span class="inline-block w-2 h-2 rounded-full" style="background:#EF4444"></span>Ordix</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#86EFAC"><span class="inline-block w-2 h-2 rounded-full" style="background:#22C55E"></span>Laris</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#FDE68A"><span class="inline-block w-2 h-2 rounded-full" style="background:#F59E0B"></span>QIAE</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#FDA4AF"><span class="inline-block w-2 h-2 rounded-full" style="background:#F43F5E"></span>Editorial</span>
     </div>
   </div>
 
@@ -3059,92 +3060,116 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ═══════════════════════════════════════════════════════
-// CALENDÁRIO EDITORIAL — modelo grade mensal
+// CALENDÁRIO EDITORIAL — cores por produto/quadro
 // ═══════════════════════════════════════════════════════
 function renderCalendario() {
-  var igPosts  = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.ig) ? ORGANIC_DATA.ig.posts || [] : [];
-  var fbPosts  = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.fb) ? ORGANIC_DATA.fb.posts || [] : [];
+  var igPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.ig) ? ORGANIC_DATA.ig.posts || [] : [];
+  var fbPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.fb) ? ORGANIC_DATA.fb.posts || [] : [];
 
-  // Mapear posts reais por dia do mês (maio = month 4)
+  // ── Paleta por produto ──────────────────────────────
+  // [bg, fg, dot]
+  var PRODUTO_COLORS = {
+    TGC:      ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
+    DP:       ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
+    Box:      ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
+    Ordix:    ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
+    Laris:    ['rgba(34,197,94,0.13)',   '#86EFAC', '#22C55E'],
+    QIAE:     ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
+    Editorial:['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E']
+  };
+
+  // ── Detectar produto pela caption ──────────────────
+  function detectProduto(caption) {
+    var c = (caption || '').toLowerCase();
+    if (/\btgc\b|gestão\s+cont|contab|mei|abertura.*empresa|empresa.*abertura|fiscal|imposto|tribut|nota fiscal/.test(c)) return 'TGC';
+    if (/\bdp\b|departamento\s+pessoal|folha|férias|rescis|holerite|fgts|pró-labore|pro-labore|admissão|demissão|clt|esocial|inss|salário.*dif|dif.*salário/.test(c)) return 'DP';
+    if (/\bbox\b/.test(c)) return 'Box';
+    if (/\bordix\b/.test(c)) return 'Ordix';
+    if (/\blaris\b/.test(c)) return 'Laris';
+    if (/\bqiae\b|\bia\b|inteligência\s+artif|automação|chatgpt|machine\s+learning/.test(c)) return 'QIAE';
+    return 'Editorial';
+  }
+
+  // ── Mapear posts por dia (maio = month 4) ──────────
   var byDay = {};
   igPosts.forEach(function(p) {
     var d = new Date(p.timestamp);
     if (d.getMonth() !== 4) return;
     var day = d.getDate();
     if (!byDay[day]) byDay[day] = [];
-    var title = (p.caption || '').replace(/\n/g,' ').trim().substring(0, 38) || ('Post ' + (p.type||'IG'));
-    byDay[day].push({ title: title, src: 'ig', url: p.url||'', type: p.type||'IMAGE', likes: p.likes||0, comments: p.comments||0 });
+    var caption = (p.caption || '').replace(/\n/g,' ').trim();
+    var title   = caption.substring(0, 36) || ('Post IG');
+    var produto = detectProduto(caption);
+    byDay[day].push({ title: title, url: p.url||'', produto: produto });
   });
   fbPosts.forEach(function(p) {
     var d = new Date(p.timestamp);
     if (d.getMonth() !== 4) return;
     var day = d.getDate();
     if (!byDay[day]) byDay[day] = [];
-    var title = (p.message || '').replace(/\n/g,' ').trim().substring(0, 38) || 'Post Facebook';
-    byDay[day].push({ title: title, src: 'fb', url: '', type: 'POST', likes: p.likes||0, comments: p.comments||0 });
+    var caption = (p.message || '').replace(/\n/g,' ').trim();
+    var title   = caption.substring(0, 36) || 'Post Facebook';
+    var produto = detectProduto(caption);
+    byDay[day].push({ title: title, url: '', produto: produto });
   });
 
-  // Construir grade
+  // ── Construir grade ─────────────────────────────────
   var grid = document.getElementById('calGrid');
   if (!grid) return;
 
-  // maio 2026: dia 1 = quinta-feira (col 4, 0-indexed; DOM=0)
-  var firstDay = 4;
+  // maio 2026: dia 1 = quinta-feira (col 4, 0=DOM)
+  var firstDay  = 4;
   var totalDays = 31;
-  var today = 21; // 21/05/2026
+  var today     = (new Date().getMonth() === 4) ? new Date().getDate() : 21;
 
-  // Dias de abril para completar 1ª semana
-  var aprilDays = [26,27,28,29,30];
   var cells = '';
 
-  // Células de abril (semana anterior)
-  aprilDays.forEach(function(d) {
-    cells += '<div class="border-r border-b p-1.5" style="border-color:#2A2D3E;min-height:90px">'
-      + '<div class="text-[11px] font-semibold mb-1" style="color:#374151">' + d + '</div>'
+  // Dias de abril (overflow)
+  [26,27,28,29,30].forEach(function(d) {
+    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid #2A2D3E">'
+      + '<div class="text-[11px] font-semibold" style="color:#374151">' + d + '</div>'
       + '</div>';
   });
 
   // Dias de maio
   for (var d = 1; d <= totalDays; d++) {
-    var ps = byDay[d] || [];
-    var isToday = (d === today);
-    var isSun = ((firstDay + d - 1) % 7 === 0);
-    var isSat = ((firstDay + d - 1) % 7 === 6);
-    var isWeekend = isSun || isSat;
-    var numColor = isToday ? '#dd2a7b' : (isWeekend ? '#F87171' : '#E5E7EB');
-    var bgStyle = isToday
-      ? 'background:rgba(221,42,123,0.06);border:1.5px solid #dd2a7b'
-      : 'border-bottom:1px solid #2A2D3E';
+    var ps       = byDay[d] || [];
+    var isSun    = ((firstDay + d - 1) % 7 === 0);
+    var isSat    = ((firstDay + d - 1) % 7 === 6);
+    var isToday  = (d === today);
+    var numColor = isToday ? '#EC4899' : (isSun||isSat ? '#F87171' : '#D1D5DB');
+    var cellStyle = 'min-height:90px;border-bottom:1px solid #2A2D3E;'
+      + (isToday ? 'background:rgba(236,72,153,0.06);outline:1.5px solid #EC4899;outline-offset:-1px' : '');
 
-    cells += '<div class="p-1.5 relative" style="' + bgStyle + ';min-height:90px">'
+    cells += '<div class="p-1.5" style="' + cellStyle + '">'
       + '<div class="text-[12px] font-bold mb-1.5" style="color:' + numColor + '">' + d + '</div>';
 
     ps.forEach(function(p) {
-      var isIG = p.src === 'ig';
-      var bg   = isIG ? 'rgba(221,42,123,0.12)'  : 'rgba(56,189,248,0.12)';
-      var fg   = isIG ? '#F9A8D4'                 : '#7DD3FC';
-      var dot  = isIG ? '#dd2a7b'                 : '#38BDF8';
-      var link = p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:' + fg + ';text-decoration:none">' + p.title + '</a>'
-                       : p.title;
-      cells += '<div class="flex items-start gap-1 mb-1 px-1.5 py-0.5 rounded" style="background:' + bg + '">'
-        + '<span class="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full" style="background:' + dot + '"></span>'
-        + '<span class="text-[10px] font-semibold leading-tight" style="color:' + fg + ';word-break:break-word">' + link + '</span>'
+      var pal  = PRODUTO_COLORS[p.produto] || PRODUTO_COLORS.Editorial;
+      var bg   = pal[0], fg = pal[1], dot = pal[2];
+      var inner = p.url
+        ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:' + fg + ';text-decoration:none">' + p.title + '</a>'
+        : p.title;
+      cells += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:' + bg + '">'
+        + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + dot + '"></span>'
+        + '<span class="text-[10px] font-semibold leading-tight" style="color:' + fg + ';word-break:break-word">' + inner + '</span>'
         + '</div>';
     });
 
     cells += '</div>';
   }
 
-  // Completar última semana com dias de junho
-  var lastCol = (firstDay + totalDays - 1) % 7; // coluna do dia 31 (0=dom)
+  // Dias de junho (overflow)
+  var lastCol   = (firstDay + totalDays - 1) % 7;
   var remaining = lastCol === 6 ? 0 : (6 - lastCol);
   for (var j = 1; j <= remaining; j++) {
-    cells += '<div class="border-r border-b p-1.5" style="border-color:#2A2D3E;min-height:90px">'
-      + '<div class="text-[11px] font-semibold mb-1" style="color:#374151">' + j + '</div>'
+    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid #2A2D3E">'
+      + '<div class="text-[11px] font-semibold" style="color:#374151">' + j + '</div>'
       + '</div>';
   }
 
   grid.innerHTML = cells;
+}
 }
 
 // ═══════════════════════════════════════════════════════
