@@ -3,17 +3,22 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "functions": {
-    "api/*.js": {
-      "runtime": "nodejs20.x"
-    }
+    "api/*.js": { "runtime": "nodejs20.x" }
   },
+  "crons": [
+    { "path": "/api/cron-publish", "schedule": "* * * * *" }
+  ],
   "routes": [
-    { "src": "/api/data",       "dest": "/api/data.js" },
-    { "src": "/api/status",     "dest": "/api/status.js" },
-    { "src": "/api/refresh",    "dest": "/api/refresh.js" },
-    { "src": "/api/budget",     "dest": "/api/budget.js" },
-    { "src": "/api/send-otp",   "dest": "/api/send-otp.js" },
-    { "src": "/api/verify-otp", "dest": "/api/verify-otp.js" },
-    { "src": "/(.*)",           "dest": "/index.html" }
+    { "src": "/api/data",           "dest": "/api/data.js" },
+    { "src": "/api/status",         "dest": "/api/status.js" },
+    { "src": "/api/refresh",        "dest": "/api/refresh.js" },
+    { "src": "/api/budget",         "dest": "/api/budget.js" },
+    { "src": "/api/send-otp",       "dest": "/api/send-otp.js" },
+    { "src": "/api/verify-otp",     "dest": "/api/verify-otp.js" },
+    { "src": "/api/post-media",     "dest": "/api/post-media.js" },
+    { "src": "/api/get-scheduled",  "dest": "/api/get-scheduled.js" },
+    { "src": "/api/cancel-post",    "dest": "/api/cancel-post.js" },
+    { "src": "/api/cron-publish",   "dest": "/api/cron-publish.js" },
+    { "src": "/(.*)",               "dest": "/index.html" }
   ]
 }

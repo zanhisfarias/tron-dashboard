@@ -13,7 +13,7 @@ import re
 import time
 import warnings
 import calendar
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Força UTF-8 no terminal do Windows
@@ -931,15 +931,46 @@ def fetch_organic_data():
     except Exception as e:
         print(f"  ! IG follower_count erro: {e}")
 
-    # IG posts recentes
+    # IG posts — todos desde 01/01/2026 (paginado)
     try:
-        resp = api_get(f"{IG_ID}/media", {
-            "fields": "id,media_type,timestamp,like_count,comments_count,caption,media_url,thumbnail_url,permalink",
-            "limit": "20",
-        })
-        posts_raw = resp.get("data", [])
+        cutoff = date(today.year, 1, 1).isoformat()  # 2026-01-01
+        posts_all = []
+        next_url = None
+        page_num = 0
+        stop = False
+
+        while not stop:
+            page_num += 1
+            if next_url:
+                import urllib.parse as _up
+                parsed = _up.urlparse(next_url)
+                params = dict(_up.parse_qsl(parsed.query))
+                resp = api_get(f"{IG_ID}/media", params)
+            else:
+                resp = api_get(f"{IG_ID}/media", {
+                    "fields": "id,media_type,timestamp,like_count,comments_count,caption,media_url,thumbnail_url,permalink",
+                    "limit": "50",
+                    "since": cutoff,
+                })
+
+            batch = resp.get("data", [])
+            for p in batch:
+                ts = p.get("timestamp", "")
+                if ts and ts[:10] < cutoff:
+                    stop = True
+                    break
+                posts_all.append(p)
+
+            paging = resp.get("paging", {})
+            next_url = paging.get("next")
+            if not next_url or not batch:
+                stop = True
+
+            if page_num > 20:  # segurança: não paginar mais de 20 páginas
+                break
+
         result["ig"]["posts"] = []
-        for p in posts_raw:
+        for p in posts_all:
             result["ig"]["posts"].append({
                 "id":        p.get("id", ""),
                 "type":      p.get("media_type", "IMAGE"),
@@ -950,7 +981,7 @@ def fetch_organic_data():
                 "thumb":     p.get("thumbnail_url") or p.get("media_url") or "",
                 "url":       p.get("permalink", ""),
             })
-        print(f"  → IG posts: {len(result['ig']['posts'])} encontrados")
+        print(f"  → IG posts: {len(result['ig']['posts'])} encontrados (desde {cutoff}, {page_num} páginas)")
     except Exception as e:
         print(f"  ! IG media erro: {e}")
 
@@ -964,16 +995,20 @@ def fetch_organic_data():
     except Exception as e:
         print(f"  ! FB info erro: {e}")
 
-    # FB posts
+    # FB posts — todos desde 01/01/2026 (sem filtro since, filtra por data no cliente)
     try:
+        fb_cutoff = date(today.year, 1, 1).isoformat()
         resp = api_get(f"{FB_PAGE}/posts", {
             "fields": "message,created_time,likes.summary(true),comments.summary(true),shares",
-            "limit": "15",
+            "limit": "100",
         })
         posts_raw = resp.get("data", [])
         result["fb"]["posts"] = []
         total_interact = 0
         for p in posts_raw:
+            ts = p.get("created_time", "")
+            if ts and ts[:10] < fb_cutoff:
+                continue
             likes    = p.get("likes",    {}).get("summary", {}).get("total_count", 0)
             comments = p.get("comments", {}).get("summary", {}).get("total_count", 0)
             shares   = p.get("shares",   {}).get("count", 0)
@@ -988,7 +1023,7 @@ def fetch_organic_data():
             })
         result["fb"]["total_interactions"] = total_interact
         result["fb"]["reach_month"]        = result["fb"]["fans"]  # estimativa
-        print(f"  → FB posts: {len(result['fb']['posts'])} encontrados | interações: {total_interact}")
+        print(f"  → FB posts: {len(result['fb']['posts'])} encontrados (desde {fb_cutoff}) | interações: {total_interact}")
     except Exception as e:
         print(f"  ! FB posts erro: {e}")
 
