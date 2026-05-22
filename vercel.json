@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    { "src": "/api/data",       "dest": "/api/data.js" },
+    { "src": "/api/status",     "dest": "/api/status.js" },
+    { "src": "/api/refresh",    "dest": "/api/refresh.js" },
+    { "src": "/api/budget",     "dest": "/api/budget.js" },
+    { "src": "/api/send-otp",   "dest": "/api/send-otp.js" },
+    { "src": "/api/verify-otp", "dest": "/api/verify-otp.js" },
+    { "src": "/(.*)",           "dest": "/index.html" }
+  ]
+}
