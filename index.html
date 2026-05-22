@@ -599,11 +599,22 @@
 
   <!-- Linha Editorial & Roteiros -->
   <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52" id="orgEditorialCard">
-    <div class="flex items-center gap-2 mb-4">
-      <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.15)">
-        <span style="font-size:14px">&#x270D;&#xFE0F;</span>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.15)">
+          <span style="font-size:14px">&#x270D;&#xFE0F;</span>
+        </div>
+        <div class="text-[9px] font-bold uppercase tracking-widest" style="color:#6366F1">Linha Editorial &amp; Roteiros</div>
       </div>
-      <div class="text-[9px] font-bold uppercase tracking-widest" style="color:#6366F1">Linha Editorial &amp; Roteiros</div>
+      <div class="flex items-center gap-2">
+        <span id="editorialPageLabel" class="text-[10px] font-semibold" style="color:#6B7280">Página 1 de 3</span>
+        <button onclick="navEditorial(-1)" id="editorialPrevBtn" style="background:#1A1D27;border:1px solid #3A3D52;color:#9CA3AF;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.color='#fff';this.style.borderColor='#6366F1'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#3A3D52'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button onclick="navEditorial(1)" id="editorialNextBtn" style="background:#1A1D27;border:1px solid #3A3D52;color:#9CA3AF;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.color='#fff';this.style.borderColor='#6366F1'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#3A3D52'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
     </div>
     <div id="orgEditorialContent"></div>
   </div>
@@ -1649,80 +1660,253 @@ function renderOrgInsights() {
   }).join('');
 }
 
+// ── Estado da paginação editorial ────────────────────
+var _editorialPage = 0;
+var _EDITORIAL_PER_PAGE = 4;
+
+var _ROTEIROS = [
+  // ── PÁGINA 1 — Formatos base ─────────────────────────
+  {
+    format:'REEL', color:'#dd2a7b', produto:'TGC',
+    title:'Reel de Tutorial — NF-e',
+    hook:'Você sabia que dá pra emitir NF-e em menos de 1 minuto?',
+    structure:[
+      'Hook (0–3s): Mostre o problema — processo lento e manual',
+      'Demonstração: passo a passo rápido no sistema TGC',
+      'CTA: "Comente DEMO e te mandamos um acesso gratuito"'
+    ],
+    tip:'Reels com demonstração de produto têm 40% mais alcance orgânico.'
+  },
+  {
+    format:'CARROSSEL', color:'#F59E0B', produto:'DP',
+    title:'5 Erros na Folha de Pagamento',
+    hook:'5 erros que fazem empresas pagarem multa no eSocial todo mês',
+    structure:[
+      'Slide 1: Hook com número de autuações em 2025',
+      'Slides 2–6: Um erro por slide com como evitar',
+      'Último slide: "Quer folha sem erro? Link na bio"'
+    ],
+    tip:'Carrosséis têm 3× mais saves — excelente para o algoritmo.'
+  },
+  {
+    format:'IMAGE', color:'#6366F1', produto:'Ordix',
+    title:'Post de Dado Impactante',
+    hook:'87% dos estoques brasileiros têm divergência. O seu está no controle?',
+    structure:[
+      'Visual: número grande em fundo escuro com destaque colorido',
+      'Copy: contextualize o dado e conecte ao Ordix',
+      'CTA: "Siga para mais dados do setor"'
+    ],
+    tip:'Posts com estatísticas têm 2× mais compartilhamentos.'
+  },
+  {
+    format:'STORIES', color:'#8134af', produto:'Box',
+    title:'Stories de Enquete',
+    hook:'Qual é o maior problema da sua empresa hoje?',
+    structure:[
+      'Story 1: Enquete — A: custo alto  B: falta de controle',
+      'Story 2: Revele o resultado + "a maioria escolheu X — e nós resolvemos"',
+      'Story 3: Link direto para formulário de demonstração'
+    ],
+    tip:'Stories com enquetes têm 20% mais retenção e geram leads qualificados.'
+  },
+
+  // ── PÁGINA 2 — Conteúdo educativo e autoridade ────────
+  {
+    format:'REEL', color:'#06B6D4', produto:'TGC',
+    title:'Reel "Antes e Depois"',
+    hook:'Esse escritório contábil reduziu 70% do tempo de fechamento. Veja como.',
+    structure:[
+      'Hook (0–3s): mostre a tela caótica de planilha',
+      'Virada: corte para o sistema organizado em segundos',
+      'Depoimento rápido de 5s do cliente ou narração off',
+      'CTA: "Quer o mesmo resultado? Link na bio"'
+    ],
+    tip:'Vídeos com transformação visível têm taxa de conclusão 2× maior.'
+  },
+  {
+    format:'CARROSSEL', color:'#EF4444', produto:'Ordix',
+    title:'Guia de Inventário no Agro',
+    hook:'Como fazer inventário de insumos sem perder item no campo',
+    structure:[
+      'Slide 1: "O erro mais comum das fazendas" + imagem de campo',
+      'Slides 2–5: passo a passo do processo correto',
+      'Slide 6: "Com Ordix você faz isso em 3 cliques"',
+      'Slide 7: CTA para demo gratuita'
+    ],
+    tip:'Conteúdo com nicho específico (agro) gera 60% mais engajamento na base certa.'
+  },
+  {
+    format:'IMAGE', color:'#EC4899', produto:'DP',
+    title:'Post Sazonal — Data do RH',
+    hook:'Hoje é o prazo final para entrega do informe de rendimentos. Sua empresa está em dia?',
+    structure:[
+      'Visual: calendário ou relogio com data em destaque',
+      'Copy curto: cite a legislação e o risco de multa',
+      'CTA: "Comente OK se sua empresa já entregou"'
+    ],
+    tip:'Posts sazonais com urgência têm 3× mais comentários que posts genéricos.'
+  },
+  {
+    format:'REELS', color:'#A855F7', produto:'Box',
+    title:'Reel "Dúvida Frequente"',
+    hook:'Qual a diferença entre ERP e sistema de gestão contábil?',
+    structure:[
+      'Hook (0–2s): a pergunta na tela com call visual',
+      'Resposta em 30s: clara, sem jargão, comparação visual',
+      'Encerramento: "Mais dúvidas? Manda aqui nos comentários"'
+    ],
+    tip:'Vídeos que respondem dúvidas são salvos com frequência — sinal positivo para o algoritmo.'
+  },
+
+  // ── PÁGINA 3 — Conversão, prova social e tendências ───
+  {
+    format:'CARROSSEL', color:'#F59E0B', produto:'QIAE',
+    title:'IA na Contabilidade em 2026',
+    hook:'A IA já está fazendo lançamentos contábeis. O contador sumiu?',
+    structure:[
+      'Slide 1: provocação sobre o futuro da profissão',
+      'Slides 2–4: o que a IA faz, o que o contador faz melhor',
+      'Slide 5: "A Tron usa IA para acelerar — não substituir"',
+      'Slide 6: CTA para demo do QIAE'
+    ],
+    tip:'Conteúdo sobre IA tem engajamento 4× maior com profissionais do setor.'
+  },
+  {
+    format:'IMAGE', color:'#22C55E', produto:'Laris',
+    title:'Depoimento de Cliente',
+    hook:'"Reduzi 3 horas por dia de trabalho manual." — Cliente Laris',
+    structure:[
+      'Visual: foto do cliente com citação em destaque (com permissão)',
+      'Copy: adicione 1 dado concreto de resultado (tempo, custo, erro)',
+      'CTA: "Quer resultado igual? Link na bio"'
+    ],
+    tip:'Prova social gera 88% mais confiança do que copy da própria marca.'
+  },
+  {
+    format:'REEL', color:'#06B6D4', produto:'TGC',
+    title:'Reel de Tendência — Áudio Viral',
+    hook:'Use áudio em alta + demonstração de feature nova do sistema',
+    structure:[
+      'Escolha áudio trending na aba de Reels',
+      'Mostre uma feature do TGC que resolve problema real',
+      'Legenda com texto sobreposto — sem narração necessária',
+      'CTA na legenda escrita: link na bio'
+    ],
+    tip:'Usar áudio em alta aumenta em 50% a chance de entrar no Explorar.'
+  },
+  {
+    format:'STORIES', color:'#8134af', produto:'DP',
+    title:'Stories de Bastidores',
+    hook:'Como é o suporte Tron por dentro? Mostrando nosso time de atendimento',
+    structure:[
+      'Story 1: "Você já se perguntou quem responde quando você chama?" (texto)',
+      'Story 2–3: foto ou vídeo curto do time de suporte trabalhando',
+      'Story 4: "Atendimento humano. Sempre." + botão de contato'
+    ],
+    tip:'Conteúdo de bastidores gera de 30–40% mais replies nos Stories — ótimo para algoritmo.'
+  },
+
+  // ── PÁGINA 4 — Sazonalidade e formatos avançados ──────
+  {
+    format:'CARROSSEL', color:'#EF4444', produto:'Ordix',
+    title:'Checklist de Fechamento Mensal',
+    hook:'10 coisas para fechar o mês sem erro no estoque',
+    structure:[
+      'Slide 1: "Salve esse carrossel para o fim do mês"',
+      'Slides 2–10: um item do checklist por slide, visual limpo',
+      'Slide 11: "O Ordix faz 7 desses automaticamente"'
+    ],
+    tip:'Conteúdo de checklist é o formato com maior taxa de save — ideal para crescimento orgânico.'
+  },
+  {
+    format:'IMAGE', color:'#6366F1', produto:'TGC',
+    title:'Post de Comparação',
+    hook:'Planilha vs Sistema: o que custa mais caro para o seu escritório?',
+    structure:[
+      'Visual: tabela simples com colunas Planilha × TGC',
+      'Linhas: tempo, erro humano, custo de multa, escalabilidade',
+      'Copy: "A planilha parece gratuita. Mas será que é?"'
+    ],
+    tip:'Posts comparativos geram muito debate nos comentários — ótimo para alcance.'
+  },
+  {
+    format:'REEL', color:'#22C55E', produto:'Laris',
+    title:'Reel "1 minuto de valor"',
+    hook:'Em 60 segundos: como automatizar a cobrança de clientes inadimplentes',
+    structure:[
+      'Hook (0–3s): "Você ainda cobra manual?" + número de clientes inadimplentes típico',
+      'Demonstração em tela do fluxo automatizado no Laris',
+      'Resultado: "Recuperamos R$ X em 30 dias sem ligação nenhuma"',
+      'CTA: "Comente COBRAR que te explico"'
+    ],
+    tip:'Reels com CTA de comentário têm 35% mais alcance por sinalizar engajamento ao algoritmo.'
+  }
+];
+
+function navEditorial(delta) {
+  var totalPages = Math.ceil(_ROTEIROS.length / _EDITORIAL_PER_PAGE);
+  _editorialPage = (_editorialPage + delta + totalPages) % totalPages;
+  renderOrgEditorial();
+}
+
 function renderOrgEditorial() {
   var el = document.getElementById('orgEditorialContent');
   if (!el) return;
-  var roteiros = [
-    {
-      format: 'REEL', color: '#dd2a7b', icon: '\ud83c\udfa5',
-      title: 'Reel de Tutorial',
-      hook: 'Você sabia que dá pra emitir NF-e em menos de 1 minuto?',
-      structure: [
-        'Hook (0-3s): Mostre o problema — processo lento de emissão',
-        'Desenvolvimento: Demonstre o passo a passo no sistema',
-        'CTA: "Quer fazer igual? Comente DEMO e te mandamos um vídeo exclusivo"'
-      ],
-      tip: 'Reels com demonstração de produto têm 40% mais alcance orgânico.'
-    },
-    {
-      format: 'CARROSSEL', color: '#F59E0B', icon: '\ud83d\uddc2\ufe0f',
-      title: 'Carrossel Educativo',
-      hook: '5 erros que estão custando dinheiro na sua gestão contábil',
-      structure: [
-        'Slide 1: Hook impactante com o número principal',
-        'Slides 2-6: Um erro por slide com solução prática',
-        'Último slide: CTA + link na bio'
-      ],
-      tip: 'Carrosséis têm 3x mais saves do que posts simples — ótimo para algoritmo.'
-    },
-    {
-      format: 'IMAGE', color: '#6366F1', icon: '\ud83d\udcbc',
-      title: 'Post de Autoridade',
-      hook: 'Número impactante sobre o agronegócio ou tecnologia + dado real',
-      structure: [
-        'Visual: Fundo escuro com número grande em destaque',
-        'Copy: Contextualize o número e conecte ao produto',
-        'CTA: "Siga para mais dados do setor"'
-      ],
-      tip: 'Posts com dados e números têm 2x mais compartilhamentos.'
-    },
-    {
-      format: 'STORIES', color: '#8134af', icon: '\ud83d\udcf1',
-      title: 'Stories Interativo',
-      hook: 'Enquete: Qual é o maior desafio da sua empresa hoje?',
-      structure: [
-        'Story 1: Enquete com 2 opções (A: custo vs B: tempo)',
-        'Story 2: Revele o resultado e conecte ao produto',
-        'Story 3: Swipe-up ou link direto para formulário'
-      ],
-      tip: 'Stories com enquetes têm 20% mais retenção e aumentam seguidores ativos.'
-    }
-  ];
+
+  var totalPages = Math.ceil(_ROTEIROS.length / _EDITORIAL_PER_PAGE);
+
+  // Atualiza label e botões
+  var lbl = document.getElementById('editorialPageLabel');
+  if (lbl) lbl.textContent = 'Página ' + (_editorialPage + 1) + ' de ' + totalPages;
+
+  // Página atual de roteiros
+  var start    = _editorialPage * _EDITORIAL_PER_PAGE;
+  var pagina   = _ROTEIROS.slice(start, start + _EDITORIAL_PER_PAGE);
+
+  var PROD_COLORS = {
+    TGC:'#06B6D4', DP:'#EC4899', Box:'#A855F7',
+    Ordix:'#EF4444', Laris:'#22C55E', QIAE:'#F59E0B', Editorial:'#F43F5E'
+  };
 
   el.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">'
-    + roteiros.map(function(r) {
-      return '<div class="org-roteiro-card">'
-        + '<div class="flex items-center gap-2 mb-3">'
-        + '<span style="font-size:18px">' + r.icon + '</span>'
-        + '<div>'
-        + '<div class="text-[9px] font-bold uppercase tracking-wider" style="color:' + r.color + '">' + r.format + '</div>'
-        + '<div class="text-xs font-bold text-white">' + r.title + '</div>'
+    + pagina.map(function(r) {
+      var prodColor = PROD_COLORS[r.produto] || '#6366F1';
+      return '<div class="org-roteiro-card" style="transition:opacity .2s">'
+        + '<div class="flex items-center justify-between mb-2">'
+        + '<div class="flex items-center gap-2">'
+        + '<span class="text-[9px] font-bold px-2 py-0.5 rounded-full" style="background:rgba(99,102,241,0.15);color:' + r.color + ';border:1px solid ' + r.color + '33">' + r.format + '</span>'
+        + '<span class="text-[9px] font-bold px-2 py-0.5 rounded-full" style="background:rgba(0,0,0,0.2);color:' + prodColor + ';border:1px solid ' + prodColor + '33">' + r.produto + '</span>'
         + '</div>'
+        + '</div>'
+        + '<div class="text-xs font-bold text-white mb-2">' + r.title + '</div>'
+        + '<div class="mb-2">'
+        + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#6B7280">Hook</div>'
+        + '<div class="text-[11px] font-semibold italic" style="color:#E5E7EB;border-left:2px solid ' + r.color + ';padding-left:8px">&ldquo;' + r.hook + '&rdquo;</div>'
         + '</div>'
         + '<div class="mb-2">'
-        + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Hook</div>'
-        + '<div class="text-[11px] font-semibold text-white italic">&ldquo;' + r.hook + '&rdquo;</div>'
+        + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#6B7280">Estrutura</div>'
+        + '<ul class="space-y-1">' + r.structure.map(function(s) {
+            return '<li class="text-[11px] flex gap-1.5" style="color:#D1D5DB"><span style="color:' + r.color + ';flex-shrink:0">\u203a</span>' + s + '</li>';
+          }).join('') + '</ul>'
         + '</div>'
-        + '<div class="mb-2">'
-        + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Estrutura</div>'
-        + '<ul class="space-y-1">' + r.structure.map(function(s){ return '<li class="text-[11px]" style="color:#D1D5DB">\u2022 ' + s + '</li>'; }).join('') + '</ul>'
-        + '</div>'
-        + '<div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.08)">'
-        + '<div class="text-[10px]" style="color:' + r.color + '">\ud83d\udca1 ' + r.tip + '</div>'
+        + '<div class="mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.06)">'
+        + '<div class="text-[10px]" style="color:' + r.color + '">\u26a1 ' + r.tip + '</div>'
         + '</div>'
         + '</div>';
     }).join('')
+    + '</div>'
+    // Dots de navegação
+    + '<div class="flex items-center justify-center gap-1.5 mt-4">'
+    + Array.from({length: totalPages}, function(_, i) {
+        return '<button onclick="navEditorialTo(' + i + ')" style="width:' + (i === _editorialPage ? '18' : '6') + 'px;height:6px;border-radius:3px;background:' + (i === _editorialPage ? '#6366F1' : '#3A3D52') + ';border:none;cursor:pointer;transition:all .25s"></button>';
+      }).join('')
     + '</div>';
+}
+
+function navEditorialTo(page) {
+  _editorialPage = page;
+  renderOrgEditorial();
 }
 
 
