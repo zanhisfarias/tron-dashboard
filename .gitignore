@@ -34,3 +34,4 @@ run_output.txt
 adsets_cache.json
 tron-dashboard/
 Prompt/
+.vercel

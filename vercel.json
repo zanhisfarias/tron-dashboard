@@ -2,11 +2,9 @@
   "version": 2,
   "buildCommand": "",
   "outputDirectory": ".",
-  "functions": {
-    "api/*.js": { "runtime": "nodejs20.x" }
-  },
+
   "crons": [
-    { "path": "/api/cron-publish", "schedule": "* * * * *" }
+    { "path": "/api/cron-publish", "schedule": "0 0 * * *" }
   ],
   "routes": [
     { "src": "/api/data",           "dest": "/api/data.js" },
