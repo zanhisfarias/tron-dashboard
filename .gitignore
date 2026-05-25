@@ -1,6 +1,7 @@
 # Credenciais e configs locais
 *.env
 .env*
+!.env.example
 meta_ads_config.env
 
 # Python
