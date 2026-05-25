@@ -1233,6 +1233,27 @@ function renderOrganicoDashboard() {
   renderOrgEditorial();
 }
 
+// Retorna posts filtrados pelo período selecionado no state
+function getFilteredOrgPosts(plat) {
+  var d = plat === 'instagram' ? ORGANIC_DATA.ig : ORGANIC_DATA.fb;
+  var posts = d.posts || [];
+  return posts.filter(function(p) {
+    if (!p.timestamp) return true;
+    var day = p.timestamp.slice(0, 10);
+    return day >= state.since && day <= state.until;
+  });
+}
+
+// Rótulo legível do período selecionado
+function orgPeriodLabel() {
+  if (state.since === state.until) {
+    var p = state.since.split('-'); return p[2] + '/' + p[1] + '/' + p[0];
+  }
+  var a = state.since.split('-'), b = state.until.split('-');
+  if (a[0] === b[0] && a[1] === b[1]) return a[1] + '/' + a[0];
+  return a[2] + '/' + a[1] + ' – ' + b[2] + '/' + b[1];
+}
+
 function renderOrgKpis() {
   var row = document.getElementById('orgKpiRow');
   if (!row) return;
@@ -1250,20 +1271,27 @@ function renderOrgKpis() {
     ];
   } else if (_activeOrgPlat === 'instagram') {
     var d = ORGANIC_DATA.ig;
+    var filteredIG = getFilteredOrgPosts('instagram');
+    var filteredLikes = filteredIG.reduce(function(s,p){ return s+(p.likes||0); }, 0);
+    var filteredComments = filteredIG.reduce(function(s,p){ return s+(p.comments||0); }, 0);
+    var lbl = orgPeriodLabel();
     cards = [
       { label:'Seguidores', value: fmt.num(d.followers), sub:'+' + fmt.num(d.follower_gain) + ' este mês', icon:'👥' },
-      { label:'Alcance Mensal', value: fmt.num(d.reach_month), sub:'Contas alcançadas — Maio', icon:'📡' },
-      { label:'Engajamento', value: fmt.num(d.total_interactions), sub: fmt.num(d.accounts_engaged) + ' contas engajadas', icon:'❤️' },
-      { label:'Posts Publicados', value: d.posts.length, sub: 'Website clicks: ' + d.website_clicks, icon:'📸' }
+      { label:'Posts no Período', value: filteredIG.length, sub: 'Posts publicados — ' + lbl, icon:'📸' },
+      { label:'Curtidas no Período', value: fmt.num(filteredLikes), sub: 'Total de curtidas — ' + lbl, icon:'❤️' },
+      { label:'Comentários no Período', value: fmt.num(filteredComments), sub: 'Total de comentários — ' + lbl, icon:'💬' }
     ];
   } else {
     var d = ORGANIC_DATA.fb;
+    var filteredFB = getFilteredOrgPosts('facebook');
+    var filteredFBLikes = filteredFB.reduce(function(s,p){ return s+(p.likes||0); }, 0);
     var engRate = d.fans > 0 ? ((d.talking_about / d.fans) * 100).toFixed(2) : '0.00';
+    var lbl = orgPeriodLabel();
     cards = [
       { label:'Fãs da Página', value: fmt.num(d.fans), sub: 'Seguidores totais — Facebook', icon:'👥' },
-      { label:'Falando Sobre', value: fmt.num(d.talking_about), sub: 'Pessoas ativas esta semana', icon:'💬' },
-      { label:'Taxa de Engajamento', value: engRate + '%', sub: 'Talking About ÷ Fãs × 100', icon:'📊' },
-      { label:'Posts via API', value: d.posts.length > 0 ? d.posts.length : '—', sub: d.posts.length > 0 ? 'Posts disponíveis em 2026' : 'Reconectar token Graph API', icon:'📄' }
+      { label:'Posts no Período', value: filteredFB.length > 0 ? filteredFB.length : '—', sub: 'Posts publicados — ' + lbl, icon:'📄' },
+      { label:'Curtidas no Período', value: filteredFB.length > 0 ? fmt.num(filteredFBLikes) : '—', sub: 'Total de curtidas — ' + lbl, icon:'❤️' },
+      { label:'Taxa de Engajamento', value: engRate + '%', sub: 'Talking About ÷ Fãs × 100', icon:'📊' }
     ];
   }
   row.innerHTML = cards.map(function(kpi) {
@@ -1328,13 +1356,15 @@ function renderOrgChart() {
   var ctxFresh = document.getElementById('orgEngChart');
   if (!ctxFresh) return;
   if (_activeOrgPlat === 'instagram') {
-    if (chartTitleEl) { chartTitleEl.textContent = 'Alcance \u0026 Engajamento \u2014 Maio 2026'; chartTitleEl.style.color = '#dd2a7b'; }
+    var lbl = orgPeriodLabel();
+    if (chartTitleEl) { chartTitleEl.textContent = 'Alcance \u0026 Engajamento \u2014 ' + lbl; chartTitleEl.style.color = '#dd2a7b'; }
     if (topTitleEl) { topTitleEl.textContent = 'Top Posts por Engajamento'; topTitleEl.style.color = '#dd2a7b'; }
     var titleElIG = chartTitleEl;
     var d = ORGANIC_DATA.ig;
-    var labels = d.posts.map(function(p) { var dt = new Date(p.timestamp); return dt.getDate() + '/' + (dt.getMonth()+1); }).reverse();
-    var likes = d.posts.map(function(p){ return p.likes||0; }).reverse();
-    var comments = d.posts.map(function(p){ return p.comments||0; }).reverse();
+    var filteredPosts = getFilteredOrgPosts('instagram');
+    var labels = filteredPosts.map(function(p) { var dt = new Date(p.timestamp); return dt.getDate() + '/' + (dt.getMonth()+1); }).reverse();
+    var likes = filteredPosts.map(function(p){ return p.likes||0; }).reverse();
+    var comments = filteredPosts.map(function(p){ return p.comments||0; }).reverse();
     _orgChartInst = new Chart(ctxFresh, {
       type:'bar',
       data:{ labels:labels, datasets:[
@@ -1502,12 +1532,14 @@ function renderOrgPosts() {
     }).join('');
     return;
   }
+  var platKey = _activeOrgPlat === 'instagram' ? 'instagram' : 'facebook';
   var d = _activeOrgPlat === 'instagram' ? ORGANIC_DATA.ig : ORGANIC_DATA.fb;
   var c = _activeOrgPlat === 'instagram' ? '#dd2a7b' : '#1877F2';
   if (thead) thead.innerHTML = '<th style="min-width:60px">Preview</th><th class="text-left" style="min-width:180px">Conteúdo</th><th>Curtidas</th><th>Comentários</th><th>Engaj.</th><th>Data</th>';
   if (title) title.style.color = c;
-  var posts = d.posts;
-  if (title) title.textContent = 'Posts Recentes \u2014 ' + (_activeOrgPlat === 'instagram' ? 'Instagram' : 'Facebook');
+  var posts = getFilteredOrgPosts(platKey);
+  var lbl = orgPeriodLabel();
+  if (title) title.textContent = 'Posts \u2014 ' + (_activeOrgPlat === 'instagram' ? 'Instagram' : 'Facebook') + ' \u2014 ' + lbl;
   if (posts.length === 0) {
     if (count) count.textContent = '0 posts';
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px 0;color:#4B5563">'
@@ -1592,8 +1624,9 @@ function renderOrgInsights() {
     return;
   }
 
-  // ── Insights agregados (todos os posts) ───────────────
-  var posts = allPosts;
+  // ── Insights agregados (filtrados pelo período) ───────
+  var posts = getFilteredOrgPosts(plat);
+  if (!posts.length) posts = allPosts; // fallback: usa todos se período não tiver posts
   if (!posts.length) { el.innerHTML = '<div class="text-sm text-center py-4" style="color:#6B7280">Sem dados suficientes</div>'; return; }
 
   var insights = [];
