@@ -3824,6 +3824,7 @@ function renderAll() {
   renderLeadsChart(); renderMetricChart();
   renderFunnel(); renderInsights(); renderNectarLeadboard(); renderRioVerde(); renderTable(); renderCreatives();
   renderSectionPeriodBars();
+  if (activePlatform === 'organico') renderOrganicoDashboard();
 }
 
 var campColorsMap = { all: '#6366F1', MR: '#6366F1', EMP: '#F59E0B', C01: '#10B981', C00: '#8B5CF6' };
