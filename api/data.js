@@ -47,41 +47,53 @@ function getLeads(actions) {
   return 0;
 }
 
-async function fetchTodayInsights(token) {
+async function fetchInsights(token, since, until) {
   const today     = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
-  const dateRange = JSON.stringify({ since: today, until: today });
+  const dateRange = JSON.stringify({ since, until });
   const allData   = {};
 
   for (const [code, campId] of Object.entries(CAMPAIGN_IDS)) {
     try {
-      const resp = await apiGet(`${campId}/insights`, {
-        fields:         'date_start,impressions,clicks,spend,actions',
-        time_increment: '1',
-        time_range:     dateRange,
-        limit:          '10',
-      }, token);
-
-      for (const row of (resp.data || [])) {
-        const d     = row.date_start;
-        const impr  = parseInt(row.impressions || 0, 10);
-        const click = parseInt(row.clicks      || 0, 10);
-        const spend = parseFloat(row.spend     || 0);
-        const leads = getLeads(row.actions);
-        if (!allData[d]) allData[d] = {};
-        allData[d][code] = {
-          leads, impr, clicks: click, spend,
-          ctr: impr  ? (click / impr * 100) : 0,
-          cpc: click ? (spend / click)       : 0,
-          cpm: impr  ? (spend / impr * 1000) : 0,
-          cpl: leads ? (spend / leads)        : 0,
+      let cursor = null;
+      do {
+        const params = {
+          fields:         'date_start,impressions,clicks,spend,actions',
+          time_increment: '1',
+          time_range:     dateRange,
+          limit:          '100',
         };
-      }
+        if (cursor) params.after = cursor;
+
+        const resp = await apiGet(`${campId}/insights`, params, token);
+
+        for (const row of (resp.data || [])) {
+          const d     = row.date_start;
+          const impr  = parseInt(row.impressions || 0, 10);
+          const click = parseInt(row.clicks      || 0, 10);
+          const spend = parseFloat(row.spend     || 0);
+          const leads = getLeads(row.actions);
+          if (!allData[d]) allData[d] = {};
+          allData[d][code] = {
+            leads, impr, clicks: click, spend,
+            ctr: impr  ? (click / impr * 100) : 0,
+            cpc: click ? (spend / click)       : 0,
+            cpm: impr  ? (spend / impr * 1000) : 0,
+            cpl: leads ? (spend / leads)        : 0,
+          };
+        }
+
+        cursor = resp.paging?.cursors?.after && resp.paging?.next ? resp.paging.cursors.after : null;
+      } while (cursor);
+
     } catch (e) {
       console.warn(`[data] Insights ${code}:`, e.message);
     }
   }
 
-  return { today, allData };
+  // Gera array ordenado de todas as datas com dados no range
+  const allDates = Object.keys(allData).sort();
+
+  return { today, allData, allDates };
 }
 
 async function fetchAdsets(token) {
@@ -152,11 +164,16 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'META_ACCESS_TOKEN não configurado', loading: false });
   }
 
+  // Aceita ?since=YYYY-MM-DD&until=YYYY-MM-DD ou usa hoje como padrão
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+  const since = (req.query?.since && /^\d{4}-\d{2}-\d{2}$/.test(req.query.since)) ? req.query.since : today;
+  const until = (req.query?.until && /^\d{4}-\d{2}-\d{2}$/.test(req.query.until)) ? req.query.until : today;
+
   try {
-    const [adsets, activeAdsCount, { today, allData }] = await Promise.all([
+    const [adsets, activeAdsCount, { allData, allDates }] = await Promise.all([
       fetchAdsets(TOKEN),
       fetchActiveAdsCount(TOKEN),
-      fetchTodayInsights(TOKEN),
+      fetchInsights(TOKEN, since, until),
     ]);
 
     const totalBudget = adsets
@@ -179,11 +196,13 @@ module.exports = async (req, res) => {
       data: {
         campaigns,
         all_data:           allData,
-        all_dates:          [today],
+        all_dates:          allDates,
         adsets_raw:         adsets,
         active_ads_count:   activeAdsCount,
         total_daily_budget: totalBudget,
-        partial:            true,
+        since,
+        until,
+        partial:            false,
       },
       updated_at: updatedAt,
       loading:    false,

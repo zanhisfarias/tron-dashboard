@@ -2239,8 +2239,38 @@ function setPeriod(since, until, periodKey, btnEl) {
   document.querySelectorAll('#periodBar .period-btn').forEach(function(b) { b.classList.remove('active'); });
   if (btnEl) btnEl.classList.add('active');
   updateMonthBtn();
-  renderAll();
+  fetchPeriodData(since, until);
   renderSectionPeriodBars();
+}
+
+var _fetchPeriodCache = {};
+function fetchPeriodData(since, until) {
+  var key = since + '_' + until;
+  // Se já temos dados do período no cache, só renderiza
+  if (_fetchPeriodCache[key]) { renderAll(); return; }
+
+  var el = document.getElementById('liveUpdatedAt');
+  if (el) { el.classList.remove('hidden'); el.textContent = 'Carregando...'; }
+
+  fetch('/api/data?since=' + since + '&until=' + until)
+    .then(function(r) { return r.json(); })
+    .then(function(json) {
+      if (json.data) {
+        // Mescla os dados do período no ALL_DATA global
+        Object.assign(ALL_DATA, json.data.all_data || {});
+        // Adiciona datas novas ao ALL_DATES sem duplicar
+        var newDates = json.data.all_dates || [];
+        newDates.forEach(function(d) { if (ALL_DATES.indexOf(d) === -1) ALL_DATES.push(d); });
+        ALL_DATES.sort();
+        _fetchPeriodCache[key] = true;
+        if (json.updated_at && el) { el.textContent = 'Atualizado ' + json.updated_at; }
+      }
+      renderAll();
+    })
+    .catch(function(e) {
+      console.warn('[fetchPeriodData] erro:', e);
+      renderAll();
+    });
 }
 
 var fmt = {
