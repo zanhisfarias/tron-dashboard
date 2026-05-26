@@ -916,20 +916,76 @@ def fetch_organic_data():
     except Exception as e:
         print(f"  ! IG insights erro: {e}")
 
-    # IG follower gain (via follower_count period=day)
+    # IG follower history — acumula deltas diários dos últimos 30 dias (limite da API)
+    # Cada execução do script mescla os novos dados com o histórico persistente
+    FOLLOWER_HIST_FILE = os.path.join(os.path.dirname(__file__), "follower_history.json")
     try:
+        from datetime import timedelta
+
+        # Carrega histórico existente
+        existing_hist = {}
+        if os.path.exists(FOLLOWER_HIST_FILE):
+            try:
+                with open(FOLLOWER_HIST_FILE, "r", encoding="utf-8") as _fh:
+                    for entry in json.load(_fh):
+                        existing_hist[entry["date"]] = entry["count"]
+            except Exception:
+                pass
+
+        # Busca deltas dos últimos 30 dias (limite da API: máx 30 dias por chamada)
+        since_30 = (today - timedelta(days=29)).isoformat()
         resp = api_get(f"{IG_ID}/insights", {
             "metric": "follower_count",
             "period": "day",
-            "since": since_str,
+            "since": since_30,
             "until": until_str,
         })
-        values = resp.get("data", [{}])[0].get("values", [])
-        total_gain = sum(v.get("value", 0) for v in values)
+        raw_values = resp.get("data", [{}])[0].get("values", [])
+
+        # Monta deltas diários
+        daily = []
+        seen_dates = set()
+        for v in raw_values:
+            end_time = v.get("end_time", "")
+            day = end_time[:10] if end_time else ""
+            if day and day not in seen_dates:
+                seen_dates.add(day)
+                daily.append({"date": day, "delta": int(v.get("value", 0))})
+        daily.sort(key=lambda x: x["date"])
+
+        # Ganho do mês atual
+        total_gain = sum(d["delta"] for d in daily if d["date"] >= since_str)
         result["ig"]["follower_gain"] = int(total_gain)
-        print(f"  → IG ganho seguidores: {result['ig']['follower_gain']}")
+
+        # Reconstrói contagens absolutas para os últimos 30 dias
+        current_count = result["ig"]["followers"]
+        new_counts = {}
+        cumulative = 0
+        for item in reversed(daily):
+            new_counts[item["date"]] = max(0, current_count - cumulative)
+            cumulative += item["delta"]
+
+        # Mescla com histórico existente (novos dados sobrescrevem entradas antigas)
+        existing_hist.update(new_counts)
+
+        # Salva histórico acumulado
+        full_history = sorted(
+            [{"date": d, "count": c} for d, c in existing_hist.items()],
+            key=lambda x: x["date"]
+        )
+        with open(FOLLOWER_HIST_FILE, "w", encoding="utf-8") as _fh:
+            json.dump(full_history, _fh)
+
+        result["ig"]["follower_history"] = full_history
+        print(f"  → IG ganho seguidores: {result['ig']['follower_gain']} | histórico acumulado: {len(full_history)} dias")
     except Exception as e:
         print(f"  ! IG follower_count erro: {e}")
+        # Tenta usar histórico salvo mesmo sem nova chamada à API
+        try:
+            with open(FOLLOWER_HIST_FILE, "r", encoding="utf-8") as _fh:
+                result["ig"]["follower_history"] = json.load(_fh)
+        except Exception:
+            result["ig"]["follower_history"] = []
 
     # IG posts — todos desde 01/01/2026 (paginado)
     try:
