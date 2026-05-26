@@ -2624,10 +2624,8 @@ function renderKPIs() {
   var receitaTrend = (receitaMes !== null && receitaMesAnt !== null && receitaMesAnt > 0)
     ? (receitaMes - receitaMesAnt) / receitaMesAnt * 100 : null;
 
-  // LTV 72 meses: MRR por cliente × 72, fallback ticket × 72
-  var ltv72 = (mrrMes > 0 && vendasMes > 0)
-    ? (mrrMes / vendasMes) * 72
-    : (TICKET_MEDIO || 0) * 72;
+  // LTV 72 meses: MRR total × 72
+  var ltv72 = mrrMes > 0 ? mrrMes * 72 : (TICKET_MEDIO || 0) * 72;
 
   var kpis = [
     { label: 'Gasto Hoje',    value: spendHoje,     fmtFn: function(v) { return fmt.brl(v); }, metric: null,
@@ -4414,9 +4412,7 @@ function renderCRM() {
     : 0;
   var cac  = vendidas > 0 && spendMesCRM > 0 ? spendMesCRM / vendidas : null;
   var roas = recTotal > 0 && spendMesCRM > 0 ? recTotal / spendMesCRM : null;
-  var ltv72 = (mrr > 0 && vendidas > 0)
-    ? (mrr / vendidas) * 72
-    : ((typeof TICKET_MEDIO !== 'undefined' && TICKET_MEDIO) ? TICKET_MEDIO * 72 : null);
+  var ltv72 = mrr > 0 ? mrr * 72 : null;
 
   function fmtBrl(v) { return v !== null ? 'R$\u00a0' + Math.round(v).toLocaleString('pt-BR') : '\u2014'; }
   function fmtK(v)   { return v !== null ? (v >= 1000 ? 'R$\u00a0' + (v/1000).toFixed(0) + 'k' : fmtBrl(v)) : '\u2014'; }
