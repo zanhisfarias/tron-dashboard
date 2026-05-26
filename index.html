@@ -302,9 +302,7 @@
       <button id="platOrganico" onclick="selectPlatform('organico')" class="camp-btn"><span style="background:linear-gradient(90deg,#f58529,#dd2a7b,#8134af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">Orgânico</span></button>
       <button id="platMeta" onclick="selectPlatform('meta')" class="camp-btn">Meta Ads</button>
       <button id="platGoogle" onclick="selectPlatform('google')" class="camp-btn">Google Ads</button>
-      <button id="platTiktok" onclick="selectPlatform('tiktok')" class="camp-btn">TikTok Ads</button>
-      <button id="platLinkedin" onclick="selectPlatform('linkedin')" class="camp-btn">LinkedIn Ads</button>
-      <button id="platCrm" onclick="selectPlatform('crm')" class="camp-btn">KPIs</button>
+      <button id="platCrm" onclick="selectPlatform('crm')" class="camp-btn">KPIs CRM</button>
     </div>
     <div class="flex items-center gap-2 flex-shrink-0 ml-auto md:ml-0">
       <div class="hidden md:block text-xs text-muted font-medium" id="headerDate"></div>
@@ -3970,7 +3968,7 @@ document.querySelectorAll('#campBar .camp-btn').forEach(function(btn) {
 // Plataforma tabs
 var activePlatform = 'social';
 var platColors = { social:'#dd2a7b', organico:'#dd2a7b', meta:'#6366F1', google:'#EA4335', tiktok:'#EE1D52', linkedin:'#0A66C2', crm:'#10B981' };
-var platBtns   = { social:'platSocial', organico:'platOrganico', meta:'platMeta', google:'platGoogle', tiktok:'platTiktok', linkedin:'platLinkedin', crm:'platCrm' };
+var platBtns   = { social:'platSocial', organico:'platOrganico', meta:'platMeta', google:'platGoogle', crm:'platCrm' };
 
 function selectPlatform(plat, skipHash) {
   activePlatform = plat;
@@ -4011,6 +4009,7 @@ function selectPlatform(plat, skipHash) {
   if (plat === 'social') {
     if (socialMain) socialMain.style.display = '';
     renderCalendario();
+    try { renderOrgEditorial(); } catch(e) { console.warn('[social] editorial:', e); }
   } else if (plat === 'organico') {
     if (organicoMain) organicoMain.style.display = '';
     renderOrganicoDashboard();
@@ -4223,7 +4222,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var parts = hash.split('/');
   var mainPlat = parts[0] || 'social';
   var subPlat  = parts[1] || null;
-  var validMains = ['social','organico','meta','google','tiktok','linkedin','crm'];
+  var validMains = ['social','organico','meta','google','crm'];
   var validSubs  = ['instagram','facebook','ga4','tiktok','linkedin','youtube'];
   if (!validMains.includes(mainPlat)) mainPlat = 'social';
   selectPlatform(mainPlat, true);
