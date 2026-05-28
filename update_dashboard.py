@@ -424,6 +424,7 @@ def fetch_nectar_leadboard():
         "vendidas_mes": 0,
         "perdidas_mes": 0,
         "historico_mes": {},
+        "ticket_por_produto": {},
     }
 
     if not NECTAR_TOKEN:
@@ -443,9 +444,37 @@ def fetch_nectar_leadboard():
     receita_avulso_total = 0.0   # acumulado geral (todos os meses)
     mrr_total            = 0.0
     receita_historico    = {}
+    ticket_por_produto   = {}    # {produto: {"count":0,"avulso":0.0,"mrr":0.0}}
 
     # Origens consideradas como "ads" para filtro do dashboard
-    ADS_ORIGENS = {"Meta Ads", "Google Ads"}
+    ADS_ORIGENS = {"Meta Ads", "Google Ads", "Site"}
+
+    # Acumuladores por origem
+    ORIGENS_TRACK = ["Meta Ads", "Google Ads", "Site"]
+    pipeline_by_origem  = {o: {s: 0 for s in LEADBOARD_STAGES} for o in ORIGENS_TRACK}
+    vendidas_by_origem  = {o: 0   for o in ORIGENS_TRACK}
+    perdidas_by_origem  = {o: 0   for o in ORIGENS_TRACK}
+    receita_by_origem   = {o: {"avulso": 0.0, "mrr": 0.0} for o in ORIGENS_TRACK}
+
+    def detectar_produto(cp, listas):
+        """Identifica o produto via RDStation ID ou tag 'mídia paga: X'."""
+        rd = (cp.get("RDStation ID") or cp.get("rdstation id") or "").lower()
+        if "ordix"  in rd: return "Ordix"
+        if "tronbp" in rd or "tron dp" in rd or ("dp" in rd and "tron" in rd): return "DP"
+        if "dp"     in rd: return "DP"
+        if "tgc"    in rd or "contab" in rd: return "TGC"
+        if "box"    in rd: return "Box"
+        if "sittax" in rd: return "Sittax"
+        for nome in listas:
+            n = nome.lower()
+            if "mídia paga:" in n or "midia paga:" in n:
+                p = n.replace("mídia paga:", "").replace("midia paga:", "").strip()
+                if "ordix"   in p: return "Ordix"
+                if "tron dp" in p or "dp" in p: return "DP"
+                if "tgc"     in p: return "TGC"
+                if "box"     in p: return "Box"
+                if "sittax"  in p: return "Sittax"
+        return "Outros"
 
     # A API do Nectar retorna no máx. 15 registros por página.
     # A paginação correta é pelo parâmetro page=N (não displayStart).
@@ -512,14 +541,22 @@ def fetch_nectar_leadboard():
                     nm = stage_nm.lower()
                     if "agendamento" in nm:
                         pipeline["Agendamento"] += 1
+                        etapa_key = "Agendamento"
                     elif "qualificada" in nm:
                         pipeline["Qualificada"] += 1
+                        etapa_key = "Qualificada"
                     elif "qualifica" in nm:
                         pipeline["Qualificação"] += 1
+                        etapa_key = "Qualificação"
                     elif "contato" in nm:
                         pipeline["Contatos"] += 1
+                        etapa_key = "Contatos"
                     else:
                         pipeline["Contatos"] += 1
+                        etapa_key = "Contatos"
+                    # Acumula por origem
+                    if origem in ORIGENS_TRACK:
+                        pipeline_by_origem[origem][etapa_key] += 1
 
                 else:
                     # Ganha (2) ou Perdida (3): usa dataConclusao para filtrar mês
@@ -539,11 +576,15 @@ def fetch_nectar_leadboard():
                             historico_mes[mes_iso]["vendidas"] += 1
                         if mes_ini <= data_conclu[:10] <= mes_fim:
                             vendidas_mes += 1
+                            if origem in ORIGENS_TRACK:
+                                vendidas_by_origem[origem] += 1
                     else:
                         if mes_iso:
                             historico_mes[mes_iso]["perdidas"] += 1
                         if mes_ini <= data_conclu[:10] <= mes_fim:
                             perdidas_mes += 1
+                            if origem in ORIGENS_TRACK:
+                                perdidas_by_origem[origem] += 1
 
                 # Extrai receita de camposListagem para TODOS os status
                 campos = o.get("camposListagem") or []
@@ -553,6 +594,8 @@ def fetch_nectar_leadboard():
                     o.get("dataAtualizacao") or ""
                 )
                 mes_ref = data_ref[:7] if data_ref else ""
+                val_avulso_rec = 0.0
+                val_mrr_rec    = 0.0
                 for campo in (campos if isinstance(campos, list) else []):
                     if not campo or not isinstance(campo, dict):
                         continue
@@ -564,6 +607,7 @@ def fetch_nectar_leadboard():
                     if not val:
                         continue
                     if lbl in ("valor único", "valor avulso", "valor unico"):
+                        val_avulso_rec = val
                         if mes_ref:
                             if mes_ref not in receita_historico:
                                 receita_historico[mes_ref] = {"avulso": 0.0, "mrr": 0.0}
@@ -571,7 +615,10 @@ def fetch_nectar_leadboard():
                         receita_avulso_total += val
                         if mes_ini <= data_ref[:10] <= mes_fim:
                             receita_avulso_mes += val
+                            if origem in ORIGENS_TRACK:
+                                receita_by_origem[origem]["avulso"] += val
                     elif "mrr" in lbl or ("mensal" in lbl and "valor" in lbl):
+                        val_mrr_rec = val
                         if mes_ref:
                             if mes_ref not in receita_historico:
                                 receita_historico[mes_ref] = {"avulso": 0.0, "mrr": 0.0}
@@ -579,29 +626,60 @@ def fetch_nectar_leadboard():
                         mrr_total += val
                         if mes_ini <= data_ref[:10] <= mes_fim:
                             mrr_mes += val
+                            if origem in ORIGENS_TRACK:
+                                receita_by_origem[origem]["mrr"] += val
+
+                # Acumula ticket por produto (registros com pelo menos um valor)
+                if val_avulso_rec or val_mrr_rec:
+                    cp_raw   = o.get("camposPersonalizados") or {}
+                    listas_r = [l.get("nome","") for l in (o.get("listas") or []) if isinstance(l, dict)]
+                    produto  = detectar_produto(cp_raw, listas_r)
+                    if produto not in ticket_por_produto:
+                        ticket_por_produto[produto] = {"count": 0, "avulso": 0.0, "mrr": 0.0}
+                    ticket_por_produto[produto]["count"]  += 1
+                    ticket_por_produto[produto]["avulso"] += val_avulso_rec
+                    ticket_por_produto[produto]["mrr"]    += val_mrr_rec
 
             if len(items) < PAGE_SIZE:
                 break
 
-        print(f"    {label}: {len(seen_ids)} total | {ads_count} de ads (Meta+Google)")
+        print(f"    {label}: {len(seen_ids)} total | {ads_count} de ads (Meta+Google+Site)")
 
     pipeline["Vendida"] = vendidas_mes  # Vendida = fechadas no mês
+    for orig in ORIGENS_TRACK:
+        pipeline_by_origem[orig]["Vendida"] = vendidas_by_origem[orig]
 
     print(f"      Pipeline: {pipeline}")
+    print(f"      Pipeline por origem: {pipeline_by_origem}")
     print(f"      Vendidas no mês: {vendidas_mes} | Perdidas no mês: {perdidas_mes}")
+    print(f"      Vendidas por origem: {vendidas_by_origem}")
+    print(f"      Receita por origem: {receita_by_origem}")
     print(f"      Receita mês: avulso=R${receita_avulso_mes:.2f} | MRR=R${mrr_mes:.2f}")
     print(f"      Receita total CRM: avulso=R${receita_avulso_total:.2f} | MRR=R${mrr_total:.2f}")
 
+    # Calcula ticket médio por produto
+    for prod, d in ticket_por_produto.items():
+        n = d["count"] or 1
+        d["ticket_avulso"] = round(d["avulso"] / n, 2)
+        d["ticket_mrr"]    = round(d["mrr"]    / n, 2)
+    if ticket_por_produto:
+        print(f"      Ticket por produto: { {p: {'ticket_avulso': v['ticket_avulso'], 'ticket_mrr': v['ticket_mrr'], 'count': v['count']} for p,v in ticket_por_produto.items()} }")
+
     return {
         "pipeline":             pipeline,
+        "pipeline_by_origem":   pipeline_by_origem,
         "vendidas_mes":         vendidas_mes,
+        "vendidas_by_origem":   vendidas_by_origem,
         "perdidas_mes":         perdidas_mes,
+        "perdidas_by_origem":   perdidas_by_origem,
         "historico_mes":        historico_mes,
         "receita_avulso_mes":   receita_avulso_mes,
         "mrr_mes":              mrr_mes,
         "receita_avulso_total": receita_avulso_total,
         "mrr_total":            mrr_total,
         "receita_historico":    receita_historico,
+        "receita_by_origem":    receita_by_origem,
+        "ticket_por_produto":   ticket_por_produto,
     }
 
 
