@@ -408,6 +408,9 @@
   <!-- KPIs Anuais e Mensais -->
   <div id="annualSummary" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
 
+  <!-- Tipo de Lead: Forms Nativos vs Frios/Nutrição -->
+  <div id="leadTypeSection" class="fade-up" style="animation-delay:0.17s"></div>
+
   <!-- Verba por Produto & Estado -->
   <div id="verbaProduto" class="fade-up" style="animation-delay:0.18s"></div>
 
@@ -3963,7 +3966,7 @@ function renderTiktokCharts() {
 function renderAll() {
   renderScore(); renderKPIs(); renderAnnualSummary(); renderBudgetPacing(); renderVerbaProduto();
   renderLeadsChart(); renderMetricChart();
-  renderFunnel(); renderInsights(); renderNectarLeadboard(); renderRioVerde(); renderTable(); renderCreatives();
+  renderFunnel(); renderInsights(); renderNectarLeadboard(); renderRioVerde(); renderTable(); renderCreatives(); renderLeadTypes();
   renderSectionPeriodBars();
   if (activePlatform === 'organico') renderOrganicoDashboard();
 }
@@ -4136,6 +4139,7 @@ function applyLiveData(json) {
   if (d.total_daily_budget)                                   TOTAL_DAILY_BUDGET = d.total_daily_budget;
   if (d.active_ads_count != null)                             ACTIVE_ADS_COUNT   = d.active_ads_count;
   if (d.rv_data && Object.keys(d.rv_data).length)             RV_DATA            = d.rv_data;
+  if (d.lead_type_data && Object.keys(d.lead_type_data).length) LEAD_TYPE_DATA  = d.lead_type_data;
   renderAll();
 }
 
@@ -4413,6 +4417,107 @@ function renderCalendario() {
 // ═══════════════════════════════════════════════════════
 // CRM — Nectar Leadboard
 // ═══════════════════════════════════════════════════════
+// ─── Forms Nativos vs Leads Frios/Nutrição ────────────────
+function renderLeadTypes() {
+  var el = document.getElementById('leadTypeSection');
+  if (!el || typeof LEAD_TYPE_DATA === 'undefined') return;
+
+  var mesAtual = CURRENT_MONTH; // ex: '2026-05'
+  var d = LEAD_TYPE_DATA[mesAtual];
+  if (!d) {
+    // tenta período de 30d como fallback
+    d = LEAD_TYPE_DATA[30];
+  }
+  if (!d) { el.innerHTML = ''; return; }
+
+  var forms = d.forms || {};
+  var frios = d.frios || {};
+
+  function fmtBrl(v) { return v != null ? 'R$\u00a0' + Math.round(v).toLocaleString('pt-BR') : '\u2014'; }
+  function fmtCPL(v) { return v != null ? 'R$\u00a0' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:0,maximumFractionDigits:0}) : '\u2014'; }
+  function pct(a, b) { return (a + b) > 0 ? Math.round(a / (a + b) * 100) : 0; }
+
+  var totalLeads = (forms.leads || 0) + (frios.leads || 0);
+  var totalSpend = (forms.spend || 0) + (frios.spend || 0);
+  var formsPct   = pct(forms.leads || 0, frios.leads || 0);
+  var friosPct   = 100 - formsPct;
+
+  function card(tipo, data, color, icon, desc, tagColor) {
+    var leads = data.leads || 0;
+    var spend = data.spend || 0;
+    var cpl   = data.cpl;
+    var ctr   = data.ctr || 0;
+    var impr  = data.impressions || 0;
+    var clicks= data.clicks || 0;
+    var sharePct = totalLeads > 0 ? Math.round(leads / totalLeads * 100) : 0;
+    return '<div class="rounded-2xl p-4 md:p-5 flex-1" style="background:rgba(255,255,255,0.03);border:1px solid ' + color + '33">'
+      + '<div class="flex items-center justify-between mb-3">'
+      + '<div class="flex items-center gap-2">'
+      + '<div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:' + color + '1A">'
+      + icon
+      + '</div>'
+      + '<div>'
+      + '<div class="text-[11px] font-bold" style="color:' + color + '">' + tipo + '</div>'
+      + '<div class="text-[9px] font-medium" style="color:#6B7280">' + desc + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="text-[9px] font-bold px-2 py-1 rounded-full" style="background:' + tagColor + ';color:#fff">' + sharePct + '% dos leads</div>'
+      + '</div>'
+
+      + '<div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">'
+      + kpiMini('Leads', leads, color)
+      + kpiMini('Investido', fmtBrl(spend), color)
+      + kpiMini('CPL', fmtCPL(cpl), cpl != null && cpl < 100 ? '#10B981' : cpl != null && cpl < 200 ? '#F59E0B' : '#EF4444')
+      + kpiMini('CTR', ctr.toFixed(2) + '%', ctr >= 1.5 ? '#10B981' : ctr >= 0.8 ? '#F59E0B' : '#EF4444')
+      + '</div>'
+
+      + '<div class="flex items-center gap-2 mb-1">'
+      + '<div class="text-[9px] font-semibold" style="color:#6B7280">Volume de leads</div>'
+      + '<div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.06)">'
+      + '<div class="h-full rounded-full" style="width:' + sharePct + '%;background:' + color + ';transition:width .8s"></div>'
+      + '</div>'
+      + '</div>'
+
+      + '<div class="text-[10px]" style="color:#9CA3AF">'
+      + (impr > 0 ? impr.toLocaleString('pt-BR') + ' impr. &middot; ' + clicks.toLocaleString('pt-BR') + ' cliques' : '')
+      + '</div>'
+      + '</div>';
+  }
+
+  function kpiMini(label, value, color) {
+    return '<div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04)">'
+      + '<div class="text-[9px] font-semibold uppercase tracking-wider mb-1" style="color:#6B7280">' + label + '</div>'
+      + '<div class="text-sm font-black" style="color:' + color + '">' + value + '</div>'
+      + '</div>';
+  }
+
+  var iconForms = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+  var iconFrios = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+
+  var mes_nomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var mesLabel = (function() {
+    var p = mesAtual.split('-'); return mes_nomes[parseInt(p[1])-1] + '/' + p[0].substring(2);
+  })();
+
+  el.innerHTML = '<div class="card p-4 md:p-5" style="background:#1E2130;border-color:#3A3D52">'
+    + '<div class="flex items-center justify-between mb-4">'
+    + '<div class="flex items-center gap-2">'
+    + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>'
+    + '<div class="text-sm font-bold text-white">Tipo de Lead &mdash; Meta Ads</div>'
+    + '<div class="text-[10px] font-medium" style="color:#6B7280">' + mesLabel + ' &middot; ' + totalLeads + ' leads &middot; ' + fmtBrl(totalSpend) + '</div>'
+    + '</div>'
+    + '<div class="hidden md:flex items-center gap-1.5">'
+    + '<span class="w-2 h-2 rounded-full" style="background:#6366F1"></span><span class="text-[10px]" style="color:#9CA3AF">Forms nativos</span>'
+    + '<span class="w-2 h-2 rounded-full ml-3" style="background:#F59E0B"></span><span class="text-[10px]" style="color:#9CA3AF">Frios / Nutri\u00e7\u00e3o</span>'
+    + '</div>'
+    + '</div>'
+    + '<div class="flex flex-col md:flex-row gap-3">'
+    + card('Forms Nativos', forms, '#6366F1', iconForms, 'Formul\u00e1rio direto no Meta (ON_AD)', '#6366F1')
+    + card('Frios / Nutri\u00e7\u00e3o', frios, '#F59E0B', iconFrios, 'Tr\u00e1fego para site \u2014 lead j\u00e1 nutrido', '#B45309')
+    + '</div>'
+    + '</div>';
+}
+
 function renderCRM() {
   if (typeof NECTAR_LEADBOARD === 'undefined') return;
   var nl = NECTAR_LEADBOARD;
@@ -4464,7 +4569,7 @@ function renderCRM() {
   if (funnel) {
     var stages = ['Contatos','Qualifica\u00e7\u00e3o','Agendamento','Qualificada','Vendida'];
     var colors = ['#6366F1','#8B5CF6','#F59E0B','#10B981','#10B981'];
-    var maxVal = pl['Contatos'] || 1;
+    var maxVal = Math.max.apply(null, stages.map(function(s){ return pl[s] || 0; })) || 1;
     funnel.innerHTML = stages.map(function(s, i) {
       var v = pl[s] || 0;
       var pct = maxVal > 0 ? Math.max(2, Math.round(v / maxVal * 100)) : 2;
@@ -4563,7 +4668,7 @@ function renderCRM() {
 
     funnelByOrigem.innerHTML = origem_config.map(function(oc) {
       var pl = pbo[oc.key] || {};
-      var maxVal = pl['Contatos'] || 1;
+      var maxVal = Math.max.apply(null, stages.map(function(s){ return pl[s] || 0; })) || 1;
       var totalPl = stages.reduce(function(s, k) { return s + (pl[k] || 0); }, 0);
 
       var rows = stages.map(function(s, i) {
