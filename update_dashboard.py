@@ -172,7 +172,7 @@ def fetch_adsets():
         cursor = None
         while True:
             params = {
-                "fields": "id,name,daily_budget,status",
+                "fields": "id,name,daily_budget,status,destination_type",
                 "limit": "50",
             }
             if cursor:
@@ -186,11 +186,12 @@ def fetch_adsets():
             for a in resp.get("data", []):
                 budget = int(a.get("daily_budget", 0)) // 100  # centavos → BRL
                 adsets.append({
-                    "id":     a["id"],
-                    "camp":   code,
-                    "name":   a["name"],
-                    "budget": budget,
-                    "status": "active" if a.get("status") == "ACTIVE" else "paused",
+                    "id":          a["id"],
+                    "camp":        code,
+                    "name":        a["name"],
+                    "budget":      budget,
+                    "status":      "active" if a.get("status") == "ACTIVE" else "paused",
+                    "destination": a.get("destination_type", "UNDEFINED"),
                 })
 
             paging = resp.get("paging", {})
@@ -891,6 +892,31 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
     # RIO VERDE
     rv_data_js = "var RV_DATA = " + json.dumps(rv_data or {}, ensure_ascii=False, separators=(',', ':')) + ";"
 
+    # LEAD TYPE — Forms Nativos vs Frios/Nutrição
+    # ON_AD (formulário nativo Meta) vs WEBSITE/UNDEFINED (tráfego frio para nutrição)
+    FORMS_DEST = {"ON_AD", "MESSENGER", "INSTAGRAM_DIRECT"}
+    adset_dest_map = {a["id"]: a.get("destination", "UNDEFINED") for a in adsets}
+    lead_type_data = {}
+    for aid, periods in adset_metrics.items():
+        dest = adset_dest_map.get(aid, "UNDEFINED")
+        tipo = "forms" if dest in FORMS_DEST else "frios"
+        for period, m in periods.items():
+            if period not in lead_type_data:
+                lead_type_data[period] = {
+                    "forms": {"leads": 0, "spend": 0.0, "impressions": 0, "clicks": 0},
+                    "frios": {"leads": 0, "spend": 0.0, "impressions": 0, "clicks": 0},
+                }
+            lead_type_data[period][tipo]["leads"]       += m.get("leads", 0)
+            lead_type_data[period][tipo]["spend"]       += m.get("spend", 0.0)
+            lead_type_data[period][tipo]["impressions"] += m.get("impressions", 0)
+            lead_type_data[period][tipo]["clicks"]      += m.get("clicks", 0)
+    # Calcula CPL e CTR
+    for period, types in lead_type_data.items():
+        for tipo, v in types.items():
+            v["cpl"] = round(v["spend"] / v["leads"], 2) if v["leads"] else None
+            v["ctr"] = round(v["clicks"] / v["impressions"] * 100, 2) if v["impressions"] else 0
+    lead_type_js = "var LEAD_TYPE_DATA = " + json.dumps(lead_type_data, ensure_ascii=False, separators=(',', ':')) + ";"
+
     # ORGÂNICO
     _default_organic = {
         "ig": {"username":"tron_sistemas","followers":8621,"following":412,"follower_gain":236,
@@ -922,6 +948,8 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 {active_ads_js}
 
 {rv_data_js}
+
+{lead_type_js}
 
 {organic_js}
 
