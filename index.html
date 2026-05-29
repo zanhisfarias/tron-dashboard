@@ -616,6 +616,83 @@
     </div>
     <div id="orgEditorialContent"></div>
   </div>
+
+  <!-- ── Always On ──────────────────────────────────────── -->
+  <div class="card p-4 md:p-5" style="background:#1E2130;border-color:#2A2D3E">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-white">Always On</div>
+          <div class="text-[10px]" style="color:#9CA3AF">Ações de inbound planejadas por mês</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Legenda -->
+        <div class="hidden md:flex items-center gap-3 mr-2">
+          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#EC4899"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#EC4899"></span>E-mail</span>
+          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#10B981"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#10B981"></span>Blog/SEO</span>
+          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#8B5CF6"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#8B5CF6"></span>Webinar</span>
+          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#6366F1"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#6366F1"></span>Landing Page</span>
+          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#F59E0B"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#F59E0B"></span>Social</span>
+          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#6B7280"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#6B7280"></span>Outro</span>
+        </div>
+        <!-- Nav mês -->
+        <button onclick="navAlwaysOn(-1)" style="background:#1A1D27;border:1px solid #3A3D52;color:#9CA3AF;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.color='#fff';this.style.borderColor='#10B981'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#3A3D52'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div id="aoTitleLabel" class="text-xs font-bold text-white" style="min-width:80px;text-align:center">Maio 2026</div>
+        <button onclick="navAlwaysOn(1)" style="background:#1A1D27;border:1px solid #3A3D52;color:#9CA3AF;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.color='#fff';this.style.borderColor='#10B981'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#3A3D52'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Grade compacta -->
+    <div class="rounded-xl overflow-hidden" style="border:1px solid #2A2D3E">
+      <!-- Cabeçalho dias -->
+      <div class="grid grid-cols-7 border-b" style="border-color:#2A2D3E;background:#161820">
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#F87171">DOM</div>
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">SEG</div>
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">TER</div>
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">QUA</div>
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">QUI</div>
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">SEX</div>
+        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#F87171">SÁB</div>
+      </div>
+      <!-- Células -->
+      <div id="aoGrid" class="grid grid-cols-7"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Always On -->
+<div id="aoModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="if(event.target===this)closeAoModal()">
+  <div style="background:#1A1D27;border:1px solid #2A2D3E;border-radius:16px;padding:24px;width:340px;max-width:90vw">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-sm font-bold text-white" id="aoModalTitle">Nova ação</div>
+      <button onclick="closeAoModal()" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:18px;line-height:1">&times;</button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <div class="text-[10px] font-semibold mb-1.5" style="color:#9CA3AF">TIPO</div>
+        <div class="grid grid-cols-3 gap-1.5" id="aoTypeButtons"></div>
+      </div>
+      <div>
+        <div class="text-[10px] font-semibold mb-1.5" style="color:#9CA3AF">TÍTULO</div>
+        <input id="aoTitleInput" type="text" placeholder="Ex: Newsletter Junho..." style="width:100%;background:#0F1117;border:1px solid #2A2D3E;border-radius:8px;padding:8px 10px;color:#E5E7EB;font-size:12px;font-family:Montserrat,sans-serif;outline:none;box-sizing:border-box" onkeydown="if(event.key==='Enter')saveAoAction()" />
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveAoAction()" style="flex:1;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">Salvar</button>
+      <button onclick="closeAoModal()" style="background:#2A2D3E;color:#9CA3AF;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:Montserrat,sans-serif">Cancelar</button>
+    </div>
+    <!-- Lista de ações do dia -->
+    <div id="aoModalList" class="mt-4 space-y-1.5"></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -4087,6 +4164,7 @@ function selectPlatform(plat, skipHash) {
   if (plat === 'social') {
     if (socialMain) socialMain.style.display = '';
     renderCalendario();
+    renderAlwaysOn();
     try { renderOrgEditorial(); } catch(e) { console.warn('[social] editorial:', e); }
   } else if (plat === 'organico') {
     if (organicoMain) organicoMain.style.display = '';
@@ -4214,7 +4292,7 @@ function renderCurrentPlatform() {
   } else if (plat === 'google') {
     try { renderGoogleCharts(); } catch(e) {}
   } else if (plat === 'social') {
-    try { renderCalendario(); } catch(e) {}
+    try { renderCalendario(); renderAlwaysOn(); } catch(e) {}
   } else if (plat === 'onepager') {
     try { renderOnePager(); } catch(e) {}
   }
@@ -4753,6 +4831,169 @@ function renderCRM() {
 
   // Leadboard por origem
   renderLeadboardOrigem();
+}
+
+// ══════════════════════════════════════════════════════════
+// ALWAYS ON — Calendário de Inbound
+// ══════════════════════════════════════════════════════════
+var AO_TYPES = [
+  { key: 'email',   label: 'E-mail',       color: '#EC4899' },
+  { key: 'blog',    label: 'Blog/SEO',     color: '#10B981' },
+  { key: 'webinar', label: 'Webinar',      color: '#8B5CF6' },
+  { key: 'lp',      label: 'Landing Page', color: '#6366F1' },
+  { key: 'social',  label: 'Social',       color: '#F59E0B' },
+  { key: 'outro',   label: 'Outro',        color: '#6B7280' },
+];
+
+var _aoYear  = new Date().getFullYear();
+var _aoMonth = new Date().getMonth() + 1;
+var _aoSelectedDate = null;
+var _aoSelectedType = 'email';
+
+function loadAoData() {
+  try { return JSON.parse(localStorage.getItem('tron_always_on') || '{}'); } catch(e) { return {}; }
+}
+function saveAoData(data) {
+  try { localStorage.setItem('tron_always_on', JSON.stringify(data)); } catch(e) {}
+}
+
+function navAlwaysOn(dir) {
+  _aoMonth += dir;
+  if (_aoMonth > 12) { _aoMonth = 1; _aoYear++; }
+  if (_aoMonth < 1)  { _aoMonth = 12; _aoYear--; }
+  renderAlwaysOn();
+}
+
+function renderAlwaysOn() {
+  var el = document.getElementById('aoGrid');
+  var lbl = document.getElementById('aoTitleLabel');
+  if (!el) return;
+
+  var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  if (lbl) lbl.textContent = MONTH_NAMES[_aoMonth - 1] + ' ' + _aoYear;
+
+  var data = loadAoData();
+  var firstDay = new Date(_aoYear, _aoMonth - 1, 1).getDay();
+  var daysInMonth = new Date(_aoYear, _aoMonth, 0).getDate();
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+  var cells = '';
+  // Células vazias antes do dia 1
+  for (var i = 0; i < firstDay; i++) {
+    cells += '<div style="min-height:52px;border-right:1px solid #2A2D3E;border-bottom:1px solid #2A2D3E;background:#0F1117;opacity:.3"></div>';
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr = _aoYear + '-' + String(_aoMonth).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var actions = data[dateStr] || [];
+    var isToday = dateStr === todayStr;
+    var isWeekend = new Date(_aoYear, _aoMonth - 1, d).getDay() === 0 || new Date(_aoYear, _aoMonth - 1, d).getDay() === 6;
+    var col = (firstDay + d - 1) % 7;
+    var isLastCol = col === 6;
+
+    var dots = actions.slice(0, 3).map(function(a) {
+      var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
+      return '<div title="' + a.title + '" style="width:100%;border-radius:3px;padding:1px 4px;margin-bottom:1px;background:' + t.color + '22;border-left:2px solid ' + t.color + ';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:8px;font-weight:600;color:' + t.color + ';cursor:pointer" onclick="event.stopPropagation();openAoModal(\'' + dateStr + '\')">' + a.title + '</div>';
+    }).join('');
+    var overflow = actions.length > 3 ? '<div style="font-size:8px;color:#6B7280;padding:0 3px">+' + (actions.length - 3) + ' mais</div>' : '';
+
+    cells += '<div onclick="openAoModal(\'' + dateStr + '\')" style="min-height:52px;border-right:1px solid #2A2D3E;border-bottom:1px solid #2A2D3E;padding:4px 3px;cursor:pointer;position:relative;background:' + (isToday ? 'rgba(16,185,129,0.06)' : 'transparent') + ';transition:background .1s" onmouseover="this.style.background=\'' + (isToday ? 'rgba(16,185,129,0.1)' : 'rgba(99,102,241,0.04)') + '\'" onmouseout="this.style.background=\'' + (isToday ? 'rgba(16,185,129,0.06)' : 'transparent') + '\'">'
+      + '<div style="font-size:10px;font-weight:' + (isToday ? '800' : '600') + ';color:' + (isToday ? '#10B981' : isWeekend ? '#6B7280' : '#9CA3AF') + ';margin-bottom:3px;' + (isToday ? 'background:rgba(16,185,129,0.15);border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;' : '') + '">' + d + '</div>'
+      + dots + overflow
+      + '</div>';
+  }
+
+  // Completar última linha
+  var totalCells = firstDay + daysInMonth;
+  var remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (var r = 0; r < remaining; r++) {
+    cells += '<div style="min-height:52px;border-right:1px solid #2A2D3E;border-bottom:1px solid #2A2D3E;background:#0F1117;opacity:.3"></div>';
+  }
+
+  el.innerHTML = cells;
+}
+
+function openAoModal(dateStr) {
+  _aoSelectedDate = dateStr;
+  _aoSelectedType = 'email';
+  var modal = document.getElementById('aoModal');
+  var titleEl = document.getElementById('aoModalTitle');
+  var input = document.getElementById('aoTitleInput');
+  var parts = dateStr.split('-');
+  var MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  if (titleEl) titleEl.textContent = parseInt(parts[2]) + ' de ' + MONTHS[parseInt(parts[1])-1] + ' ' + parts[0];
+  if (input) input.value = '';
+
+  // Botões de tipo
+  var btns = document.getElementById('aoTypeButtons');
+  if (btns) {
+    btns.innerHTML = AO_TYPES.map(function(t) {
+      return '<button onclick="selectAoType(\'' + t.key + '\')" id="aoTypBtn_' + t.key + '" style="padding:5px 4px;border-radius:7px;border:1px solid ' + t.color + '44;background:' + (t.key === _aoSelectedType ? t.color + '22' : 'transparent') + ';color:' + t.color + ';font-size:9px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;transition:all .15s">' + t.label + '</button>';
+    }).join('');
+  }
+
+  // Lista de ações existentes
+  renderAoModalList(dateStr);
+
+  if (modal) { modal.style.display = 'flex'; setTimeout(function(){ if(input) input.focus(); }, 50); }
+}
+
+function selectAoType(key) {
+  _aoSelectedType = key;
+  AO_TYPES.forEach(function(t) {
+    var btn = document.getElementById('aoTypBtn_' + t.key);
+    if (!btn) return;
+    btn.style.background = t.key === key ? t.color + '22' : 'transparent';
+    btn.style.borderColor = t.key === key ? t.color : t.color + '44';
+  });
+}
+
+function renderAoModalList(dateStr) {
+  var data = loadAoData();
+  var actions = data[dateStr] || [];
+  var listEl = document.getElementById('aoModalList');
+  if (!listEl) return;
+  if (!actions.length) { listEl.innerHTML = ''; return; }
+  listEl.innerHTML = '<div style="border-top:1px solid #2A2D3E;padding-top:12px;margin-top:4px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações do dia</div>'
+    + actions.map(function(a, i) {
+      var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:4px">'
+        + '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>'
+        + '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + a.title + '</span>'
+        + '<span style="font-size:9px;color:' + t.color + ';font-weight:600">' + t.label + '</span>'
+        + '<button onclick="deleteAoAction(\'' + dateStr + '\',' + i + ')" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:14px;line-height:1;padding:0 2px" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#6B7280\'">&times;</button>'
+        + '</div>';
+    }).join('') + '</div>';
+}
+
+function saveAoAction() {
+  var input = document.getElementById('aoTitleInput');
+  var title = (input ? input.value.trim() : '');
+  if (!title) { if(input) input.focus(); return; }
+  var data = loadAoData();
+  if (!data[_aoSelectedDate]) data[_aoSelectedDate] = [];
+  data[_aoSelectedDate].push({ type: _aoSelectedType, title: title });
+  saveAoData(data);
+  if (input) input.value = '';
+  renderAoModalList(_aoSelectedDate);
+  renderAlwaysOn();
+}
+
+function deleteAoAction(dateStr, idx) {
+  var data = loadAoData();
+  if (data[dateStr]) {
+    data[dateStr].splice(idx, 1);
+    if (!data[dateStr].length) delete data[dateStr];
+  }
+  saveAoData(data);
+  renderAoModalList(dateStr);
+  renderAlwaysOn();
+}
+
+function closeAoModal() {
+  var modal = document.getElementById('aoModal');
+  if (modal) modal.style.display = 'none';
 }
 
 function renderLeadboardOrigem() {
