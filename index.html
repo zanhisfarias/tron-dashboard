@@ -168,6 +168,13 @@
     body.light [style*="color: #E5E7EB"] { color: #1F2937 !important; }
     body.light [style*="color: #9CA3AF"] { color: #4B5563 !important; }
     body.light [style*="color: #6B7280"] { color: #4B5563 !important; }
+    /* Dark mode: One Pager — força texto legível sobre fundos escuros */
+    body:not(.light) #onePagerMain [style*="color:#6B7280"]  { color: #CBD5E1 !important; }
+    body:not(.light) #onePagerMain [style*="color: #6B7280"] { color: #CBD5E1 !important; }
+    body:not(.light) #onePagerMain [style*="color:#9CA3AF"]  { color: #CBD5E1 !important; }
+    body:not(.light) #onePagerMain [style*="color: #9CA3AF"] { color: #CBD5E1 !important; }
+    body:not(.light) #onePagerMain td:not([style*="color:"]),
+    body:not(.light) #onePagerMain th:not([style*="color:"]) { color: #E5E7EB; }
     /* Fundos escuros inline */
     body.light [style*="background:#0F1117"] { background: #F8F9FC !important; }
     body.light [style*="background:#1A1D27"] { background: #FFFFFF !important; }
@@ -4283,7 +4290,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var parts = hash.split('/');
   var mainPlat = parts[0] || 'social';
   var subPlat  = parts[1] || null;
-  var validMains = ['social','organico','meta','google','crm'];
+  var validMains = ['social','organico','meta','google','crm','onepager','tiktok','linkedin'];
   var validSubs  = ['instagram','facebook','ga4','tiktok','linkedin','youtube'];
   if (!validMains.includes(mainPlat)) mainPlat = 'social';
   selectPlatform(mainPlat, true);
