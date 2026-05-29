@@ -1153,22 +1153,22 @@
   <!-- KPIs — 4 big cards -->
   <div id="opKpiRow" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
 
-  <!-- Corpo principal: 3 colunas -->
-  <div class="grid gap-3" style="grid-template-columns:1fr 1.35fr 1fr">
+  <!-- Corpo principal: 3 colunas (empilha em mobile) -->
+  <div class="grid gap-3 grid-cols-1 md:grid-cols-[1fr_1.35fr_1fr]">
 
     <!-- Col 1: Leads por Origem + Funil -->
-    <div class="flex flex-col gap-3">
-      <div id="opLeadsOrigem" class="card p-3 flex-1"></div>
+    <div class="flex flex-col gap-3 min-w-0">
+      <div id="opLeadsOrigem" class="card p-3 flex-1 overflow-x-auto"></div>
       <div id="opFunilAbertos" class="card p-3 flex-1"></div>
     </div>
 
     <!-- Col 2: Negócios Fechados BIG -->
-    <div id="opFechadosBig" class="card p-4" style="border-color:rgba(99,102,241,0.35);box-shadow:0 0 28px rgba(99,102,241,0.08)"></div>
+    <div id="opFechadosBig" class="card p-4 min-w-0 overflow-x-auto" style="border-color:rgba(99,102,241,0.35);box-shadow:0 0 28px rgba(99,102,241,0.08)"></div>
 
     <!-- Col 3: Todos Maio + Abertos -->
-    <div class="flex flex-col gap-3">
-      <div id="opTodosMaio" class="card p-3 flex-1"></div>
-      <div id="opAbertosPipeline" class="card p-3 flex-1"></div>
+    <div class="flex flex-col gap-3 min-w-0">
+      <div id="opTodosMaio" class="card p-3 flex-1 overflow-x-auto"></div>
+      <div id="opAbertosPipeline" class="card p-3 flex-1 overflow-x-auto"></div>
     </div>
   </div>
 
@@ -5322,7 +5322,7 @@ function renderOnePager() {
     var totalRec = fd.total_lu + fd.total_mrr;
 
     // Big numbers top
-    var bigNums = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">'
+    var bigNums = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-bottom:18px">'
       + [
           { v: fd.total_qtd,  l:'Fechados',   col:'#6366F1', big:true },
           { v: fK(fd.total_lu),  l:'Receita LU',  col:'#F59E0B', big:false },
