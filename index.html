@@ -4196,7 +4196,26 @@ function applyLiveData(json) {
   if (d.active_ads_count != null)                             ACTIVE_ADS_COUNT   = d.active_ads_count;
   if (d.rv_data && Object.keys(d.rv_data).length)             RV_DATA            = d.rv_data;
   if (d.lead_type_data && Object.keys(d.lead_type_data).length) LEAD_TYPE_DATA  = d.lead_type_data;
-  renderAll();
+  renderCurrentPlatform();
+}
+
+// Renderiza apenas a aba ativa — não altera display de nenhuma seção
+function renderCurrentPlatform() {
+  var plat = activePlatform;
+  if (plat === 'meta') {
+    renderAll();
+  } else if (plat === 'crm') {
+    renderCRM();
+  } else if (plat === 'organico') {
+    renderOrganicoDashboard();
+  } else if (plat === 'google') {
+    try { renderGoogleCharts(); } catch(e) {}
+  } else if (plat === 'social') {
+    try { renderCalendario(); } catch(e) {}
+  } else if (plat === 'onepager') {
+    try { renderOnePager(); } catch(e) {}
+  }
+  // outros: tiktok, linkedin — não têm dados live por ora
 }
 
 function loadLiveData() {
@@ -4290,13 +4309,9 @@ document.addEventListener('DOMContentLoaded', function() {
     fd.textContent = 'Atualizado: ' + d2.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
   buildPeriodBar();
-  if (IS_LIVE) {
-    startLiveMode();
-  } else {
-    renderAll();
-  }
 
-  // Restaura aba pelo hash da URL; fallback para localStorage (persiste após F5 e em qualquer cenário)
+  // ── Restaura aba ANTES de iniciar live mode ──────────────
+  // Prioridade: hash da URL → localStorage → 'social'
   var validMains = ['social','organico','meta','google','crm','onepager','tiktok','linkedin'];
   var validSubs  = ['instagram','facebook','ga4','tiktok','linkedin','youtube'];
   var hash = (window.location.hash || '').replace('#', '').trim();
@@ -4311,6 +4326,13 @@ document.addEventListener('DOMContentLoaded', function() {
   history.replaceState(null, '', '#' + mainPlat);
   if (mainPlat === 'organico' && subPlat && validSubs.includes(subPlat)) {
     selectOrgPlat(subPlat, true);
+  }
+
+  // ── Inicia live mode após aba já estar definida ──────────
+  if (IS_LIVE) {
+    startLiveMode();
+  } else {
+    renderAll();
   }
 
   // Re-renderiza calendário ao redimensionar (mobile ↔ desktop muda o limite de pílulas)
