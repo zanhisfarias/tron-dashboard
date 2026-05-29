@@ -349,8 +349,6 @@
     <div class="max-w-[1400px] mx-auto px-3 md:px-6 h-9 md:h-10 flex items-center gap-1 overflow-x-auto scroll-hide" id="periodBar">
       <button class="period-btn" data-period="hoje">Hoje</button>
       <button class="period-btn" data-period="ontem">Ontem</button>
-      <!-- Botão semana com dropdown Seg–Dom -->
-      <button id="weekPickerBtn" class="period-btn flex items-center gap-1" onclick="toggleWeekPicker(this)" style="padding:3px 8px"><span id="wpLabel">Semana</span><svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg></button>
       <!-- Botão mês com dropdown -->
       <button id="monthPickerBtn" class="period-btn active flex items-center gap-1" onclick="toggleMonthPicker('monthPicker',this,'main')" style="padding:3px 8px"><span id="mpLabel">M&#234;s</span><svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg></button>
       <div class="period-sep mx-1"></div>
@@ -368,7 +366,6 @@
 <div id="monthPicker" class="month-picker"></div>
 <div id="rvCalPicker" class="day-picker"></div>
 <div id="rvMonthPicker" class="month-picker"></div>
-<div id="weekPicker" style="display:none;position:fixed;z-index:1000;background:#1A1D27;border:1px solid #2A2D3E;border-radius:12px;padding:8px;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5)"></div>
 
 <!-- MAIN -->
 <main class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-3 md:space-y-5">
@@ -2340,61 +2337,23 @@ function getISOWeek(d) {
   return Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
 }
 
-function toggleWeekPicker(btn) {
-  var picker = document.getElementById('weekPicker');
-  if (!picker) return;
-  if (picker.style.display !== 'none') { picker.style.display = 'none'; return; }
+
+function selectClosedWeek(since, until, pickerId) {
   closeAllPickers();
-
-  var weeks = getClosedWeeks(10);
-  var activeKey = state.activePeriodKey || '';
-
-  picker.innerHTML = '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;padding:2px 6px 6px">Semanas (Seg–Dom)</div>'
-    + weeks.map(function(w) {
-      var isActive = activeKey === 'semana-' + w.since;
-      return '<div onclick="selectClosedWeek(\'' + w.since + '\',\'' + w.until + '\',\'' + w.label + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;cursor:pointer;background:' + (isActive ? 'rgba(99,102,241,0.15)' : 'transparent') + ';margin-bottom:1px;transition:background .1s" onmouseover="this.style.background=\'rgba(99,102,241,0.1)\'" onmouseout="this.style.background=\'' + (isActive ? 'rgba(99,102,241,0.15)' : 'transparent') + '\'">'
-        + '<div><div style="font-size:11px;font-weight:' + (w.current ? '700' : '600') + ';color:' + (isActive ? '#6366F1' : '#E5E7EB') + '">' + w.label + '</div>'
-        + '<div style="font-size:9px;color:#6B7280;margin-top:1px">' + w.sub + '</div></div>'
-        + (w.current ? '<span style="font-size:8px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(99,102,241,0.15);color:#6366F1">em curso</span>' : '')
-        + '</div>';
-    }).join('');
-
-  // Posiciona o picker abaixo do botão
-  var rect = btn.getBoundingClientRect();
-  picker.style.top  = (rect.bottom + 6) + 'px';
-  picker.style.left = Math.max(4, rect.left) + 'px';
-  picker.style.display = 'block';
-}
-
-function selectClosedWeek(since, until, label) {
-  var picker = document.getElementById('weekPicker');
-  if (picker) picker.style.display = 'none';
 
   state.activePeriodKey = 'semana-' + since;
   state.since = since; state.until = until; state.periodKey = 7;
 
-  // Destaca botão semana e remove active dos outros
+  // Destaca botão calendário e remove active dos outros
   document.querySelectorAll('#periodBar .period-btn').forEach(function(b) { b.classList.remove('active'); });
-  var wBtn = document.getElementById('weekPickerBtn');
-  if (wBtn) {
-    wBtn.classList.add('active');
-    var lbl = wBtn.querySelector('#wpLabel');
-    if (lbl) lbl.textContent = label === 'Semana atual' ? 'Semana' : label;
-  }
+  var calBtn = document.getElementById('calPickerBtn');
+  if (calBtn) calBtn.classList.add('active');
+
   updateMonthBtn();
   renderSectionPeriodBars();
   renderAll();
 }
 
-// Fecha weekPicker ao clicar fora
-document.addEventListener('click', function(e) {
-  var picker = document.getElementById('weekPicker');
-  if (picker && picker.style.display !== 'none') {
-    if (!e.target.closest('#weekPicker') && !e.target.closest('#weekPickerBtn')) {
-      picker.style.display = 'none';
-    }
-  }
-});
 
 // Seta período por chave de texto (usado nas barras de seção)
 function setPeriodByKey(key) {
@@ -2436,20 +2395,57 @@ function getActiveMonthNum() {
 }
 
 // ── Day Picker ─────────────────────────────────────────────
+var _dpTab = 'semana'; // aba ativa do day-picker: 'dia' | 'semana'
+
+function switchDpTab(tab, pickerId, context, selectedDate) {
+  _dpTab = tab;
+  var picker = document.getElementById(pickerId);
+  if (picker) picker.innerHTML = buildDayPickerContent(pickerId, context, selectedDate);
+}
+
 function buildDayPickerContent(pickerId, context, selectedDate) {
+  var dAct = _dpTab === 'dia'    ? '#6366F1' : '#232636';
+  var dCol = _dpTab === 'dia'    ? '#fff'    : '#9CA3AF';
+  var sAct = _dpTab === 'semana' ? '#6366F1' : '#232636';
+  var sCol = _dpTab === 'semana' ? '#fff'    : '#9CA3AF';
+  var sd   = selectedDate || '';
+
+  var html = '<div style="display:flex;gap:4px;margin-bottom:8px">'
+    + '<button onclick="switchDpTab(\'dia\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\')" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + dAct + ';color:' + dCol + '">Dia</button>'
+    + '<button onclick="switchDpTab(\'semana\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\')" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + sAct + ';color:' + sCol + '">Semana</button>'
+    + '</div>';
+
+  if (_dpTab === 'semana') {
+    var weeks = getClosedWeeks(10);
+    var activeKey = state.activePeriodKey || '';
+    html += '<div style="display:flex;flex-direction:column;gap:1px">';
+    weeks.forEach(function(w) {
+      var isActive = activeKey === 'semana-' + w.since;
+      var bg  = isActive ? 'rgba(99,102,241,0.18)' : 'transparent';
+      var bgH = 'rgba(99,102,241,0.1)';
+      html += '<div onclick="selectClosedWeek(\'' + w.since + '\',\'' + w.until + '\',\'' + pickerId + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:7px;cursor:pointer;background:' + bg + '" onmouseover="this.style.background=\'' + bgH + '\'" onmouseout="this.style.background=\'' + bg + '\'">'
+        + '<div><div style="font-size:11px;font-weight:' + (w.current?'700':'600') + ';color:' + (isActive?'#818CF8':'#E5E7EB') + '">' + w.label + '</div>'
+        + '<div style="font-size:9px;color:#6B7280;margin-top:1px">' + w.sub + '</div></div>'
+        + (w.current ? '<span style="font-size:8px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(99,102,241,0.15);color:#6366F1">em curso</span>' : '')
+        + '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ── Aba Dia ───────────────────────────────────────────────
   var now = new Date();
   var year = now.getFullYear();
-  var month = now.getMonth(); // 0-based
+  var month = now.getMonth();
   var todayStr = toISO(now);
   var daysInMonth = new Date(year, month + 1, 0).getDate();
   var monthName = MONTH_NAMES[month] + '/' + year;
   var DAY_LABELS = ['D','S','T','Q','Q','S','S'];
 
-  var html = '<div class="day-picker-header">' + monthName + '</div>';
+  html += '<div class="day-picker-header">' + monthName + '</div>';
   html += '<div class="day-picker-grid">';
   DAY_LABELS.forEach(function(l) { html += '<div class="day-lbl">' + l + '</div>'; });
 
-  // blank cells before day 1
   var firstWeekday = new Date(year, month, 1).getDay();
   for (var b = 0; b < firstWeekday; b++) html += '<div></div>';
 
@@ -2457,16 +2453,16 @@ function buildDayPickerContent(pickerId, context, selectedDate) {
     var dateStr = year + '-' + String(month + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
     var isFuture = dateStr > todayStr;
     var isToday  = dateStr === todayStr;
-    var isActive = dateStr === selectedDate;
-    var cls = 'day-btn' + (isToday ? ' dp-today' : '') + (isActive ? ' dp-active' : '');
-    var label = String(d).padStart(2,'0');
+    var isActive2 = dateStr === selectedDate;
+    var cls = 'day-btn' + (isToday ? ' dp-today' : '') + (isActive2 ? ' dp-active' : '');
+    var lbl = String(d).padStart(2,'0');
     if (isFuture) {
-      html += '<button class="day-btn" disabled>' + label + '</button>';
+      html += '<button class="day-btn" disabled>' + lbl + '</button>';
     } else {
       var onclick = context === 'main'
         ? "selectMainDay('" + dateStr + "')"
         : "rvSelectDay('" + dateStr + "')";
-      html += '<button class="' + cls + '" onclick="' + onclick + '">' + label + '</button>';
+      html += '<button class="' + cls + '" onclick="' + onclick + '">' + lbl + '</button>';
     }
   }
   html += '</div>';
