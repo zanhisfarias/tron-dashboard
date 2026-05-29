@@ -4018,6 +4018,7 @@ function renderAll() {
   renderFunnel(); renderInsights(); renderNectarLeadboard(); renderRioVerde(); renderTable(); renderCreatives(); renderLeadTypes();
   renderSectionPeriodBars();
   if (activePlatform === 'organico') renderOrganicoDashboard();
+  if (activePlatform === 'crm') renderCRM();
 }
 
 var campColorsMap = { all: '#6366F1', MR: '#6366F1', EMP: '#F59E0B', C01: '#10B981', C00: '#8B5CF6' };
@@ -4043,6 +4044,7 @@ var platBtns   = { social:'platSocial', organico:'platOrganico', meta:'platMeta'
 
 function selectPlatform(plat, skipHash) {
   activePlatform = plat;
+  try { localStorage.setItem('tron_active_platform', plat); } catch(e) {}
   if (!skipHash) {
     var hash = plat === 'organico' ? 'organico/' + _activeOrgPlat : plat;
     history.replaceState(null, '', '#' + hash);
@@ -4294,20 +4296,22 @@ document.addEventListener('DOMContentLoaded', function() {
     renderAll();
   }
 
-  // Restaura aba pelo hash da URL (persiste após F5)
-  var hash = (window.location.hash || '').replace('#', '').trim();
-  var parts = hash.split('/');
-  var mainPlat = parts[0] || 'social';
-  var subPlat  = parts[1] || null;
+  // Restaura aba pelo hash da URL; fallback para localStorage (persiste após F5 e em qualquer cenário)
   var validMains = ['social','organico','meta','google','crm','onepager','tiktok','linkedin'];
   var validSubs  = ['instagram','facebook','ga4','tiktok','linkedin','youtube'];
-  if (!validMains.includes(mainPlat)) mainPlat = 'social';
+  var hash = (window.location.hash || '').replace('#', '').trim();
+  var parts = hash.split('/');
+  var mainPlat = parts[0];
+  var subPlat  = parts[1] || null;
+  if (!mainPlat || !validMains.includes(mainPlat)) {
+    try { mainPlat = localStorage.getItem('tron_active_platform') || 'social'; } catch(e) { mainPlat = 'social'; }
+    if (!validMains.includes(mainPlat)) mainPlat = 'social';
+  }
   selectPlatform(mainPlat, true);
+  history.replaceState(null, '', '#' + mainPlat);
   if (mainPlat === 'organico' && subPlat && validSubs.includes(subPlat)) {
     selectOrgPlat(subPlat, true);
   }
-  // Grava hash inicial se estava em branco
-  if (!hash) history.replaceState(null, '', '#social');
 
   // Re-renderiza calendário ao redimensionar (mobile ↔ desktop muda o limite de pílulas)
   var _calResizeTimer;
