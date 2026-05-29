@@ -1169,6 +1169,9 @@
   <!-- KPIs — 4 big cards -->
   <div id="opKpiRow" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
 
+  <!-- ROI Meta Ads -->
+  <div id="opRoiMeta" class="card p-3" style="border-color:rgba(99,102,241,0.3);box-shadow:0 0 20px rgba(99,102,241,0.06)"></div>
+
   <!-- Corpo principal: 3 colunas (empilha em mobile) -->
   <div class="grid gap-3 grid-cols-1 md:grid-cols-[1fr_1.35fr_1fr]">
 
@@ -5399,6 +5402,50 @@ function renderOnePager() {
         + '<div style="margin-top:10px;height:2px;border-radius:99px;background:linear-gradient(to right,'+k.col+',transparent)"></div>'
         + '</div>';
     }).join('');
+  }
+
+  // ── ROI META ADS ──────────────────────────────────────
+  var elRoi = document.getElementById('opRoiMeta');
+  if (elRoi) {
+    var metaLead = (OP.leads.por_origem.find(function(x){ return x.o === 'Mídia Paga'; }) || {qtd:0}).qtd;
+    var metaFech = OP.fechados.por_origem.find(function(x){ return x.o === 'Meta Ads'; }) || {qtd:0, lu:0, mrr:0};
+    var inv      = OP.investimento;
+    var lu       = metaFech.lu;
+    var mrr      = metaFech.mrr;
+    var qtdV     = metaFech.qtd;
+    var rec12    = lu + mrr * 12;
+    var recMes   = lu + mrr;
+    var cpl      = metaLead > 0 ? inv / metaLead : 0;
+    var cpv      = qtdV > 0 ? inv / qtdV : 0;
+    var roas12   = inv > 0 ? rec12 / inv : 0;
+    var roi12    = inv > 0 ? (rec12 - inv) / inv * 100 : 0;
+    var roiMes   = inv > 0 ? (recMes - inv) / inv * 100 : 0;
+
+    function roiColor(v) { return v >= 0 ? '#10B981' : '#EF4444'; }
+    function roiSign(v)  { return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+    function raosCol(v)  { return v >= 1 ? '#10B981' : '#F59E0B'; }
+
+    var metrics = [
+      { l:'Investimento',    v: fK(inv),             sub:'Meta Ads ' + OP.periodo,          col:'#6366F1' },
+      { l:'Leads Gerados',   v: metaLead,             sub:'CPL ' + fK(cpl),                 col:'#818CF8' },
+      { l:'Vendas',          v: qtdV,                 sub:'CPV ' + fK(cpv),                 col:'#A78BFA' },
+      { l:'Receita LU',      v: fK(lu),               sub:'Entrada única',                  col:'#F59E0B' },
+      { l:'MRR Gerado',      v: fK(mrr),              sub: fK(mrr * 12) + '/ano',           col:'#FCD34D' },
+      { l:'ROAS 12 meses',   v: roas12.toFixed(2)+'x', sub:'LU + MRR×12 ÷ Invest.',        col: raosCol(roas12) },
+      { l:'ROI 12 meses',    v: roiSign(roi12),       sub: fK(rec12) + ' gerado',           col: roiColor(roi12) },
+      { l:'ROI no mês',      v: roiSign(roiMes),      sub:'Apenas LU+MRR mensal',           col: roiColor(roiMes) }
+    ];
+
+    elRoi.innerHTML = '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6366F1;margin-bottom:10px">ROI Meta Ads &mdash; ' + OP.periodo + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">'
+      + metrics.map(function(m){
+          return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px">'
+            + '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:'+mc+';margin-bottom:4px">'+m.l+'</div>'
+            + '<div style="font-size:20px;font-weight:900;color:'+m.col+';line-height:1.1">'+m.v+'</div>'
+            + '<div style="font-size:10px;color:'+mc+';margin-top:3px">'+m.sub+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
   }
 
   // helper linha de tabela compacta
