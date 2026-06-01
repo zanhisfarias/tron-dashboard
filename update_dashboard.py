@@ -445,10 +445,13 @@ def fetch_nectar_leadboard():
         "mrr_total":            0.0,
         "receita_historico":    {},
         "receita_by_origem":    {o: {"avulso": 0.0, "mrr": 0.0} for o in ORIGENS_TRACK},
-        "leads_by_origem_mes":  {o: 0 for o in ORIGENS_TRACK},
-        "leads_by_origem_ano":  {o: 0 for o in ORIGENS_TRACK},
-        "leads_historico":      {},
-        "ticket_por_produto":   {},
+        "leads_by_origem_mes":     {o: 0 for o in ORIGENS_TRACK},
+        "leads_by_origem_ano":     {o: 0 for o in ORIGENS_TRACK},
+        "leads_historico":         {},
+        "vendidas_historico":      {},
+        "perdidas_historico":      {},
+        "receita_hist_by_origem":  {},
+        "ticket_por_produto":      {},
     }
 
     token = NECTAR_BIG_DATA_TOKEN or NECTAR_TOKEN
@@ -512,9 +515,12 @@ def fetch_nectar_leadboard():
     receita_historico    = {}
     receita_by_origem    = {o: {"avulso": 0.0, "mrr": 0.0} for o in ORIGENS_TRACK}
     leads_by_origem_mes  = {o: 0 for o in ORIGENS_TRACK}
-    leads_by_origem_ano  = {o: 0 for o in ORIGENS_TRACK}
-    leads_historico      = {}   # { "2026-01": {"Meta Ads": N, "Google Ads": N, "Site": N} }
-    ticket_por_produto   = {}
+    leads_by_origem_ano      = {o: 0 for o in ORIGENS_TRACK}
+    leads_historico          = {}   # { "2026-01": {"Meta Ads": N, ...} }
+    vendidas_historico       = {}   # { "2026-01": {"Meta Ads": N, ...} }
+    perdidas_historico       = {}   # { "2026-01": {"Meta Ads": N, ...} }
+    receita_hist_by_origem   = {}   # { "2026-01": {"Meta Ads": {"avulso": N, "mrr": N}, ...} }
+    ticket_por_produto       = {}
 
     for r in rows:
         origem = r.get("Contato: origem") or ""
@@ -558,6 +564,10 @@ def fetch_nectar_leadboard():
             if mk:
                 historico_mes.setdefault(mk, {"vendidas": 0, "perdidas": 0})
                 historico_mes[mk]["vendidas"] += 1
+                if origem in ORIGENS_TRACK:
+                    if mk not in vendidas_historico:
+                        vendidas_historico[mk] = {o: 0 for o in ORIGENS_TRACK}
+                    vendidas_historico[mk][origem] += 1
             if no_mes_atual(date_conv):
                 vendidas_mes += 1
                 if origem in ORIGENS_TRACK:
@@ -570,6 +580,10 @@ def fetch_nectar_leadboard():
             if mk:
                 historico_mes.setdefault(mk, {"vendidas": 0, "perdidas": 0})
                 historico_mes[mk]["perdidas"] += 1
+                if origem in ORIGENS_TRACK:
+                    if mk not in perdidas_historico:
+                        perdidas_historico[mk] = {o: 0 for o in ORIGENS_TRACK}
+                    perdidas_historico[mk][origem] += 1
             if no_mes_atual(date_conclu):
                 perdidas_mes += 1
                 if origem in ORIGENS_TRACK:
@@ -592,6 +606,11 @@ def fetch_nectar_leadboard():
                 receita_historico.setdefault(mk, {"avulso": 0.0, "mrr": 0.0})
                 receita_historico[mk]["avulso"] += val_avulso
                 receita_historico[mk]["mrr"]    += val_mrr
+                if origem in ORIGENS_TRACK:
+                    if mk not in receita_hist_by_origem:
+                        receita_hist_by_origem[mk] = {o: {"avulso": 0.0, "mrr": 0.0} for o in ORIGENS_TRACK}
+                    receita_hist_by_origem[mk][origem]["avulso"] += val_avulso
+                    receita_hist_by_origem[mk][origem]["mrr"]    += val_mrr
             receita_avulso_total += val_avulso
             mrr_total            += val_mrr
             if no_mes_atual(date_ref):
@@ -641,8 +660,11 @@ def fetch_nectar_leadboard():
         "receita_by_origem":    receita_by_origem,
         "leads_by_origem_mes":  leads_by_origem_mes,
         "leads_by_origem_ano":  leads_by_origem_ano,
-        "leads_historico":      leads_historico,
-        "ticket_por_produto":   ticket_por_produto,
+        "leads_historico":         leads_historico,
+        "vendidas_historico":      vendidas_historico,
+        "perdidas_historico":      perdidas_historico,
+        "receita_hist_by_origem":  receita_hist_by_origem,
+        "ticket_por_produto":      ticket_por_produto,
     }
 
 
