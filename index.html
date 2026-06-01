@@ -3635,6 +3635,10 @@ function renderVerbaProduto() {
   var el = document.getElementById('verbaProduto');
   if (!el) return;
 
+  // Sincroniza com o seletor global de mês (Jan-Dez)
+  var globalMon = getActiveMonthNum();
+  if (globalMon) verbaProdutoFilter.month = globalMon;
+
   var f = verbaProdutoFilter;
   var monthKey = '2026-' + String(f.month).padStart(2, '0');
   var daysInMon = new Date(2026, f.month, 0).getDate();
@@ -3824,6 +3828,8 @@ var pacingFilter = { month: CURRENT_MONTH };
 function renderBudgetPacing() {
   var el = document.getElementById('budgetPacing');
   if (!el) return;
+  var globalMon = getActiveMonthNum();
+  if (globalMon) pacingFilter.month = globalMon;
   var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
   var selMonth     = pacingFilter.month;
   var isPast       = selMonth < CURRENT_MONTH;
