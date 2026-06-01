@@ -1460,7 +1460,7 @@ function renderOrgKpis() {
 
   } else if (_activeOrgPlat === 'instagram') {
     row.className = 'grid grid-cols-2 gap-3 md:gap-4';
-    var d = ORGANIC_DATA.ig;
+    var igData = (ORGANIC_DATA && ORGANIC_DATA.ig) ? ORGANIC_DATA.ig : {};
     var filteredIG = getFilteredOrgPosts('instagram');
     var lbl = orgPeriodLabel();
 
@@ -1468,23 +1468,24 @@ function renderOrgKpis() {
     var storiesCount  = filteredIG.filter(function(p){ return p.type === 'STORY'; }).length;
     var totalLikes    = filteredIG.reduce(function(s,p){ return s+(p.likes||0); }, 0);
     var totalComments = filteredIG.reduce(function(s,p){ return s+(p.comments||0); }, 0);
-    var reachVal      = d.reach_month      || 0;
-    var engagedVal    = d.accounts_engaged || 0;
+    var reachVal      = igData.reach_month      || 0;
+    var engagedVal    = igData.accounts_engaged || 0;
 
-    var kpis = [
-      { label:'Posts Publicados', value: postsCount,          sub: lbl,    icon:'📸', color:'#dd2a7b', note:'' },
-      { label:'Stories Publicados',value: storiesCount,       sub: lbl,    icon:'🎬', color:'#a855f7', note: storiesCount === 0 ? 'Stories expiram em 24h na API' : '' },
-      { label:'Visualizações',     value: fmt.num(reachVal),  sub:'Alcance — mês atual', icon:'👁️', color:'#6366F1', note: reachVal === 0 ? 'Rode update_dashboard.py' : '' },
-      { label:'Visualizadores',    value: fmt.num(engagedVal),sub:'Contas engajadas — mês atual', icon:'👤', color:'#06b6d4', note: engagedVal === 0 ? 'Rode update_dashboard.py' : '' },
-      { label:'Total de Curtidas', value: fmt.num(totalLikes),sub: lbl,    icon:'❤️', color:'#ef4444', note:'' },
-      { label:'Total de Comentários',value: fmt.num(totalComments),sub: lbl, icon:'💬', color:'#10b981', note:'' }
+    // rgba border/glow por card (evitar hex 8 digitos que alguns parsers rejeitam)
+    var igKpis = [
+      { label:'Posts Publicados',     value: postsCount,             sub: lbl,                        icon:'&#128248;', color:'#dd2a7b', border:'rgba(221,42,123,0.22)',  glow:'rgba(221,42,123,0.07)',  note:'' },
+      { label:'Stories Publicados',   value: storiesCount,           sub: lbl,                        icon:'&#127909;', color:'#a855f7', border:'rgba(168,85,247,0.22)',  glow:'rgba(168,85,247,0.07)',  note: storiesCount === 0 ? 'Stories expiram em 24h na API' : '' },
+      { label:'Visualiza\u00e7\u00f5es',    value: fmt.num(reachVal),      sub:'Alcance \u2014 m\u00eas atual', icon:'&#128065;', color:'#6366F1', border:'rgba(99,102,241,0.22)',  glow:'rgba(99,102,241,0.07)',  note: reachVal === 0 ? 'Rode update_dashboard.py' : '' },
+      { label:'Visualizadores',       value: fmt.num(engagedVal),    sub:'Contas engajadas \u2014 m\u00eas atual', icon:'&#128100;', color:'#06b6d4', border:'rgba(6,182,212,0.22)',   glow:'rgba(6,182,212,0.07)',   note: engagedVal === 0 ? 'Rode update_dashboard.py' : '' },
+      { label:'Total de Curtidas',    value: fmt.num(totalLikes),    sub: lbl,                        icon:'&#10084;',  color:'#ef4444', border:'rgba(239,68,68,0.22)',   glow:'rgba(239,68,68,0.07)',   note:'' },
+      { label:'Total de Coment\u00e1rios', value: fmt.num(totalComments), sub: lbl,                  icon:'&#128172;', color:'#10b981', border:'rgba(16,185,129,0.22)',  glow:'rgba(16,185,129,0.07)',  note:'' }
     ];
 
-    row.innerHTML = kpis.map(function(k) {
-      return '<div class="card p-5 md:p-6 kpi-card" style="background:#1E2130;border-color:' + k.color + '33;box-shadow:0 0 24px ' + k.color + '11">'
+    row.innerHTML = igKpis.map(function(k) {
+      return '<div class="card p-5 md:p-6 kpi-card" style="background:#1E2130;border:1px solid ' + k.border + ';box-shadow:0 0 24px ' + k.glow + '">'
         + '<div class="flex items-start justify-between gap-2">'
         + '<div class="text-[10px] font-bold uppercase tracking-widest mt-0.5" style="color:' + k.color + '">' + k.label + '</div>'
-        + '<div style="font-size:26px;line-height:1;flex-shrink:0">' + k.icon + '</div>'
+        + '<div style="font-size:24px;line-height:1;flex-shrink:0">' + k.icon + '</div>'
         + '</div>'
         + '<div class="text-4xl md:text-5xl font-black text-white mt-3 mb-1" style="letter-spacing:-1px">' + k.value + '</div>'
         + '<div class="text-[11px] font-semibold" style="color:#6B7280">' + k.sub + '</div>'
