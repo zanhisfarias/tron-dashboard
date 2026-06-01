@@ -1459,32 +1459,40 @@ function renderOrgKpis() {
     ];
 
   } else if (_activeOrgPlat === 'instagram') {
-    row.className = 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4';
+    row.className = 'grid grid-cols-2 gap-3 md:gap-4';
     var d = ORGANIC_DATA.ig;
     var filteredIG = getFilteredOrgPosts('instagram');
     var lbl = orgPeriodLabel();
 
-    // Posts vs Stories — apenas IMAGE/VIDEO/CAROUSEL são retornados pela API (stories expiram em 24h)
-    var postsCount   = filteredIG.filter(function(p){ return p.type !== 'STORY'; }).length;
-    var storiesCount = filteredIG.filter(function(p){ return p.type === 'STORY'; }).length;
-
+    var postsCount    = filteredIG.filter(function(p){ return p.type !== 'STORY'; }).length;
+    var storiesCount  = filteredIG.filter(function(p){ return p.type === 'STORY'; }).length;
     var totalLikes    = filteredIG.reduce(function(s,p){ return s+(p.likes||0); }, 0);
     var totalComments = filteredIG.reduce(function(s,p){ return s+(p.comments||0); }, 0);
+    var reachVal      = d.reach_month      || 0;
+    var engagedVal    = d.accounts_engaged || 0;
 
-    // reach_month e accounts_engaged vêm do IG Insights (mês inteiro, não filtrável por período)
-    var reachVal   = d.reach_month    || 0;
-    var engagedVal = d.accounts_engaged || 0;
-    var reachSub   = reachVal > 0 ? 'Contas únicas alcançadas — mês atual' : 'Dados do mês atual';
-    var engSub     = engagedVal > 0 ? 'Contas que interagiram — mês atual' : 'Dados do mês atual';
-
-    cards = [
-      { label:'Posts no Período',    value: postsCount,             sub: 'Feed · ' + lbl,   icon:'📸' },
-      { label:'Stories no Período',  value: storiesCount > 0 ? storiesCount : '—', sub: storiesCount > 0 ? lbl : 'Expiram em 24h — indisponível', icon:'🎬' },
-      { label:'Visualizações',       value: fmt.num(reachVal),      sub: reachSub,           icon:'👁️' },
-      { label:'Visualizadores',      value: fmt.num(engagedVal),    sub: engSub,             icon:'👤' },
-      { label:'Total de Curtidas',   value: fmt.num(totalLikes),    sub: 'Posts · ' + lbl,  icon:'❤️' },
-      { label:'Total de Comentários',value: fmt.num(totalComments), sub: 'Posts · ' + lbl,  icon:'💬' }
+    var kpis = [
+      { label:'Posts Publicados', value: postsCount,          sub: lbl,    icon:'📸', color:'#dd2a7b', note:'' },
+      { label:'Stories Publicados',value: storiesCount,       sub: lbl,    icon:'🎬', color:'#a855f7', note: storiesCount === 0 ? 'Stories expiram em 24h na API' : '' },
+      { label:'Visualizações',     value: fmt.num(reachVal),  sub:'Alcance — mês atual', icon:'👁️', color:'#6366F1', note: reachVal === 0 ? 'Rode update_dashboard.py' : '' },
+      { label:'Visualizadores',    value: fmt.num(engagedVal),sub:'Contas engajadas — mês atual', icon:'👤', color:'#06b6d4', note: engagedVal === 0 ? 'Rode update_dashboard.py' : '' },
+      { label:'Total de Curtidas', value: fmt.num(totalLikes),sub: lbl,    icon:'❤️', color:'#ef4444', note:'' },
+      { label:'Total de Comentários',value: fmt.num(totalComments),sub: lbl, icon:'💬', color:'#10b981', note:'' }
     ];
+
+    row.innerHTML = kpis.map(function(k) {
+      return '<div class="card p-5 md:p-6 kpi-card" style="background:#1E2130;border-color:' + k.color + '33;box-shadow:0 0 24px ' + k.color + '11">'
+        + '<div class="flex items-start justify-between gap-2">'
+        + '<div class="text-[10px] font-bold uppercase tracking-widest mt-0.5" style="color:' + k.color + '">' + k.label + '</div>'
+        + '<div style="font-size:26px;line-height:1;flex-shrink:0">' + k.icon + '</div>'
+        + '</div>'
+        + '<div class="text-4xl md:text-5xl font-black text-white mt-3 mb-1" style="letter-spacing:-1px">' + k.value + '</div>'
+        + '<div class="text-[11px] font-semibold" style="color:#6B7280">' + k.sub + '</div>'
+        + (k.note ? '<div class="mt-2 text-[10px] px-2 py-1 rounded-md inline-block" style="background:rgba(255,255,255,0.04);color:#4B5563">' + k.note + '</div>' : '')
+        + '<div class="mt-3 h-0.5 rounded-full" style="background:linear-gradient(to right,' + k.color + ',transparent)"></div>'
+        + '</div>';
+    }).join('');
+    return;
 
   } else {
     row.className = 'grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4';
