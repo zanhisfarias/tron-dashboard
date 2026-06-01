@@ -1120,7 +1120,7 @@ def fetch_organic_data():
             result["ig"]["posts"].append({
                 "id":        p.get("id", ""),
                 "type":      p.get("media_type", "IMAGE"),
-                "caption":   (p.get("caption") or "")[:120],
+                "caption":   (p.get("caption") or "").replace("\n", " ").replace("\r", "")[:120],
                 "likes":     p.get("like_count", 0),
                 "comments":  p.get("comments_count", 0),
                 "timestamp": p.get("timestamp", ""),
@@ -1161,7 +1161,7 @@ def fetch_organic_data():
             total_interact += likes + comments + shares
             result["fb"]["posts"].append({
                 "id":        p.get("id", ""),
-                "message":   (p.get("message") or "")[:120],
+                "message":   (p.get("message") or "").replace("\n", " ").replace("\r", "")[:120],
                 "likes":     likes,
                 "comments":  comments,
                 "shares":    shares,
