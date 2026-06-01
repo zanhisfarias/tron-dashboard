@@ -4910,7 +4910,7 @@ function renderCRM() {
     // União de todos os meses com dados
     var allMonths = Array.from(new Set(
       Object.keys(histMes).concat(Object.keys(leadsHist))
-    )).sort().reverse();
+    )).sort();
 
     var MES_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     function mesLabel(m) {
@@ -4918,8 +4918,8 @@ function renderCRM() {
       return MES_NAMES[parseInt(p[1])-1] + '/' + p[0].substring(2);
     }
 
-    var header = '<div class="grid py-1.5 mb-1 border-b text-[9px] font-bold uppercase tracking-wider" '
-      + 'style="grid-template-columns:44px 1fr 1fr 1fr 1fr 50px;color:#6B7280;border-color:#2A2D3E">'
+    var header = '<div class="grid py-2 mb-1 border-b text-[11px] font-bold uppercase tracking-wider" '
+      + 'style="grid-template-columns:52px 1fr 1fr 1fr 1fr 58px;color:#6B7280;border-color:#2A2D3E">'
       + '<div>Mês</div>'
       + '<div class="text-right" style="color:#6366F1">Meta Ads</div>'
       + '<div class="text-right" style="color:#10B981">Site</div>'
@@ -4939,25 +4939,25 @@ function renderCRM() {
       var taxa    = lTotal > 0 ? (vendas / lTotal * 100).toFixed(1) + '%' : '\u2014';
       var taxaColor = vendas >= 5 ? '#10B981' : vendas > 0 ? '#F59E0B' : '#6B7280';
 
-      return '<div class="grid items-center py-2 border-b" '
-        + 'style="grid-template-columns:44px 1fr 1fr 1fr 1fr 50px;border-color:#2A2D3E">'
-        + '<div class="text-xs font-bold" style="color:#9CA3AF">' + mesLabel(m) + '</div>'
+      return '<div class="grid items-center py-2.5 border-b" '
+        + 'style="grid-template-columns:52px 1fr 1fr 1fr 1fr 58px;border-color:#2A2D3E">'
+        + '<div class="text-sm font-bold" style="color:#9CA3AF">' + mesLabel(m) + '</div>'
         + '<div class="text-right">'
-        +   '<div class="text-xs font-bold" style="color:#6366F1">' + (lMeta || '\u2014') + '</div>'
+        +   '<div class="text-sm font-bold" style="color:#6366F1">' + (lMeta || '\u2014') + '</div>'
         + '</div>'
         + '<div class="text-right">'
-        +   '<div class="text-xs font-bold" style="color:#10B981">' + (lSite || '\u2014') + '</div>'
+        +   '<div class="text-sm font-bold" style="color:#10B981">' + (lSite || '\u2014') + '</div>'
         + '</div>'
         + '<div class="text-right">'
-        +   '<div class="text-xs font-bold" style="color:#F59E0B">' + (lGoogle || '\u2014') + '</div>'
+        +   '<div class="text-sm font-bold" style="color:#F59E0B">' + (lGoogle || '\u2014') + '</div>'
         + '</div>'
         + '<div class="text-right">'
-        +   '<div class="text-xs font-bold" style="color:' + (vendas > 0 ? '#10B981' : '#6B7280') + '">'
+        +   '<div class="text-sm font-bold" style="color:' + (vendas > 0 ? '#10B981' : '#6B7280') + '">'
         +     (vendas > 0 ? '\u2714\u00a0' + vendas : '\u2014') + '</div>'
-        +   (h.perdidas > 0 ? '<div class="text-[9px]" style="color:#EF444488">\u2715\u00a0' + h.perdidas + '</div>' : '')
+        +   (h.perdidas > 0 ? '<div class="text-[11px]" style="color:#EF444488">\u2715\u00a0' + h.perdidas + '</div>' : '')
         + '</div>'
         + '<div class="text-right">'
-        +   '<div class="text-xs font-bold" style="color:' + taxaColor + '">' + taxa + '</div>'
+        +   '<div class="text-sm font-bold" style="color:' + taxaColor + '">' + taxa + '</div>'
         + '</div>'
         + '</div>';
     }).join('');
