@@ -4933,7 +4933,7 @@ function renderCRM() {
       { label:'Pipeline Ativo',       value: pipelineAtivo,                                    sub: 'Snapshot atual',            color:'#8B5CF6' },
       { label:'Vendas Fechadas',      value: vendidas,                                          sub: perdidas + ' perdidas',       color:'#10B981' },
       { label:'Conv. Lead\u2192Venda',value: taxaConv,                                          sub: 'Taxa de fechamento',        color: vendidas > 0 ? '#10B981' : '#6B7280' },
-      { label:'Receita Avulso',       value: fmtBrl(recAvulso),                                sub: 'Contratos novos',           color:'#F59E0B' },
+      { label:'Receita LU',            value: fmtBrl(recAvulso),                                sub: 'Contratos novos',           color:'#F59E0B' },
       { label:'MRR',                  value: fmtBrl(mrr),                                      sub: 'Recorrente mensal',          color:'#dd2a7b' },
       { label:'ROAS',                 value: roas !== null ? roas.toFixed(2) + 'x' : '\u2014', sub: 'Receita / Gasto Ads',       color: roas !== null && roas >= 3 ? '#10B981' : roas !== null && roas >= 1 ? '#F59E0B' : '#EF4444' },
       { label:'LTV 36 meses',         value: fmtK(ltv),                                        sub: 'Lifetime value estimado',   color:'#A78BFA' }
@@ -4978,7 +4978,7 @@ function renderCRM() {
   if (recDiv) {
     function fmtR(v) { return 'R$\u00a0' + Math.round(v || 0).toLocaleString('pt-BR'); }
     recDiv.innerHTML = [
-      { label:'LU (avulso)',       value: recAvulso, color:'#F59E0B' },
+      { label:'Receita LU',        value: recAvulso, color:'#F59E0B' },
       { label:'MRR (recorrente)',  value: mrr,        color:'#10B981' },
       { label:'Total Receita',     value: recTotal,   color:'#6366F1' }
     ].map(function(r) {
