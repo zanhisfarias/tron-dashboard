@@ -81,7 +81,7 @@ print(f'  Total perdidas: {len(items3)}')
 print()
 print('=== O QUE ESTA SENDO INJETADO NO DASHBOARD ===')
 import re
-with open(r'C:\Users\Marketing\Desktop\dashboard.html', encoding='utf-8') as f:
+with open(r'C:\Users\Marketing\Desktop\Dashboard\index.html', encoding='utf-8') as f:
     html = f.read()
 m = re.search(r'var NECTAR_LEADBOARD = ({.*?});', html)
 if m:

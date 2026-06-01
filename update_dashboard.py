@@ -447,6 +447,7 @@ def fetch_nectar_leadboard():
         "receita_by_origem":    {o: {"avulso": 0.0, "mrr": 0.0} for o in ORIGENS_TRACK},
         "leads_by_origem_mes":  {o: 0 for o in ORIGENS_TRACK},
         "leads_by_origem_ano":  {o: 0 for o in ORIGENS_TRACK},
+        "leads_historico":      {},
         "ticket_por_produto":   {},
     }
 
@@ -512,6 +513,7 @@ def fetch_nectar_leadboard():
     receita_by_origem    = {o: {"avulso": 0.0, "mrr": 0.0} for o in ORIGENS_TRACK}
     leads_by_origem_mes  = {o: 0 for o in ORIGENS_TRACK}
     leads_by_origem_ano  = {o: 0 for o in ORIGENS_TRACK}
+    leads_historico      = {}   # { "2026-01": {"Meta Ads": N, "Google Ads": N, "Site": N} }
     ticket_por_produto   = {}
 
     for r in rows:
@@ -528,6 +530,12 @@ def fetch_nectar_leadboard():
             leads_by_origem_ano[origem] += 1
             if no_mes_atual(data_criacao):
                 leads_by_origem_mes[origem] += 1
+            # Histórico mês a mês
+            mk_lead = mes_de(data_criacao)
+            if mk_lead:
+                if mk_lead not in leads_historico:
+                    leads_historico[mk_lead] = {o: 0 for o in ORIGENS_TRACK}
+                leads_historico[mk_lead][origem] = leads_historico[mk_lead].get(origem, 0) + 1
 
         # ── Pipeline ativo ──────────────────────────────
         if fase in FASES_ATIVAS:
@@ -615,6 +623,7 @@ def fetch_nectar_leadboard():
     print(f"      Vendidas por origem: {vendidas_by_origem}")
     print(f"      Receita mês: avulso=R${receita_avulso_mes:.2f} | MRR=R${mrr_mes:.2f}")
     print(f"      Receita por origem: {receita_by_origem}")
+    print(f"      Leads histórico ({len(leads_historico)} meses): { {m: sum(v.values()) for m, v in sorted(leads_historico.items())} }")
 
     return {
         "pipeline":             pipeline,
@@ -632,6 +641,7 @@ def fetch_nectar_leadboard():
         "receita_by_origem":    receita_by_origem,
         "leads_by_origem_mes":  leads_by_origem_mes,
         "leads_by_origem_ano":  leads_by_origem_ano,
+        "leads_historico":      leads_historico,
         "ticket_por_produto":   ticket_por_produto,
     }
 
