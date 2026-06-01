@@ -347,15 +347,12 @@
   <!-- Barra de periodos -->
   <div class="border-t border-border" style="background:#0F1117cc">
     <div class="max-w-[1400px] mx-auto px-3 md:px-6 h-9 md:h-10 flex items-center gap-1 overflow-x-auto scroll-hide" id="periodBar">
-      <button class="period-btn" data-period="hoje">Hoje</button>
-      <button class="period-btn" data-period="ontem">Ontem</button>
-      <!-- Botão mês com dropdown -->
-      <button id="monthPickerBtn" class="period-btn active flex items-center gap-1" onclick="toggleMonthPicker('monthPicker',this,'main')" style="padding:3px 8px"><span id="mpLabel">M&#234;s</span><svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg></button>
-      <div class="period-sep mx-1"></div>
-      <!-- Botão calendário (dias do mês) -->
-      <button id="calPickerBtn" onclick="toggleDayPicker('calPicker',this,'main')" title="Selecionar dia" class="period-btn flex items-center gap-1" style="padding:3px 7px">
+      <!-- Meses Jan-Dez gerados por buildPeriodBar() -->
+      <span id="periodMonthBtns" class="flex items-center gap-1"></span>
+      <!-- Ícone calendário ao lado dos meses (dia ou semana) -->
+      <button id="calPickerBtn" onclick="toggleDayPicker('calPicker',this,'main')" title="Selecionar dia ou semana" class="period-btn flex items-center gap-1" style="padding:3px 7px;margin-left:2px">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <svg width="8" height="8" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
+        <svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
       </button>
     </div>
   </div>
@@ -2270,28 +2267,35 @@ var metricChartInst = null;
 var MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 function buildPeriodBar() {
-  // Apenas registra listeners dos botões estáticos (Hoje/Ontem/Semana)
-  var bar = document.getElementById('periodBar');
-  bar.querySelectorAll('.period-btn[data-period]').forEach(function(btn) {
-    btn.addEventListener('click', function() { handlePeriodClick(btn); });
-  });
-  // Inicializa label do mês
+  // Gera botões Jan-Dez no periodBar
+  var el = document.getElementById('periodMonthBtns');
+  if (el) {
+    var html = '';
+    for (var m = 1; m <= 12; m++) {
+      var key = (m === CURRENT_MONTH) ? 'mes' : 'mes-' + m;
+      var isFuture = m > CURRENT_MONTH;
+      html += '<button class="period-btn" data-period="' + key + '"'
+        + (isFuture ? ' disabled style="opacity:.28;cursor:default;pointer-events:none"' : '')
+        + '>' + MONTH_NAMES[m - 1] + '</button>';
+    }
+    el.innerHTML = html;
+    el.querySelectorAll('.period-btn[data-period]').forEach(function(btn) {
+      btn.addEventListener('click', function() { handlePeriodClick(btn); });
+    });
+  }
+  // Inicializa ativo e barras de seção
   updateMonthBtn();
-  // Renderiza barras de período nas seções
   renderSectionPeriodBars();
 }
 
 function handlePeriodClick(btn) {
   var p = btn.dataset.period;
   var since, until, periodKey;
-  if (p === 'hoje') {
-    since = TODAY; until = TODAY; periodKey = 7;
-  } else if (p === 'ontem') {
-    since = YESTERDAY; until = YESTERDAY; periodKey = 7;
-  } else if (p === 'semana') {
+  if (p === 'semana') {
     var now = new Date();
-    var sun = new Date(now); sun.setDate(now.getDate() - now.getDay());
-    since = toISO(sun); until = TODAY; periodKey = 7;
+    var diffToMon = now.getDay() === 0 ? 6 : now.getDay() - 1;
+    var mon = new Date(now); mon.setDate(now.getDate() - diffToMon);
+    since = toISO(mon); until = TODAY; periodKey = 7;
   } else if (p === 'mes') {
     since = firstOfMonth(CURRENT_MONTH); until = TODAY; periodKey = 30;
   } else if (p.startsWith('mes-')) {
@@ -2348,11 +2352,6 @@ function selectClosedWeek(since, until, pickerId) {
   state.activePeriodKey = 'semana-' + since;
   state.since = since; state.until = until; state.periodKey = 7;
 
-  // Destaca botão calendário e remove active dos outros
-  document.querySelectorAll('#periodBar .period-btn').forEach(function(b) { b.classList.remove('active'); });
-  var calBtn = document.getElementById('calPickerBtn');
-  if (calBtn) calBtn.classList.add('active');
-
   updateMonthBtn();
   renderSectionPeriodBars();
   renderAll();
@@ -2362,11 +2361,7 @@ function selectClosedWeek(since, until, pickerId) {
 // Seta período por chave de texto (usado nas barras de seção)
 function setPeriodByKey(key) {
   var since, until, periodKey;
-  if (key === 'hoje') {
-    since = TODAY; until = TODAY; periodKey = 7;
-  } else if (key === 'ontem') {
-    since = YESTERDAY; until = YESTERDAY; periodKey = 7;
-  } else if (key === 'semana') {
+  if (key === 'semana') {
     var now = new Date();
     var sun = new Date(now); sun.setDate(now.getDate() - now.getDay());
     since = toISO(sun); until = TODAY; periodKey = 7;
@@ -2556,16 +2551,20 @@ function rvSelectMonth(m) {
 
 function updateMonthBtn() {
   var key = state.activePeriodKey || 'mes';
-  var lbl = document.getElementById('mpLabel');
-  var btn = document.getElementById('monthPickerBtn');
-  var isMonthActive = key === 'mes' || key.startsWith('mes-');
-  var mn = getActiveMonthNum();
-  if (lbl) lbl.textContent = mn ? MONTH_NAMES[mn - 1] : 'M\u00eas';
-  if (btn) {
-    btn.classList.toggle('active', isMonthActive);
-    if (!isMonthActive) btn.style.background = '';
-    else btn.style.background = '';
+  var mn  = getActiveMonthNum();
+  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
+  // Atualiza botões de mês
+  var el = document.getElementById('periodMonthBtns');
+  if (el) {
+    el.querySelectorAll('.period-btn[data-period]').forEach(function(b) {
+      var bKey = b.dataset.period;
+      var bMon = bKey === 'mes' ? CURRENT_MONTH : parseInt(bKey.split('-')[1] || 0);
+      b.classList.toggle('active', !isDay && bMon === mn);
+    });
   }
+  // Atualiza ícone calendário
+  var calBtn = document.getElementById('calPickerBtn');
+  if (calBtn) calBtn.classList.toggle('active', isDay);
 }
 
 // Gera HTML da barra de período para seções
@@ -2586,7 +2585,7 @@ function buildSpbHTML() {
   var mAct = isMonth ? ' style="background:#6366F1;border-color:#6366F1;color:#fff;padding:3px 7px"' : ' style="padding:3px 7px"';
   var cAct = isDay ? ';background:#6366F1;border-color:#6366F1;color:#fff' : '';
 
-  return pb('hoje','Hoje') + pb('ontem','Ontem') + pb('semana','Semana')
+  return pb('semana','Semana')
     + '<button class="period-btn flex items-center gap-1" onclick="toggleMonthPicker(\'monthPicker\',this,\'main\')"' + mAct + '><span class="spb-mlabel">' + monthLabel + '</span>' + svg7 + '</button>'
     + '<button class="period-btn flex items-center gap-1" onclick="toggleDayPicker(\'calPicker\',this,\'main\')" style="padding:3px 6px' + cAct + '">' + svgCal + svg7 + '</button>';
 }
@@ -2609,7 +2608,7 @@ function closeAllDayPickers() { closeAllPickers(); }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.day-picker') && !e.target.closest('.month-picker') &&
       !e.target.closest('[onclick*="toggleDayPicker"]') && !e.target.closest('[onclick*="toggleMonthPicker"]') &&
-      !e.target.closest('#calPickerBtn') && !e.target.closest('#monthPickerBtn')) {
+      !e.target.closest('#calPickerBtn')) {
     closeAllPickers();
   }
 });
@@ -2618,9 +2617,6 @@ function selectMainDay(dateStr) {
   closeAllPickers();
   _calSelectedDay = dateStr;
   state.activePeriodKey = 'dia-' + dateStr;
-  document.querySelectorAll('#periodBar .period-btn').forEach(function(b) { b.classList.remove('active'); });
-  var calBtn = document.getElementById('calPickerBtn');
-  if (calBtn) calBtn.classList.add('active');
   updateMonthBtn();
   renderSectionPeriodBars();
   setPeriod(dateStr, dateStr, 7, null);
