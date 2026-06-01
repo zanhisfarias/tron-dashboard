@@ -344,8 +344,8 @@
       <button class="camp-btn" data-camp="C00">Cont&#225;bil 00</button>
     </div>
   </div>
-  <!-- Barra de periodos (oculta — seletores de mês movidos para cada seção) -->
-  <div class="border-t border-border" style="background:#0F1117cc;display:none">
+  <!-- Barra de periodos global (Meta Ads) -->
+  <div class="border-t border-border" style="background:#0F1117cc">
     <div class="max-w-[1400px] mx-auto px-3 md:px-6 h-9 md:h-10 flex items-center gap-1 overflow-x-auto scroll-hide" id="periodBar">
     </div>
   </div>
@@ -2286,6 +2286,8 @@ var MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','
 
 function buildPeriodBar() {
   updateMonthBtn();
+  var pb = document.getElementById('periodBar');
+  if (pb) pb.innerHTML = buildSpbHTML();
   renderSectionPeriodBars();
 }
 
@@ -2596,7 +2598,7 @@ function buildSpbHTML() {
 
 function renderSectionPeriodBars() {
   var html = buildSpbHTML();
-  ['spbLeads','spbMetric','spbTable','spbCreatives'].forEach(function(id) {
+  ['periodBar','spbLeads','spbMetric','spbTable','spbCreatives'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
