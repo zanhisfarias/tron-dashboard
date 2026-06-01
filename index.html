@@ -1482,15 +1482,15 @@ function renderOrgKpis() {
     ];
 
     row.innerHTML = igKpis.map(function(k) {
-      return '<div class="card p-5 md:p-6 kpi-card" style="background:#1E2130;border:1px solid ' + k.border + ';box-shadow:0 0 24px ' + k.glow + '">'
-        + '<div class="flex items-start justify-between gap-2">'
-        + '<div class="text-[10px] font-bold uppercase tracking-widest mt-0.5" style="color:' + k.color + '">' + k.label + '</div>'
-        + '<div style="font-size:24px;line-height:1;flex-shrink:0">' + k.icon + '</div>'
+      return '<div class="card kpi-card" style="background:#1E2130;border:1px solid ' + k.border + ';box-shadow:0 0 16px ' + k.glow + ';padding:10px 14px">'
+        + '<div class="flex items-center justify-between gap-2 mb-1">'
+        + '<div class="text-[9px] font-bold uppercase tracking-widest" style="color:' + k.color + '">' + k.label + '</div>'
+        + '<div style="font-size:16px;line-height:1;flex-shrink:0;opacity:0.8">' + k.icon + '</div>'
         + '</div>'
-        + '<div class="text-4xl md:text-5xl font-black text-white mt-3 mb-1" style="letter-spacing:-1px">' + k.value + '</div>'
-        + '<div class="text-[11px] font-semibold" style="color:#6B7280">' + k.sub + '</div>'
-        + (k.note ? '<div class="mt-2 text-[10px] px-2 py-1 rounded-md inline-block" style="background:rgba(255,255,255,0.04);color:#4B5563">' + k.note + '</div>' : '')
-        + '<div class="mt-3 h-0.5 rounded-full" style="background:linear-gradient(to right,' + k.color + ',transparent)"></div>'
+        + '<div class="font-black text-white" style="font-size:28px;letter-spacing:-1px;line-height:1.1">' + k.value + '</div>'
+        + '<div style="font-size:10px;color:#6B7280;margin-top:2px">' + k.sub + '</div>'
+        + (k.note ? '<div style="margin-top:4px;font-size:9px;padding:2px 6px;border-radius:4px;display:inline-block;background:rgba(255,255,255,0.04);color:#4B5563">' + k.note + '</div>' : '')
+        + '<div style="margin-top:6px;height:2px;border-radius:9999px;background:linear-gradient(to right,' + k.color + ',transparent)"></div>'
         + '</div>';
     }).join('');
     return;
@@ -2878,8 +2878,8 @@ function renderKPIs() {
   var receitaTrend = (receitaMes !== null && receitaMesAnt !== null && receitaMesAnt > 0)
     ? (receitaMes - receitaMesAnt) / receitaMesAnt * 100 : null;
 
-  // LTV 36 meses: MRR total × 36
-  var ltv72 = mrrMes > 0 ? mrrMes * 36 : (TICKET_MEDIO || 0) * 36;
+  // LTV 36 meses: apenas MRR recorrente × 36
+  var ltv72 = mrrMes > 0 ? mrrMes * 36 : null;
 
   var kpis = [
     { label: 'Gasto Hoje',    value: spendHoje,     fmtFn: function(v) { return fmt.brl(v); }, metric: null,
