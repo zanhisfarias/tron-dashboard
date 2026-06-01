@@ -3314,7 +3314,7 @@ var ADSET_PAGE_SIZE = 5;
 
 function renderTable() {
   var camps = state.camp === 'all' ? Object.keys(CAMPAIGNS) : [state.camp];
-  var rows = ADSETS_RAW.filter(function(a) { return camps.includes(a.camp); })
+  var rows = ADSETS_RAW.filter(function(a) { return camps.includes(a.camp) && a.status === 'active'; })
     .map(function(a) {
       var metrics = genAdsetMetrics(a, state.periodKey);
       var row = {};
