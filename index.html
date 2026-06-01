@@ -1165,14 +1165,6 @@
     <div id="crmHistorico" class="space-y-2"></div>
   </div>
 
-  <!-- Leadboard por Origem — Meta Ads / Site / Google Ads -->
-  <div class="card p-4 md:p-5" style="background:#2A2D3E;border-color:#3A3D52">
-    <div class="flex items-center gap-2 mb-4">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <div class="text-[9px] font-bold uppercase tracking-widest" style="color:#F59E0B">Veracidade de Leads — Por Origem (CRM Nectar)</div>
-    </div>
-    <div id="crmLeadboardOrigem" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -5008,8 +5000,6 @@ function renderCRM() {
       : '<div class="text-[11px] py-4 text-center" style="color:#6B7280">Sem histórico disponível</div>';
   }
 
-  // Leadboard por origem
-  renderLeadboardOrigem();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -5175,110 +5165,6 @@ function closeAoModal() {
   if (modal) modal.style.display = 'none';
 }
 
-function renderLeadboardOrigem() {
-  var el = document.getElementById('crmLeadboardOrigem');
-  if (!el || typeof NECTAR_LEADBOARD === 'undefined') return;
-  var nl   = NECTAR_LEADBOARD;
-  var pbo  = nl.pipeline_by_origem  || {};
-  var rbo  = nl.receita_by_origem   || {};
-  var vbo  = nl.vendidas_by_origem  || {};
-  var pdbo = nl.perdidas_by_origem  || {};
-  var lmo  = nl.leads_by_origem_mes || {};
-
-  var origens = [
-    { key: 'Meta Ads',   label: 'Meta Ads',   color: '#6366F1' },
-    { key: 'Site',       label: 'Site',        color: '#10B981' },
-    { key: 'Google Ads', label: 'Google Ads',  color: '#F59E0B' }
-  ];
-
-  var stageColors = ['#6366F1','#8B5CF6','#F59E0B','#10B981','#10B981'];
-  var stages = ['Contatos','Qualifica\u00e7\u00e3o','Agendamento','Qualificada','Vendida'];
-
-  function fmtR(v) { return 'R$\u00a0' + Math.round(v || 0).toLocaleString('pt-BR'); }
-
-  el.innerHTML = origens.map(function(orig) {
-    var pl       = pbo[orig.key]  || {};
-    var rec      = rbo[orig.key]  || { avulso: 0, mrr: 0 };
-    var vendidas = vbo[orig.key]  || 0;
-    var perdidas = pdbo[orig.key] || 0;
-    var leads    = lmo[orig.key]  || 0;
-    var recAvulso = rec.avulso || 0;
-    var mrr       = rec.mrr    || 0;
-    var recTotal  = recAvulso + mrr;
-    var taxaConv  = leads > 0 ? (vendidas / leads * 100).toFixed(1) + '%' : '\u2014';
-    var pipelineAtivo = ['Contatos','Qualifica\u00e7\u00e3o','Agendamento','Qualificada']
-      .reduce(function(s, k) { return s + (pl[k] || 0); }, 0);
-    var maxVal = Math.max.apply(null, stages.map(function(s){ return pl[s] || 0; })) || 1;
-
-    var funnelHtml = stages.map(function(s, i) {
-      var v   = pl[s] || 0;
-      var pct = maxVal > 0 ? Math.max(2, Math.round(v / maxVal * 100)) : 2;
-      return '<div class="mb-1.5">'
-        + '<div class="flex items-center justify-between mb-0.5">'
-        + '<span class="text-[10px] font-medium" style="color:#9CA3AF">' + s + '</span>'
-        + '<span class="text-[10px] font-bold" style="color:' + stageColors[i] + '">' + v + '</span>'
-        + '</div>'
-        + '<div class="w-full rounded-full" style="height:5px;background:rgba(255,255,255,0.07)">'
-        + '<div class="rounded-full" style="height:5px;width:' + pct + '%;background:' + stageColors[i] + ';transition:width 0.6s"></div>'
-        + '</div></div>';
-    }).join('');
-
-    var semDados = leads === 0 && pipelineAtivo === 0;
-
-    return '<div class="rounded-xl p-4" style="background:rgba(255,255,255,0.03);border:1px solid ' + orig.color + '44">'
-      // Cabeçalho
-      + '<div class="flex items-center gap-2 mb-4">'
-      + '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:' + orig.color + '22">'
-      + '<div class="w-3 h-3 rounded-full" style="background:' + orig.color + '"></div>'
-      + '</div>'
-      + '<div><div class="text-sm font-bold text-white">' + orig.label + '</div>'
-      + '<div class="text-[10px]" style="color:#9CA3AF">Maio 2026 \u00b7 CRM Nectar</div></div>'
-      + '</div>'
-      + (semDados
-        ? '<div class="text-center py-6"><div class="text-2xl mb-2">—</div><div class="text-[11px]" style="color:#6B7280">Sem leads registrados com esta origem</div></div>'
-        : // KPIs
-          '<div class="grid grid-cols-2 gap-2 mb-3">'
-          + '<div class="rounded-lg p-2.5" style="background:rgba(255,255,255,0.04)">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Leads Mês</div>'
-          + '<div class="text-xl font-black" style="color:' + orig.color + '">' + leads + '</div>'
-          + '</div>'
-          + '<div class="rounded-lg p-2.5" style="background:rgba(255,255,255,0.04)">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Pipeline Ativo</div>'
-          + '<div class="text-xl font-black text-white">' + pipelineAtivo + '</div>'
-          + '</div>'
-          + '<div class="rounded-lg p-2.5" style="background:rgba(255,255,255,0.04)">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Vendas</div>'
-          + '<div class="text-xl font-black" style="color:#10B981">' + vendidas + '</div>'
-          + '</div>'
-          + '<div class="rounded-lg p-2.5" style="background:rgba(255,255,255,0.04)">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color:#9CA3AF">Perdidas</div>'
-          + '<div class="text-xl font-black" style="color:#EF4444">' + perdidas + '</div>'
-          + '</div>'
-          + '</div>'
-          // Taxa + Receita
-          + '<div class="flex items-center gap-2 mb-3 p-2.5 rounded-lg" style="background:rgba(255,255,255,0.04)">'
-          + '<div class="flex-1">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-0.5" style="color:#9CA3AF">Lead\u2192Venda</div>'
-          + '<div class="text-base font-black" style="color:' + (vendidas > 0 ? '#10B981' : '#6B7280') + '">' + taxaConv + '</div>'
-          + '</div>'
-          + '<div class="w-px h-8" style="background:#3A3D52"></div>'
-          + '<div class="flex-1">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-0.5" style="color:#9CA3AF">Receita</div>'
-          + '<div class="text-base font-black" style="color:#F59E0B">' + (recTotal > 0 ? fmtR(recTotal) : '\u2014') + '</div>'
-          + '</div>'
-          + '<div class="w-px h-8" style="background:#3A3D52"></div>'
-          + '<div class="flex-1">'
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-0.5" style="color:#9CA3AF">MRR</div>'
-          + '<div class="text-base font-black" style="color:#dd2a7b">' + (mrr > 0 ? fmtR(mrr) : '\u2014') + '</div>'
-          + '</div>'
-          + '</div>'
-          // Funil
-          + '<div class="text-[9px] font-bold uppercase tracking-wider mb-2" style="color:#6B7280">Funil Ativo</div>'
-          + funnelHtml
-      )
-      + '</div>';
-  }).join('');
-}
 
 </script>
 
