@@ -503,28 +503,6 @@
     <div id="adsetPagination" class="flex items-center justify-between px-4 py-2 border-t border-border" style="display:none"></div>
   </div>
 
-  <!-- Criativos -->
-  <div class="card fade-up" style="animation-delay:0.35s">
-    <div class="flex flex-col md:flex-row md:items-center justify-between px-3 md:px-5 py-3 border-b border-border gap-2">
-      <div>
-        <div class="text-sm font-semibold text-white">Performance por Criativo</div>
-        <div class="text-[10px] md:text-xs text-muted font-medium mt-0.5">An&#250;ncios &middot; Leads gerados em 2026</div>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <div class="text-[10px] md:text-xs font-semibold px-2.5 py-1 rounded-full" id="creativesCount" style="background:#2A2D3E;color:#9CA3AF"></div>
-      </div>
-    </div>
-    <div class="relative">
-      <button id="creativesPrev" onclick="scrollCreatives(-1)" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-8 h-14 rounded-r-lg transition-all" style="background:linear-gradient(to right,#0F1117,#0F1117cc);color:#9CA3AF;border:none;cursor:pointer" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#9CA3AF'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div id="creativesSection" class="flex gap-3 p-3 md:p-5 pb-4 md:px-10" style="overflow-x:auto;scroll-behavior:smooth"></div>
-      <button id="creativesNext" onclick="scrollCreatives(1)" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-8 h-14 rounded-l-lg transition-all" style="background:linear-gradient(to left,#0F1117,#0F1117cc);color:#9CA3AF;border:none;cursor:pointer" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#9CA3AF'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer class="flex flex-col md:flex-row items-center justify-between gap-1 py-2 text-center md:text-left">
     <span class="text-[10px] text-muted">Tron &#8212; Dashboard de Performance &#8212; Meta Ads</span>
@@ -646,7 +624,10 @@
       <div class="text-sm font-bold text-white">Performance Orgânica</div>
       <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Instagram · Facebook · <span style="color:#6B7280">TikTok · LinkedIn · YouTube</span></div>
     </div>
-    <div id="orgLastUpdate" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(221,42,123,0.12);color:#dd2a7b">Atualizado agora</div>
+    <div class="flex items-center gap-2">
+      <div id="orgPeriodBadge" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(255,255,255,0.06);color:#9CA3AF">—</div>
+      <div id="orgLastUpdate" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(221,42,123,0.12);color:#dd2a7b">Atualizado agora</div>
+    </div>
   </div>
 
   <!-- Platform switcher -->
@@ -1397,14 +1378,20 @@ function selectOrgPlat(plat, skipHash) {
 }
 
 function renderOrganicoDashboard() {
-  // Sincroniza orgState com o seletor global (selectOrgMonth() pode sobrescrever individualmente)
+  // Sincroniza orgState com o seletor global SEMPRE que houver um mês ativo
+  // (getActiveMonthNum retorna null para dia-/semana-, que já atualizam orgState diretamente)
   var globalMon = getActiveMonthNum();
-  if (globalMon && globalMon !== _orgSelectedMonth) {
+  if (globalMon) {
+    var changed = (globalMon !== _orgSelectedMonth);
     _orgSelectedMonth = globalMon;
     orgState.activePeriodKey = (globalMon === CURRENT_MONTH) ? 'mes' : 'mes-' + globalMon;
     orgState.since = firstOfMonth(globalMon);
     orgState.until = minDate(lastOfMonth(globalMon), TODAY);
+    if (changed) _orgPostsPage = 0; // reseta paginação ao trocar de mês
   }
+  // Atualiza badge de período no cabeçalho da aba
+  var orgPeriodBadge = document.getElementById('orgPeriodBadge');
+  if (orgPeriodBadge) orgPeriodBadge.textContent = orgPeriodLabel();
   try { renderOrgKpis(); }     catch(e) { console.warn('[org] kpis:', e); }
   try { renderOrgPosts(); }    catch(e) { console.warn('[org] posts:', e); }
   try { renderOrgChart(); }    catch(e) { console.warn('[org] chart:', e); }
@@ -2385,11 +2372,18 @@ function setPeriodByKey(key) {
   if (headerBtn) headerBtn.classList.add('active');
   updateMonthBtn();
   renderSectionPeriodBars();
+  // Sempre atualiza orgState (mesmo fora da aba orgânico, para estar pronto ao entrar)
+  orgState.since = since; orgState.until = until;
+  orgState.activePeriodKey = key;
+  if (key.startsWith('dia-') || key.startsWith('semana-')) {
+    _orgSelectedMonth = 0;
+  } else {
+    var _newMon = getActiveMonthNum();
+    if (_newMon && _newMon !== _orgSelectedMonth) { _orgPostsPage = 0; }
+    if (_newMon) _orgSelectedMonth = _newMon;
+  }
   renderAll();
   if (activePlatform === 'organico') {
-    orgState.since = since; orgState.until = until;
-    orgState.activePeriodKey = key;
-    if (key.startsWith('dia-') || key.startsWith('semana-')) { _orgSelectedMonth = 0; }
     try { renderOrganicoDashboard(); } catch(e) {}
   }
   if (activePlatform === 'crm') {
@@ -3086,8 +3080,8 @@ function renderTopCreativesMes() {
   var CAMP_COLORS = { MR:'#6366F1', EMP:'#F59E0B', C01:'#10B981', C00:'#8B5CF6', INST:'#64748B' };
   var CAMP_LABELS = { MR:'MR Contábil', EMP:'Empresarial', C01:'Contábil', C00:'Contábil 00', INST:'Institucional' };
 
-  // Top 8 por leads
-  var top = CREATIVES_MAIO.filter(function(c){ return c.leads > 0; }).slice(0, 8);
+  // Todos os criativos com pelo menos 1 lead em maio, ordenados por leads desc
+  var top = CREATIVES_MAIO.filter(function(c){ return c.leads > 0; });
 
   var cards = top.map(function(c) {
     var color = CAMP_COLORS[c.camp] || '#6366F1';
@@ -3134,7 +3128,7 @@ function renderTopCreativesMes() {
     + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
     + '<div class="text-sm font-bold text-white">Melhores Criativos <span style="color:#F59E0B">&#183; Maio 2026</span></div>'
     + '</div>'
-    + '<div class="text-[10px] font-semibold px-2 py-1 rounded-lg" style="background:rgba(245,158,11,0.12);color:#F59E0B">Top ' + top.length + ' por leads</div>'
+    + '<div class="text-[10px] font-semibold px-2 py-1 rounded-lg" style="background:rgba(245,158,11,0.12);color:#F59E0B">' + top.length + ' criativos</div>'
     + '</div>'
     + '<div class="flex gap-3 overflow-x-auto pb-2" style="scrollbar-width:thin;scrollbar-color:#3A3D52 transparent">'
     + cards
