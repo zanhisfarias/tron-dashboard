@@ -4920,10 +4920,10 @@ function renderCRM() {
     : 0;
   var cac  = vendidas > 0 && spendMesCRM > 0 ? spendMesCRM / vendidas : null;
   var roas = recTotal > 0 && spendMesCRM > 0 ? recTotal / spendMesCRM : null;
-  var ltv  = mrr > 0 ? mrr * 36 : null;
+  var ltv  = mrr * 36;
 
   function fmtBrl(v) { return v !== null ? 'R$\u00a0' + Math.round(v).toLocaleString('pt-BR') : '\u2014'; }
-  function fmtK(v)   { return v !== null ? (v >= 1000 ? 'R$\u00a0' + (v/1000).toFixed(0) + 'k' : fmtBrl(v)) : '\u2014'; }
+  function fmtK(v)   { return v !== null ? (v >= 1000 ? 'R$\u00a0' + (v/1000).toFixed(0) + 'k' : 'R$\u00a0' + Math.round(v).toLocaleString('pt-BR')) : '\u2014'; }
 
   // KPIs
   var kpiRow = document.getElementById('crmKpiRow');
@@ -5038,13 +5038,16 @@ function renderCRM() {
       return MES_NAMES[parseInt(p[1])-1] + '/' + p[0].substring(2);
     }
 
+    var recHistByOrigem = nl.receita_hist_by_origem || {};
+
     var header = '<div class="grid py-2 mb-1 border-b text-[11px] font-bold uppercase tracking-wider" '
-      + 'style="grid-template-columns:52px 1fr 1fr 1fr 1fr 58px;color:#6B7280;border-color:#2A2D3E">'
+      + 'style="grid-template-columns:52px 1fr 1fr 1fr 1fr 1fr 58px;color:#6B7280;border-color:#2A2D3E">'
       + '<div>Mês</div>'
       + '<div class="text-right" style="color:#6366F1">Meta Ads</div>'
       + '<div class="text-right" style="color:#10B981">Site</div>'
       + '<div class="text-right" style="color:#F59E0B">Google</div>'
       + '<div class="text-right">Vendas</div>'
+      + '<div class="text-right" style="color:#A78BFA">Valor</div>'
       + '<div class="text-right">Taxa</div>'
       + '</div>';
 
@@ -5058,9 +5061,12 @@ function renderCRM() {
       var vendas  = h.vendidas || 0;
       var taxa    = lTotal > 0 ? (vendas / lTotal * 100).toFixed(1) + '%' : '\u2014';
       var taxaColor = vendas >= 5 ? '#10B981' : vendas > 0 ? '#F59E0B' : '#6B7280';
+      var recMeta = (recHistByOrigem[m] && recHistByOrigem[m]['Meta Ads']) || {};
+      var valorMes = (recMeta.avulso || 0) + (recMeta.mrr || 0);
+      var valorStr = valorMes > 0 ? 'R$' + (valorMes / 1000).toFixed(1) + 'k' : '\u2014';
 
       return '<div class="grid items-center py-2.5 border-b" '
-        + 'style="grid-template-columns:52px 1fr 1fr 1fr 1fr 58px;border-color:#2A2D3E">'
+        + 'style="grid-template-columns:52px 1fr 1fr 1fr 1fr 1fr 58px;border-color:#2A2D3E">'
         + '<div class="text-sm font-bold" style="color:#9CA3AF">' + mesLabel(m) + '</div>'
         + '<div class="text-right">'
         +   '<div class="text-sm font-bold" style="color:#6366F1">' + (lMeta || '\u2014') + '</div>'
@@ -5075,6 +5081,9 @@ function renderCRM() {
         +   '<div class="text-sm font-bold" style="color:' + (vendas > 0 ? '#10B981' : '#6B7280') + '">'
         +     (vendas > 0 ? '\u2714\u00a0' + vendas : '\u2014') + '</div>'
         +   (h.perdidas > 0 ? '<div class="text-[11px]" style="color:#EF444488">\u2715\u00a0' + h.perdidas + '</div>' : '')
+        + '</div>'
+        + '<div class="text-right">'
+        +   '<div class="text-sm font-bold" style="color:#A78BFA">' + valorStr + '</div>'
         + '</div>'
         + '<div class="text-right">'
         +   '<div class="text-sm font-bold" style="color:' + taxaColor + '">' + taxa + '</div>'
