@@ -2843,18 +2843,31 @@ function renderKPIs() {
     return s + (d ? d.spend : 0);
   }, 0);
 
-  // CAC e ROAS — baseados no mes atual (dados Nectar + gasto acumulado mes)
-  var mesAtual = (new Date().getMonth() + 1);
+  // CAC e ROAS — baseados no mês selecionado no seletor (Jan-Dez)
+  var mesAtual = getActiveMonthNum() || CURRENT_MONTH;
   var mesStr   = '2026-' + String(mesAtual).padStart(2, '0');
   var allCamps = Object.keys(CAMPAIGNS);
   // Usa ADSET_METRICS (conta inteira, nível adset) para gasto do mês — mais preciso que somar diários
   var spendMes = Object.values(ADSET_METRICS).reduce(function(s, m) {
     var mv = m[mesStr]; return s + (mv ? mv.spend : 0);
   }, 0);
-  var vendasMes = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.vendidas_mes) || 0;
-  // Receita financeira real do Nectar (valorAvulso + valorMensal das oportunidades vendidas)
-  var receitaAvulso = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.receita_avulso_mes) || 0;
-  var mrrMes        = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.mrr_mes) || 0;
+  // Nectar: para mês corrente usa _mes, para meses anteriores usa histórico
+  var isCurrentMonth = (mesAtual === CURRENT_MONTH);
+  var nectarVendasHist  = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.vendidas_historico)  || {};
+  var nectarRecHist     = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.receita_hist_by_origem) || {};
+  var vendasMes, receitaAvulso, mrrMes;
+  if (isCurrentMonth) {
+    vendasMes     = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.vendidas_mes)     || 0;
+    receitaAvulso = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.receita_avulso_mes) || 0;
+    mrrMes        = (NECTAR_LEADBOARD && NECTAR_LEADBOARD.mrr_mes)           || 0;
+  } else {
+    var vhM = nectarVendasHist[mesStr] || {};
+    vendasMes     = Object.values(vhM).reduce(function(s,v){ return s+v; }, 0);
+    var rhM = nectarRecHist[mesStr] || {};
+    var rhAll = Object.values(rhM).reduce(function(acc, o){ acc.a += (o.avulso||0); acc.m += (o.mrr||0); return acc; }, {a:0,m:0});
+    receitaAvulso = rhAll.a;
+    mrrMes        = rhAll.m;
+  }
   // Receita total do mes: avulso + MRR. Se sem dados reais, usa vendas x ticket
   var receitaMes = (receitaAvulso + mrrMes) > 0
     ? (receitaAvulso + mrrMes)
@@ -2887,7 +2900,7 @@ function renderKPIs() {
     { label: 'Gasto Hoje',    value: spendHoje,     fmtFn: function(v) { return fmt.brl(v); }, metric: null,
       trendMetric: 'spend', trendDates: [today],
       colorFn: function(v) { return v <= dailyBudget * 1.0 ? '#10B981' : v <= dailyBudget * 1.2 ? '#F59E0B' : '#EF4444'; } },
-    { label: 'Gasto M\u00eas',    value: spendMes,      fmtFn: function(v) { return fmt.brl(v); }, metric: null, trendMetric: null },
+    { label: 'Gasto ' + MONTH_NAMES[mesAtual-1],    value: spendMes,      fmtFn: function(v) { return fmt.brl(v); }, metric: null, trendMetric: null },
     { label: 'Verba Di\u00e1ria', value: dailyBudget,   fmtFn: function(v) { return fmt.brl(v); }, metric: null, trendMetric: null },
     { label: 'Leads',           value: agg.leads,       fmtFn: function(v) { return fmt.num(v); }, metric: null, trendMetric: 'leads' },
     { label: 'CPL',             value: agg.cpl,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpl',  trendMetric: 'cpl' },
