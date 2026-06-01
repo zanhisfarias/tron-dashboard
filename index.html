@@ -1130,7 +1130,7 @@
     </div>
     <div class="flex-1 min-w-0">
       <div class="text-sm font-bold text-white">CRM — Nectar <span style="color:#6366F1">· Meta Ads</span></div>
-      <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Pipeline de vendas gerado por Meta Ads — Maio 2026</div>
+      <div id="crmBannerMes" class="text-[11px] mt-0.5" style="color:#9CA3AF">Pipeline de vendas — Nectar CRM</div>
     </div>
     <div class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(99,102,241,0.12);color:#6366F1">Meta Ads</div>
   </div>
@@ -4774,14 +4774,17 @@ function selectCrmMonth(m) {
 function renderCrmMonthSelector() {
   var el = document.getElementById('crmMonthSelector');
   if (!el) return;
-  el.innerHTML = CRM_MES_NAMES.slice(0, CURRENT_MONTH).map(function(name, i) {
+  el.innerHTML = CRM_MES_NAMES.map(function(name, i) {
     var m = i + 1;
     var active = m === crmSelectedMonth;
-    return '<button onclick="selectCrmMonth(' + m + ')" style="'
-      + 'padding:5px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;'
+    var future = m > CURRENT_MONTH;
+    return '<button onclick="selectCrmMonth(' + m + ')" '
+      + (future ? 'disabled ' : '')
+      + 'style="'
+      + 'padding:5px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:' + (future ? 'default' : 'pointer') + ';'
       + 'border:1px solid ' + (active ? '#6366F1' : '#3A3D52') + ';'
       + 'background:' + (active ? 'rgba(99,102,241,0.18)' : 'transparent') + ';'
-      + 'color:' + (active ? '#fff' : '#9CA3AF') + ';'
+      + 'color:' + (active ? '#fff' : future ? '#3A3D52' : '#9CA3AF') + ';'
       + 'transition:all .15s">' + name + '</button>';
   }).join('');
 }
