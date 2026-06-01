@@ -2598,9 +2598,11 @@ function buildSpbHTML() {
 
 function renderSectionPeriodBars() {
   var html = buildSpbHTML();
-  ['periodBar','spbLeads','spbMetric','spbTable','spbCreatives'].forEach(function(id) {
+  var pb = document.getElementById('periodBar');
+  if (pb) pb.innerHTML = html;
+  ['spbLeads','spbMetric','spbTable','spbCreatives'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) el.innerHTML = html;
+    if (el) el.innerHTML = '';
   });
   renderOrgMonthSelector();
   renderGoogleMonthSelector();
@@ -5075,7 +5077,7 @@ function renderCRM() {
       var taxa    = lTotal > 0 ? (vendas / lTotal * 100).toFixed(1) + '%' : '\u2014';
       var taxaColor = vendas >= 5 ? '#10B981' : vendas > 0 ? '#F59E0B' : '#6B7280';
       var recMeta = (recHistByOrigem[m] && recHistByOrigem[m]['Meta Ads']) || {};
-      var valorMes = (recMeta.avulso || 0) + (recMeta.mrr || 0);
+      var valorMes = recMeta.mrr || 0;
       var valorStr = valorMes > 0 ? 'R$' + (valorMes / 1000).toFixed(1) + 'k' : '\u2014';
 
       return '<div class="grid items-center py-2.5 border-b" '
