@@ -4686,11 +4686,9 @@ function navCalendario(delta) {
   _calMonth += delta;
   if (_calMonth < 1)  { _calMonth = 12; _calYear--; }
   if (_calMonth > 12) { _calMonth = 1;  _calYear++; }
+  // Bloqueia voltar antes de Janeiro 2026
+  if (_calYear < 2026 || (_calYear === 2026 && _calMonth < 1)) { _calMonth = 1; _calYear = 2026; }
   _calSelectedDay = null;
-  // Bloqueia avançar além do mês atual
-  var now = new Date();
-  var nextBtn = document.getElementById('calNextBtn');
-  if (nextBtn) nextBtn.style.opacity = (_calYear > now.getFullYear() || (_calYear === now.getFullYear() && _calMonth >= now.getMonth() + 1)) ? '0.3' : '1';
   renderCalendario();
 }
 
@@ -4698,18 +4696,20 @@ function renderCalendario() {
   var igPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.ig) ? ORGANIC_DATA.ig.posts || [] : [];
   var fbPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.fb) ? ORGANIC_DATA.fb.posts || [] : [];
 
-  // Sincroniza com o seletor global (navCalendario() pode sobrescrever independentemente)
-  var globalMon = getActiveMonthNum();
-  if (globalMon) _calMonth = globalMon;
+  // _calMonth é controlado apenas por navCalendario() — sem sync com período global
 
   // Atualiza título
   var titleEl = document.getElementById('calTitleLabel');
   if (titleEl) titleEl.textContent = CAL_MONTH_NAMES[_calMonth - 1] + ' ' + _calYear;
 
-  // Bloqueia botão "próximo" se já estiver no mês atual ou além
+  // Controla opacidade dos botões de navegação
   var now = new Date();
   var nextBtn = document.getElementById('calNextBtn');
-  if (nextBtn) nextBtn.style.opacity = (_calYear > now.getFullYear() || (_calYear === now.getFullYear() && _calMonth >= now.getMonth() + 1)) ? '0.3' : '1';
+  var prevBtns = document.querySelectorAll('[onclick="navCalendario(-1)"]');
+  var atStart = (_calYear <= 2026 && _calMonth <= 1);
+  var atEnd   = (_calYear > now.getFullYear() || (_calYear === now.getFullYear() && _calMonth >= now.getMonth() + 1));
+  if (nextBtn) { nextBtn.style.opacity = atEnd ? '0.3' : '1'; nextBtn.style.cursor = atEnd ? 'default' : 'pointer'; }
+  prevBtns.forEach(function(b) { b.style.opacity = atStart ? '0.3' : '1'; b.style.cursor = atStart ? 'default' : 'pointer'; });
 
   // ── Paleta por produto ──────────────────────────────
   var PRODUTO_COLORS = {
