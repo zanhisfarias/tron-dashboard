@@ -344,14 +344,9 @@
       <button class="camp-btn" data-camp="C00">Cont&#225;bil 00</button>
     </div>
   </div>
-  <!-- Barra de periodos -->
-  <div class="border-t border-border" style="background:#0F1117cc">
+  <!-- Barra de periodos (oculta — seletores de mês movidos para cada seção) -->
+  <div class="border-t border-border" style="background:#0F1117cc;display:none">
     <div class="max-w-[1400px] mx-auto px-3 md:px-6 h-9 md:h-10 flex items-center gap-1 overflow-x-auto scroll-hide" id="periodBar">
-      <!-- Calendário: selecionar dia ou semana -->
-      <button id="calPickerBtn" onclick="toggleDayPicker('calPicker',this,'main')" title="Selecionar dia ou semana" class="period-btn flex items-center gap-1" style="padding:3px 7px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
-      </button>
     </div>
   </div>
 </header>
@@ -573,6 +568,9 @@
     </div>
   </div>
 
+  <!-- Seletor de mês — Calendário -->
+  <div id="calMonthSelector" class="flex flex-wrap gap-2"></div>
+
   <!-- Grade calendário principal -->
   <div class="card overflow-hidden" style="background:#1E2130;border-color:#2A2D3E">
     <!-- Header dias da semana -->
@@ -655,6 +653,9 @@
     </div>
     <div id="orgLastUpdate" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(221,42,123,0.12);color:#dd2a7b">Atualizado agora</div>
   </div>
+
+  <!-- Seletor de mês — Orgânico -->
+  <div id="orgMonthSelector" class="flex flex-wrap gap-2"></div>
 
   <!-- Platform switcher -->
   <div class="flex items-center gap-2 flex-wrap" id="orgPlatTabs">
@@ -786,6 +787,9 @@
     </div>
     <div class="flex-shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full" style="background:rgba(251,188,5,0.12);color:#FBBC05">Tag pendente</div>
   </div>
+
+  <!-- Seletor de mês — Google Ads -->
+  <div id="googleMonthSelector" class="flex flex-wrap gap-2"></div>
 
   <!-- KPIs de Marcação -->
   <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
@@ -2529,27 +2533,29 @@ function updateMonthBtn() {
   if (calBtn) calBtn.classList.toggle('active', isDay);
 }
 
-// Gera HTML da barra de período para seções
+// Gera HTML da barra de período para seções (inline Jan-Dez + 📅)
 function buildSpbHTML() {
   var key = state.activePeriodKey || 'mes';
-  var isMonth = key === 'mes' || key.startsWith('mes-');
-  var isDay = key.startsWith('dia-');
-  var mn = getActiveMonthNum();
-  var monthLabel = mn ? MONTH_NAMES[mn - 1] : 'M\u00eas';
+  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
+  var mn = getActiveMonthNum() || CURRENT_MONTH;
   var svg7 = '<svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>';
   var svgCal = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  var SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  function pb(k, label) {
-    var isAct = key === k;
-    var act = isAct ? ' style="background:#6366F1;border-color:#6366F1;color:#fff"' : '';
-    return '<button class="period-btn"' + act + ' onclick="setPeriodByKey(\'' + k + '\')">' + label + '</button>';
-  }
-  var mAct = isMonth ? ' style="background:#6366F1;border-color:#6366F1;color:#fff;padding:3px 7px"' : ' style="padding:3px 7px"';
-  var cAct = isDay ? ';background:#6366F1;border-color:#6366F1;color:#fff' : '';
+  var html = SHORT.map(function(name, i) {
+    var m = i + 1;
+    var active = m === mn && !isDay;
+    var future = m > CURRENT_MONTH;
+    if (future) return '<button class="period-btn" disabled style="color:#3A3D52;cursor:default">' + name + '</button>';
+    var act = active ? ' style="background:#6366F1;border-color:#6366F1;color:#fff"' : '';
+    return '<button class="period-btn"' + act + ' onclick="selectMonthPeriod(' + m + ')">' + name + '</button>';
+  }).join('');
 
-  return pb('semana','Semana')
-    + '<button class="period-btn flex items-center gap-1" onclick="toggleMonthPicker(\'monthPicker\',this,\'main\')"' + mAct + '><span class="spb-mlabel">' + monthLabel + '</span>' + svg7 + '</button>'
-    + '<button class="period-btn flex items-center gap-1" onclick="toggleDayPicker(\'calPicker\',this,\'main\')" style="padding:3px 6px' + cAct + '">' + svgCal + svg7 + '</button>';
+  var cStyle = isDay ? 'background:#6366F1;border-color:#6366F1;color:#fff;padding:3px 6px' : 'padding:3px 6px';
+  html += '<span style="width:1px;height:14px;background:#2A2D3E;display:inline-block;align-self:center;margin:0 4px"></span>'
+    + '<button class="period-btn flex items-center gap-1" onclick="toggleDayPicker(\'calPicker\',this,\'main\')" style="' + cStyle + '">' + svgCal + svg7 + '</button>';
+
+  return html;
 }
 
 function renderSectionPeriodBars() {
@@ -2558,6 +2564,8 @@ function renderSectionPeriodBars() {
     var el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
+  renderOrgMonthSelector();
+  renderGoogleMonthSelector();
 }
 
 function closeAllPickers() {
@@ -4219,6 +4227,7 @@ function selectPlatform(plat, skipHash) {
     try { renderOrgEditorial(); } catch(e) { console.warn('[social] editorial:', e); }
   } else if (plat === 'organico') {
     if (organicoMain) organicoMain.style.display = '';
+    renderOrgMonthSelector();
     renderOrganicoDashboard();
   } else if (plat === 'meta') {
     if (campWrap) campWrap.style.display = '';
@@ -4226,6 +4235,7 @@ function selectPlatform(plat, skipHash) {
     renderAll();
   } else if (plat === 'google') {
     if (googleMain) googleMain.style.display = '';
+    renderGoogleMonthSelector();
     renderGoogleCharts();
   } else if (plat === 'tiktok') {
     if (tiktokMain) tiktokMain.style.display = '';
@@ -4502,6 +4512,8 @@ function renderCalendario() {
   var igPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.ig) ? ORGANIC_DATA.ig.posts || [] : [];
   var fbPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.fb) ? ORGANIC_DATA.fb.posts || [] : [];
 
+  renderCalMonthSelector();
+
   // Atualiza título
   var titleEl = document.getElementById('calTitleLabel');
   if (titleEl) titleEl.textContent = CAL_MONTH_NAMES[_calMonth - 1] + ' ' + _calYear;
@@ -4744,6 +4756,11 @@ function selectCrmMonth(m) {
 function renderCrmMonthSelector() {
   var el = document.getElementById('crmMonthSelector');
   if (!el) return;
+  var key = state.activePeriodKey || 'mes';
+  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
+  var svgCal = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  var svg7 = '<svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>';
+  var cStyle = isDay ? 'background:#6366F1;border-color:#6366F1;color:#fff;padding:3px 7px' : 'padding:3px 7px';
   el.innerHTML = CRM_MES_NAMES.map(function(name, i) {
     var m = i + 1;
     var active = m === crmSelectedMonth;
@@ -4756,7 +4773,62 @@ function renderCrmMonthSelector() {
       + 'background:' + (active ? 'rgba(99,102,241,0.18)' : 'transparent') + ';'
       + 'color:' + (active ? '#fff' : future ? '#3A3D52' : '#9CA3AF') + ';'
       + 'transition:all .15s">' + name + '</button>';
+  }).join('')
+  + '<span style="width:1px;height:18px;background:#2A2D3E;display:inline-block;align-self:center;margin:0 4px"></span>'
+  + '<button onclick="toggleDayPicker(\'calPicker\',this,\'main\')" class="period-btn flex items-center gap-1" style="' + cStyle + '">'
+  + svgCal + svg7 + '</button>';
+}
+
+// ── Seletor de mês compartilhado (Jan-Dez + 📅) ────────────────────────────
+function buildMonthSelectorHTML(activeMn, clickFnTpl, isDayActive) {
+  var SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var svgCal = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  var svg7 = '<svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>';
+  var html = SHORT.map(function(name, i) {
+    var m = i + 1;
+    var active = m === activeMn && !isDayActive;
+    var future = m > CURRENT_MONTH;
+    if (future) return '<button class="period-btn" disabled style="color:#3A3D52;cursor:default">' + name + '</button>';
+    var act = active ? ' style="background:#6366F1;border-color:#6366F1;color:#fff"' : '';
+    return '<button class="period-btn"' + act + ' onclick="' + clickFnTpl.replace('{{m}}', m) + '">' + name + '</button>';
   }).join('');
+  var cStyle = isDayActive ? 'background:#6366F1;border-color:#6366F1;color:#fff;padding:3px 6px' : 'padding:3px 6px';
+  return html
+    + '<span style="width:1px;height:14px;background:#2A2D3E;display:inline-block;align-self:center;margin:0 4px"></span>'
+    + '<button class="period-btn flex items-center gap-1" onclick="toggleDayPicker(\'calPicker\',this,\'main\')" style="' + cStyle + '">' + svgCal + svg7 + '</button>';
+}
+
+// Calendário section
+function selectCalMonth(m) {
+  _calMonth = m;
+  renderCalendario();
+}
+function renderCalMonthSelector() {
+  var el = document.getElementById('calMonthSelector');
+  if (!el) return;
+  var key = state.activePeriodKey || 'mes';
+  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
+  el.innerHTML = buildMonthSelectorHTML(_calMonth, 'selectCalMonth({{m}})', isDay);
+}
+
+// Orgânico section
+function renderOrgMonthSelector() {
+  var el = document.getElementById('orgMonthSelector');
+  if (!el) return;
+  var key = state.activePeriodKey || 'mes';
+  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
+  var mn = getActiveMonthNum() || CURRENT_MONTH;
+  el.innerHTML = buildMonthSelectorHTML(mn, 'selectMonthPeriod({{m}})', isDay);
+}
+
+// Google Ads section
+function renderGoogleMonthSelector() {
+  var el = document.getElementById('googleMonthSelector');
+  if (!el) return;
+  var key = state.activePeriodKey || 'mes';
+  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
+  var mn = getActiveMonthNum() || CURRENT_MONTH;
+  el.innerHTML = buildMonthSelectorHTML(mn, 'selectMonthPeriod({{m}})', isDay);
 }
 
 function renderCRM() {
