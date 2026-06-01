@@ -347,10 +347,8 @@
   <!-- Barra de periodos -->
   <div class="border-t border-border" style="background:#0F1117cc">
     <div class="max-w-[1400px] mx-auto px-3 md:px-6 h-9 md:h-10 flex items-center gap-1 overflow-x-auto scroll-hide" id="periodBar">
-      <!-- Meses Jan-Dez gerados por buildPeriodBar() -->
-      <span id="periodMonthBtns" class="flex items-center gap-1"></span>
-      <!-- Ícone calendário ao lado dos meses (dia ou semana) -->
-      <button id="calPickerBtn" onclick="toggleDayPicker('calPicker',this,'main')" title="Selecionar dia ou semana" class="period-btn flex items-center gap-1" style="padding:3px 7px;margin-left:2px">
+      <!-- Calendário: selecionar dia ou semana -->
+      <button id="calPickerBtn" onclick="toggleDayPicker('calPicker',this,'main')" title="Selecionar dia ou semana" class="period-btn flex items-center gap-1" style="padding:3px 7px">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
       </button>
@@ -2259,23 +2257,6 @@ var metricChartInst = null;
 var MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 function buildPeriodBar() {
-  // Gera botões Jan-Dez no periodBar
-  var el = document.getElementById('periodMonthBtns');
-  if (el) {
-    var html = '';
-    for (var m = 1; m <= 12; m++) {
-      var key = (m === CURRENT_MONTH) ? 'mes' : 'mes-' + m;
-      var isFuture = m > CURRENT_MONTH;
-      html += '<button class="period-btn" data-period="' + key + '"'
-        + (isFuture ? ' disabled style="opacity:.28;cursor:default;pointer-events:none"' : '')
-        + '>' + MONTH_NAMES[m - 1] + '</button>';
-    }
-    el.innerHTML = html;
-    el.querySelectorAll('.period-btn[data-period]').forEach(function(btn) {
-      btn.addEventListener('click', function() { handlePeriodClick(btn); });
-    });
-  }
-  // Inicializa ativo e barras de seção
   updateMonthBtn();
   renderSectionPeriodBars();
 }
@@ -2543,18 +2524,7 @@ function rvSelectMonth(m) {
 
 function updateMonthBtn() {
   var key = state.activePeriodKey || 'mes';
-  var mn  = getActiveMonthNum();
   var isDay = key.startsWith('dia-') || key.startsWith('semana-');
-  // Atualiza botões de mês
-  var el = document.getElementById('periodMonthBtns');
-  if (el) {
-    el.querySelectorAll('.period-btn[data-period]').forEach(function(b) {
-      var bKey = b.dataset.period;
-      var bMon = bKey === 'mes' ? CURRENT_MONTH : parseInt(bKey.split('-')[1] || 0);
-      b.classList.toggle('active', !isDay && bMon === mn);
-    });
-  }
-  // Atualiza ícone calendário
   var calBtn = document.getElementById('calPickerBtn');
   if (calBtn) calBtn.classList.toggle('active', isDay);
 }
