@@ -429,7 +429,6 @@
           <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background:#8B5CF6"></span>C00</span>
         </div>
       </div>
-      <div class="spb-wrap mb-3" id="spbLeads"></div>
       <canvas id="leadsChart"></canvas>
     </div>
     <div class="card p-3 md:p-5 fade-up" style="animation-delay:0.15s">
@@ -444,7 +443,6 @@
           <button id="metricCTR" class="period-btn" data-metric="ctr">CTR</button>
         </div>
       </div>
-      <div class="spb-wrap mb-3" id="spbMetric"></div>
       <canvas id="metricChart"></canvas>
     </div>
   </div>
@@ -479,7 +477,6 @@
         <div class="text-[10px] text-muted font-medium mt-0.5 hidden md:block">Per&#237;odo selecionado &middot; Clique no cabe&#231;alho para ordenar</div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
-        <div class="spb-wrap" id="spbTable"></div>
         <div id="tableCount" class="text-[10px] md:text-xs font-semibold px-2.5 py-1 rounded-full" style="background:#2A2D3E;color:#9CA3AF"></div>
       </div>
     </div>
@@ -512,7 +509,6 @@
         <div class="text-[10px] md:text-xs text-muted font-medium mt-0.5">An&#250;ncios &middot; Leads gerados em 2026</div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
-        <div class="spb-wrap" id="spbCreatives"></div>
         <div class="text-[10px] md:text-xs font-semibold px-2.5 py-1 rounded-full" id="creativesCount" style="background:#2A2D3E;color:#9CA3AF"></div>
       </div>
     </div>
@@ -567,9 +563,6 @@
       <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#FDA4AF"><span class="inline-block w-2 h-2 rounded-full" style="background:#F43F5E"></span>Editorial</span>
     </div>
   </div>
-
-  <!-- Seletor de mês — Calendário -->
-  <div id="calMonthSelector" class="flex flex-wrap gap-2"></div>
 
   <!-- Grade calendário principal -->
   <div class="card overflow-hidden" style="background:#1E2130;border-color:#2A2D3E">
@@ -653,9 +646,6 @@
     </div>
     <div id="orgLastUpdate" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(221,42,123,0.12);color:#dd2a7b">Atualizado agora</div>
   </div>
-
-  <!-- Seletor de mês — Orgânico -->
-  <div id="orgMonthSelector" class="flex flex-wrap gap-2"></div>
 
   <!-- Platform switcher -->
   <div class="flex items-center gap-2 flex-wrap" id="orgPlatTabs">
@@ -787,9 +777,6 @@
     </div>
     <div class="flex-shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full" style="background:rgba(251,188,5,0.12);color:#FBBC05">Tag pendente</div>
   </div>
-
-  <!-- Seletor de mês — Google Ads -->
-  <div id="googleMonthSelector" class="flex flex-wrap gap-2"></div>
 
   <!-- KPIs de Marcação -->
   <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
@@ -1137,9 +1124,6 @@
     <div class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(99,102,241,0.12);color:#6366F1">Meta Ads</div>
   </div>
 
-  <!-- Seletor de mês CRM -->
-  <div id="crmMonthSelector" class="flex flex-wrap gap-2"></div>
-
   <!-- KPIs CRM -->
   <div id="crmKpiRow" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"></div>
 
@@ -1411,7 +1395,14 @@ function selectOrgPlat(plat, skipHash) {
 }
 
 function renderOrganicoDashboard() {
-  renderOrgMonthSelector();
+  // Sincroniza orgState com o seletor global (selectOrgMonth() pode sobrescrever individualmente)
+  var globalMon = getActiveMonthNum();
+  if (globalMon && globalMon !== _orgSelectedMonth) {
+    _orgSelectedMonth = globalMon;
+    orgState.activePeriodKey = (globalMon === CURRENT_MONTH) ? 'mes' : 'mes-' + globalMon;
+    orgState.since = firstOfMonth(globalMon);
+    orgState.until = minDate(lastOfMonth(globalMon), TODAY);
+  }
   try { renderOrgKpis(); }     catch(e) { console.warn('[org] kpis:', e); }
   try { renderOrgPosts(); }    catch(e) { console.warn('[org] posts:', e); }
   try { renderOrgChart(); }    catch(e) { console.warn('[org] chart:', e); }
@@ -4576,7 +4567,9 @@ function renderCalendario() {
   var igPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.ig) ? ORGANIC_DATA.ig.posts || [] : [];
   var fbPosts = (typeof ORGANIC_DATA !== 'undefined' && ORGANIC_DATA.fb) ? ORGANIC_DATA.fb.posts || [] : [];
 
-  renderCalMonthSelector();
+  // Sincroniza com o seletor global (navCalendario() pode sobrescrever independentemente)
+  var globalMon = getActiveMonthNum();
+  if (globalMon) _calMonth = globalMon;
 
   // Atualiza título
   var titleEl = document.getElementById('calTitleLabel');
@@ -4807,41 +4800,13 @@ function renderLeadTypes() {
     + '</div>';
 }
 
-// Mês selecionado na seção CRM (1-based, padrão = mês atual)
-var crmSelectedMonth = CURRENT_MONTH;
-
 var CRM_MES_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-
-function selectCrmMonth(m) {
-  crmSelectedMonth = m;
-  renderCRM();
-}
-
-function renderCrmMonthSelector() {
-  var el = document.getElementById('crmMonthSelector');
-  if (!el) return;
-  var key = state.activePeriodKey || 'mes';
-  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
-  var svgCal = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-  var svg7 = '<svg width="7" height="7" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>';
-  var cStyle = isDay ? 'background:#6366F1;border-color:#6366F1;color:#fff;padding:3px 7px' : 'padding:3px 7px';
-  el.innerHTML = CRM_MES_NAMES.map(function(name, i) {
-    var m = i + 1;
-    var active = m === crmSelectedMonth;
-    var future = m > CURRENT_MONTH;
-    return '<button onclick="selectCrmMonth(' + m + ')" '
-      + (future ? 'disabled ' : '')
-      + 'style="'
-      + 'padding:5px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:' + (future ? 'default' : 'pointer') + ';'
-      + 'border:1px solid ' + (active ? '#6366F1' : '#3A3D52') + ';'
-      + 'background:' + (active ? 'rgba(99,102,241,0.18)' : 'transparent') + ';'
-      + 'color:' + (active ? '#fff' : future ? '#3A3D52' : '#9CA3AF') + ';'
-      + 'transition:all .15s">' + name + '</button>';
-  }).join('')
-  + '<span style="width:1px;height:18px;background:#2A2D3E;display:inline-block;align-self:center;margin:0 4px"></span>'
-  + '<button onclick="toggleDayPicker(\'calPicker\',this,\'main\')" class="period-btn flex items-center gap-1" style="' + cStyle + '">'
-  + svgCal + svg7 + '</button>';
-}
+// Seletores de seção removidos — mês controlado pelo periodBar global
+function selectCrmMonth(m)        { selectMonthPeriod(m); }
+function renderCrmMonthSelector() {}
+function renderCalMonthSelector() {}
+function renderOrgMonthSelector() {}
+function renderGoogleMonthSelector() {}
 
 // ── Seletor de mês compartilhado (Jan-Dez + 📅) ────────────────────────────
 function buildMonthSelectorHTML(activeMn, clickFnTpl, isDayActive) {
@@ -4862,47 +4827,17 @@ function buildMonthSelectorHTML(activeMn, clickFnTpl, isDayActive) {
     + '<button class="period-btn flex items-center gap-1" onclick="toggleDayPicker(\'calPicker\',this,\'main\')" style="' + cStyle + '">' + svgCal + svg7 + '</button>';
 }
 
-// Calendário section
-function selectCalMonth(m) {
-  _calMonth = m;
-  renderCalendario();
-}
-function renderCalMonthSelector() {
-  var el = document.getElementById('calMonthSelector');
-  if (!el) return;
-  var key = state.activePeriodKey || 'mes';
-  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
-  el.innerHTML = buildMonthSelectorHTML(_calMonth, 'selectCalMonth({{m}})', isDay);
-}
-
-// Orgânico section
-function renderOrgMonthSelector() {
-  var el = document.getElementById('orgMonthSelector');
-  if (!el) return;
-  var key = orgState.activePeriodKey || 'mes';
-  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
-  el.innerHTML = buildMonthSelectorHTML(_orgSelectedMonth, 'selectOrgMonth({{m}})', isDay);
-}
-
-// Google Ads section
-function renderGoogleMonthSelector() {
-  var el = document.getElementById('googleMonthSelector');
-  if (!el) return;
-  var key = state.activePeriodKey || 'mes';
-  var isDay = key.startsWith('dia-') || key.startsWith('semana-');
-  var mn = getActiveMonthNum() || CURRENT_MONTH;
-  el.innerHTML = buildMonthSelectorHTML(mn, 'selectMonthPeriod({{m}})', isDay);
-}
+// Calendário section — mês sincronizado via getActiveMonthNum() em renderCalendario()
+function selectCalMonth(m) { selectMonthPeriod(m); }
 
 function renderCRM() {
   if (typeof NECTAR_LEADBOARD === 'undefined') return;
   var nl = NECTAR_LEADBOARD;
 
-  renderCrmMonthSelector();
-
-  var mesStr = '2026-' + String(crmSelectedMonth).padStart(2, '0');
-  var mesLabel = CRM_MES_NAMES[crmSelectedMonth - 1] + '/26';
-  var isCurrentMonth = crmSelectedMonth === CURRENT_MONTH;
+  var crmMes = getActiveMonthNum() || CURRENT_MONTH;
+  var mesStr = '2026-' + String(crmMes).padStart(2, '0');
+  var mesLabel = CRM_MES_NAMES[crmMes - 1] + '/26';
+  var isCurrentMonth = crmMes === CURRENT_MONTH;
 
   // Pipeline — sempre snapshot atual (só existe para o mês corrente)
   var pbo = nl.pipeline_by_origem || {};
