@@ -164,9 +164,10 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'META_ACCESS_TOKEN não configurado', loading: false });
   }
 
-  // Aceita ?since=YYYY-MM-DD&until=YYYY-MM-DD ou usa hoje como padrão
+  // Aceita ?since=YYYY-MM-DD&until=YYYY-MM-DD ou usa o mês corrente como padrão
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
-  const since = (req.query?.since && /^\d{4}-\d{2}-\d{2}$/.test(req.query.since)) ? req.query.since : today;
+  const firstOfMonth = today.slice(0, 8) + '01'; // YYYY-MM-01
+  const since = (req.query?.since && /^\d{4}-\d{2}-\d{2}$/.test(req.query.since)) ? req.query.since : firstOfMonth;
   const until = (req.query?.until && /^\d{4}-\d{2}-\d{2}$/.test(req.query.until)) ? req.query.until : today;
 
   try {
@@ -202,7 +203,7 @@ module.exports = async (req, res) => {
         total_daily_budget: totalBudget,
         since,
         until,
-        partial:            false,
+        partial:            true,
       },
       updated_at: updatedAt,
       loading:    false,
