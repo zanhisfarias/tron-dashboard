@@ -5141,6 +5141,9 @@ function startLiveMode() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Popula o calendário do Daily com os dados do Always On.xlsx (uma vez)
+  try { seedAlwaysOnFromXlsx(); } catch(e) { console.warn('seed AO:', e); }
+
   var hd = document.getElementById('headerDate');
   if (hd) {
     var d = new Date();
@@ -5898,6 +5901,34 @@ function loadAoData() {
 }
 function saveAoData(data) {
   try { localStorage.setItem('tron_always_on', JSON.stringify(data)); } catch(e) {}
+}
+
+// ── Seed: popula o calendário do Daily com os dados do Always On.xlsx ──
+function seedAlwaysOnFromXlsx() {
+  var FLAG = 'tron_ao_seeded_v2'; // incrementar para forçar re-seed
+  try { if (localStorage.getItem(FLAG)) return; } catch(e) { return; }
+
+  function detectAoType(title) {
+    var t = (title || '').toLowerCase();
+    if (/\bblog\b/.test(t))                         return 'blog';
+    if (/webinar/.test(t))                          return 'webinar';
+    if (/meta ads|campanhas ativas/.test(t))        return 'outro';
+    if (/ordix na m.dia|portal cont.beis/.test(t))  return 'outro';
+    return 'social';
+  }
+
+  var existing = loadAoData();
+  ALWAYS_ON_DATA.forEach(function(ev) {
+    if (!existing[ev.date]) existing[ev.date] = [];
+    // Evita duplicatas pelo título
+    var alreadyExists = existing[ev.date].some(function(a) { return a.title === ev.title; });
+    if (!alreadyExists) {
+      existing[ev.date].push({ type: detectAoType(ev.title), title: ev.title });
+    }
+  });
+
+  saveAoData(existing);
+  try { localStorage.setItem(FLAG, '1'); } catch(e) {}
 }
 
 function navAlwaysOn(dir) {
