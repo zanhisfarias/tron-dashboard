@@ -26,6 +26,7 @@
   <style>
     * { font-family: 'Montserrat', sans-serif; box-sizing: border-box; }
     body { background: #0F1117; color: #E5E7EB; margin: 0; }
+    #postModal.modal-open { display:flex !important; align-items:flex-start; justify-content:center; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #1A1D27; }
     ::-webkit-scrollbar-thumb { background: #2A2D3E; border-radius: 3px; }
@@ -168,6 +169,9 @@
     body.light [style*="color: #E5E7EB"] { color: #1F2937 !important; }
     body.light [style*="color: #9CA3AF"] { color: #4B5563 !important; }
     body.light [style*="color: #6B7280"] { color: #4B5563 !important; }
+    body.light [style*="color:#BEF264"]      { color: #4D7C0F !important; }
+    body.light [style*="color:#84CC16"]      { color: #4D7C0F !important; }
+    body.light [style*="background:#84CC16"] { background: #65A30D !important; }
     /* Dark mode: One Pager — força texto legível sobre fundos escuros */
     body:not(.light) #onePagerMain [style*="color:#6B7280"]  { color: #CBD5E1 !important; }
     body:not(.light) #onePagerMain [style*="color: #6B7280"] { color: #CBD5E1 !important; }
@@ -254,7 +258,8 @@
     /* ── Responsividade mobile ─────────────────────────────── */
     @media (max-width: 639px) {
       /* Calendário — células fixas no mobile: máx 2 pílulas */
-      #calGrid > div { min-height:0 !important; height:62px !important; padding:3px !important; overflow:hidden !important; }
+      #calGrid > div:not(.cal-week-label) { min-height:0 !important; height:62px !important; padding:3px !important; overflow:hidden !important; }
+      #calGrid .cal-week-label { height:auto !important; min-height:62px !important; padding:4px 0 !important; overflow:visible !important; }
       #calGrid .text-\[12px\] { font-size:10px !important; margin-bottom:2px !important; }
       #calGrid .text-\[10px\] { font-size:8px !important; line-height:1.1 !important;
         overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; display:block !important; }
@@ -293,7 +298,7 @@
     }
     @media (min-width: 640px) and (max-width: 767px) {
       /* Tablet pequeno — calendário um pouco mais compacto */
-      #calGrid > div { min-height:70px !important; }
+      #calGrid > div:not(.cal-week-label) { min-height:70px !important; }
       #crmKpiRow { grid-template-columns: repeat(4, 1fr) !important; }
     }
   </style>
@@ -313,7 +318,7 @@
     </div>
     <!-- Plataformas -->
     <div class="flex items-center gap-1.5 flex-shrink-0">
-      <button id="platSocial" onclick="selectPlatform('social')" class="camp-btn">Calendário</button>
+      <button id="platSocial" onclick="selectPlatform('social')" class="camp-btn">Always On</button>
       <button id="platOrganico" onclick="selectPlatform('organico')" class="camp-btn"><span style="background:linear-gradient(90deg,#f58529,#dd2a7b,#8134af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">Orgânico</span></button>
       <button id="platMeta" onclick="selectPlatform('meta')" class="camp-btn">Meta Ads</button>
       <button id="platGoogle" onclick="selectPlatform('google')" class="camp-btn">Google Ads</button>
@@ -542,11 +547,10 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
-        <div class="text-[11px] mt-0.5" style="color:#9CA3AF">Calendário Editorial — Instagram &amp; Facebook</div>
       </div>
     </div>
     <div class="flex flex-wrap gap-2 items-center">
-      <button onclick="openPostModal()" class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all" style="background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:none;cursor:pointer" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <button id="novoPostBtn" class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all" style="background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:none;cursor:pointer" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Novo Post
       </button>
@@ -557,14 +561,15 @@
       <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#FDE68A"><span class="inline-block w-2 h-2 rounded-full" style="background:#F59E0B"></span>QIAE</span>
       <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#FDA4AF"><span class="inline-block w-2 h-2 rounded-full" style="background:#F43F5E"></span>Editorial</span>
       <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#A5B4FC"><span class="inline-block w-2 h-2 rounded-full" style="background:#6366F1"></span>Meta Ads</span>
-      <span class="flex items-center gap-1 text-[10px] font-medium" style="color:#9CA3AF;border:1px dashed rgba(255,255,255,0.2);padding:1px 5px;border-radius:4px">┄ Planejado</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#BEF264"><span class="inline-block w-2 h-2 rounded-full" style="background:#84CC16"></span>Comemorativa</span>
     </div>
   </div>
 
   <!-- Grade calendário principal -->
   <div class="card overflow-hidden" style="background:#1E2130;border-color:#2A2D3E">
     <!-- Header dias da semana -->
-    <div class="grid grid-cols-7 border-b" style="border-color:#2A2D3E">
+    <div class="grid border-b" style="border-color:#2A2D3E;grid-template-columns:36px repeat(7,1fr)">
+      <div class="py-2 text-center" style="font-size:8px;font-weight:700;color:#4B5563;background:#0F1117;letter-spacing:0.05em">SEM</div>
       <div class="py-2 text-center text-[11px] font-bold" style="color:#F87171">DOM</div>
       <div class="py-2 text-center text-[11px] font-bold" style="color:#9CA3AF">SEG</div>
       <div class="py-2 text-center text-[11px] font-bold" style="color:#9CA3AF">TER</div>
@@ -574,7 +579,40 @@
       <div class="py-2 text-center text-[11px] font-bold" style="color:#F87171">SÁB</div>
     </div>
     <!-- Células -->
-    <div id="calGrid" class="grid grid-cols-7" style="min-height:480px"></div>
+    <div id="calGrid" style="display:grid;grid-template-columns:36px repeat(7,1fr);min-height:480px"></div>
+  </div>
+
+  <!-- Always On — Próximas Ações -->
+  <div class="card p-4 md:p-5" style="background:#1A1D27;border-color:#2A2D3E">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.15)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-widest" style="color:#6366F1">Próximas Ações</div>
+          <div class="text-[10px]" style="color:#6B7280">Planejamento editorial do mês</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="aoFilterMes" onchange="renderAlwaysOnList()" style="background:#0F1117;border:1px solid #2A2D3E;color:#9CA3AF;border-radius:7px;padding:3px 8px;font-size:10px;font-family:inherit;cursor:pointer;outline:none">
+          <option value="6">Junho 2026</option>
+          <option value="7">Julho 2026</option>
+          <option value="8">Agosto 2026</option>
+        </select>
+        <select id="aoFilterProd" onchange="renderAlwaysOnList()" style="background:#0F1117;border:1px solid #2A2D3E;color:#9CA3AF;border-radius:7px;padding:3px 8px;font-size:10px;font-family:inherit;cursor:pointer;outline:none">
+          <option value="">Todos</option>
+          <option value="DP">DP</option>
+          <option value="Box">Box</option>
+          <option value="Ordix">Ordix</option>
+          <option value="QIAE">QIAE</option>
+          <option value="Editorial">Editorial</option>
+          <option value="Meta">Meta Ads</option>
+          <option value="Comemorativa">Comemorativa</option>
+        </select>
+      </div>
+    </div>
+    <div id="alwaysOnList" class="space-y-1 overflow-y-auto" style="max-height:340px"></div>
   </div>
 
   <!-- Linha Editorial & Roteiros -->
@@ -597,38 +635,6 @@
       </div>
     </div>
     <div id="orgEditorialContent"></div>
-  </div>
-
-  <!-- Always On — Próximas Ações -->
-  <div class="card p-4 md:p-5" style="background:#1A1D27;border-color:#2A2D3E">
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.15)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <div>
-          <div class="text-[11px] font-bold uppercase tracking-widest" style="color:#6366F1">Always On — Próximas Ações</div>
-          <div class="text-[10px]" style="color:#6B7280">Planejamento editorial extraído do Always On.xlsx</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <select id="aoFilterMes" onchange="renderAlwaysOnList()" style="background:#0F1117;border:1px solid #2A2D3E;color:#9CA3AF;border-radius:7px;padding:3px 8px;font-size:10px;font-family:inherit;cursor:pointer;outline:none">
-          <option value="6">Junho 2026</option>
-          <option value="7">Julho 2026</option>
-          <option value="8">Agosto 2026</option>
-        </select>
-        <select id="aoFilterProd" onchange="renderAlwaysOnList()" style="background:#0F1117;border:1px solid #2A2D3E;color:#9CA3AF;border-radius:7px;padding:3px 8px;font-size:10px;font-family:inherit;cursor:pointer;outline:none">
-          <option value="">Todos</option>
-          <option value="DP">DP</option>
-          <option value="Box">Box</option>
-          <option value="Ordix">Ordix</option>
-          <option value="QIAE">QIAE</option>
-          <option value="Editorial">Editorial</option>
-          <option value="Meta">Meta Ads</option>
-        </select>
-      </div>
-    </div>
-    <div id="alwaysOnList" class="space-y-1 overflow-y-auto" style="max-height:340px"></div>
   </div>
 
 </div>
@@ -1639,57 +1645,6 @@
     </div>
   </div>
 
-  <!-- ── Always On ──────────────────────────────────────── -->
-  <div class="card p-4 md:p-5" style="background:#1E2130;border-color:#2A2D3E">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div>
-          <div class="text-sm font-bold text-white">Always On</div>
-          <div class="text-[10px]" style="color:#9CA3AF">Ações de inbound planejadas por mês</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <!-- Legenda -->
-        <div class="hidden md:flex items-center gap-3 mr-2">
-          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#EC4899"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#EC4899"></span>E-mail</span>
-          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#10B981"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#10B981"></span>Blog/SEO</span>
-          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#8B5CF6"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#8B5CF6"></span>Webinar</span>
-          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#6366F1"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#6366F1"></span>Landing Page</span>
-          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#F59E0B"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#F59E0B"></span>Social</span>
-          <span class="flex items-center gap-1 text-[9px] font-semibold" style="color:#6B7280"><span class="inline-block w-2 h-2 rounded-full flex-shrink-0" style="background:#6B7280"></span>Outro</span>
-        </div>
-        <!-- Nav mês -->
-        <button onclick="navAlwaysOn(-1)" style="background:#1A1D27;border:1px solid #3A3D52;color:#9CA3AF;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.color='#fff';this.style.borderColor='#10B981'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#3A3D52'">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <div id="aoTitleLabel" class="text-xs font-bold text-white" style="min-width:80px;text-align:center">Junho 2026</div>
-        <button onclick="navAlwaysOn(1)" style="background:#1A1D27;border:1px solid #3A3D52;color:#9CA3AF;border-radius:7px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer" onmouseover="this.style.color='#fff';this.style.borderColor='#10B981'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#3A3D52'">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Grade compacta -->
-    <div class="rounded-xl overflow-hidden" style="border:1px solid #2A2D3E">
-      <!-- Cabeçalho dias -->
-      <div class="grid grid-cols-7 border-b" style="border-color:#2A2D3E;background:#161820">
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#F87171">DOM</div>
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">SEG</div>
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">TER</div>
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">QUA</div>
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">QUI</div>
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#6B7280">SEX</div>
-        <div class="py-1.5 text-center text-[9px] font-bold" style="color:#F87171">SÁB</div>
-      </div>
-      <!-- Células -->
-      <div id="aoGrid" class="grid grid-cols-7"></div>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -2360,8 +2315,9 @@ function sortOrgPosts(key) {
 }
 
 function selectCalDay(dateStr) {
-  _calSelectedDay = (_calSelectedDay === dateStr) ? null : dateStr; // toggle
-  renderCalendario(); // atualiza highlight
+  _calSelectedDay = dateStr;
+  try { renderCalendario(); } catch(e) { console.warn('[selectCalDay] renderCalendario:', e); }
+  openAoModal(dateStr);
 }
 
 function renderOrgInsights() {
@@ -4918,7 +4874,7 @@ function selectPlatform(plat, skipHash) {
   // Mostra a seção certa
   if (plat === 'social') {
     if (socialMain) socialMain.style.display = '';
-    renderCalendario();
+    try { renderCalendario(); } catch(e) { console.warn('[social] calendario:', e); }
     try { renderOrgEditorial(); } catch(e) { console.warn('[social] editorial:', e); }
     try { renderAlwaysOnList(); } catch(e) { console.warn('[social] alwaysOn:', e); }
     // Pré-selecionar o mês atual no filtro Always On
@@ -5168,7 +5124,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { mainPlat = localStorage.getItem('tron_active_platform') || 'social'; } catch(e) { mainPlat = 'social'; }
     if (!validMains.includes(mainPlat)) mainPlat = 'social';
   }
-  selectPlatform(mainPlat, true);
+  try { selectPlatform(mainPlat, true); } catch(e) { console.warn('[init] selectPlatform:', e); }
   history.replaceState(null, '', '#' + mainPlat);
   if (mainPlat === 'organico' && subPlat && validSubs.includes(subPlat)) {
     selectOrgPlat(subPlat, true);
@@ -5187,6 +5143,24 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimeout(_calResizeTimer);
     _calResizeTimer = setTimeout(renderCalendario, 150);
   });
+
+  // ── Botão Novo Post ──────────────────────────────────────
+  var _novoPostBtn = document.getElementById('novoPostBtn');
+  if (_novoPostBtn) {
+    _novoPostBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var modal = document.getElementById('postModal');
+      if (!modal) return;
+      modal.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      try {
+        var mn = new Date(Date.now() + 600000);
+        var pp = function(n){ return String(n).padStart(2,'0'); };
+        var di = document.getElementById('postScheduleAt');
+        if (di) di.min = mn.getFullYear()+'-'+pp(mn.getMonth()+1)+'-'+pp(mn.getDate())+'T'+pp(mn.getHours())+':'+pp(mn.getMinutes());
+      } catch(e){}
+    });
+  }
 });
 
 
@@ -5197,67 +5171,106 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Always On — Planejamento editorial (Always On.xlsx) ──
 var ALWAYS_ON_DATA = [
   // ══════════════ JUNHO 2026 ══════════════
-  { date:'2026-06-01', title:'Meta Ads — Campanhas ativas',                    produto:'Meta' },
-  { date:'2026-06-01', title:'IG TOFU: 5 sinais que sua planilha não dá conta', produto:'Editorial' },
-  { date:'2026-06-01', title:'IG BOFU: Conheça o Ordix',                       produto:'Ordix' },
-  { date:'2026-06-02', title:'Blog MoFu: Indicadores todo escritório contábil', produto:'Editorial' },
-  { date:'2026-06-02', title:'IG DP: Convite Webinar — Atualizações Trab.',    produto:'DP' },
-  { date:'2026-06-03', title:'IG MOFU: Retrabalho fiscal — quanto custa?',     produto:'Editorial' },
-  { date:'2026-06-03', title:'IG: Comunicado Corpus Christi',                  produto:'Editorial' },
-  { date:'2026-06-03', title:'Webinar DP: Cortes NR-1 e Riscos Psicossociais', produto:'DP' },
-  { date:'2026-06-03', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-04', title:'Blog MoFu: Distribuição de lucros até 2028',     produto:'Editorial' },
-  { date:'2026-06-04', title:'IG BOFU: Ordix',                                 produto:'Ordix' },
-  { date:'2026-06-05', title:'IG MOFU: eSocial — erro começa no cadastro',     produto:'DP' },
-  { date:'2026-06-05', title:'IG Shorts DP: NR-1 Riscos Psicossociais',        produto:'DP' },
-  { date:'2026-06-05', title:'IG DP: Convite Webinar — Atualizações Trab.',    produto:'DP' },
-  { date:'2026-06-05', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-07', title:'IG Shorts DP: NR-1 Riscos Psicossociais',        produto:'DP' },
-  { date:'2026-06-08', title:'IG TOFU: Hora extra virou rotina — por quê?',    produto:'DP' },
-  { date:'2026-06-08', title:'IG DP: Convite Webinar — Atualizações Trab.',    produto:'DP' },
-  { date:'2026-06-08', title:'Ordix na Mídia: Banner Portal Contábeis',        produto:'Ordix' },
-  { date:'2026-06-08', title:'Ordix na Mídia: Instagram Portal Contábeis',     produto:'Ordix' },
-  { date:'2026-06-08', title:'Ordix na Mídia: Whatsapp Portal Contábeis',      produto:'Ordix' },
-  { date:'2026-06-08', title:'IG BOFU: Ordix',                                 produto:'Ordix' },
-  { date:'2026-06-09', title:'Webinar TOFU: DP — Atualizações Trabalhistas 2026', produto:'DP' },
-  { date:'2026-06-09', title:'IG Shorts DP: NR-1 Riscos Psicossociais',        produto:'DP' },
-  { date:'2026-06-10', title:'IG TOFU: Férias vencidas — risco trabalhista',   produto:'DP' },
-  { date:'2026-06-10', title:'IG QIAE: Benefício dos produtos',                produto:'QIAE' },
-  { date:'2026-06-10', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-11', title:'Blog ToFu: O que diferencia um escritório estratégico', produto:'Editorial' },
-  { date:'2026-06-11', title:'IG BOFU: Ordix',                                 produto:'Ordix' },
+  // ── Semana 1 (01–07) ────────────────────
+  { date:'2026-06-01', title:'Junho Vermelho — Doação de Sangue',                    produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Junho Verde — Meio Ambiente',                          produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Junho Lilás — Teste do Pezinho',                       produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Junho Laranja — Anemia e Leucemia',                    produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Junho Verde — Escoliose',                              produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Junho Preto — Melanoma',                               produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Festa Junina',                                         produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Semana Mundial do Meio Ambiente',                      produto:'Comemorativa' },
+  { date:'2026-06-01', title:'Meta Ads — Campanhas ativas',                          produto:'Meta' },
+  { date:'2026-06-01', title:'IG TOFU: 5 sinais que sua planilha não dá conta',      produto:'Editorial' },
+  { date:'2026-06-01', title:'IG BOFU: Conheça o Ordix',                             produto:'Ordix' },
+  { date:'2026-06-01', title:'TGC Eos — Reels 01 Junho 2026',                        produto:'TGC' },
+  { date:'2026-06-01', title:'TGC Eos — Estático Feed+Story Junho 2026',             produto:'TGC' },
+  { date:'2026-06-01', title:'Box — Estático Feed+Story Junho 2026',                 produto:'Box' },
+  { date:'2026-06-01', title:'Box — Reels 01 Junho 2026',                            produto:'Box' },
+  { date:'2026-06-01', title:'DP — Retrabalho DP Feed+Story',                        produto:'DP' },
+  { date:'2026-06-01', title:'DP — Folha Pagamento Feed+Story',                      produto:'DP' },
+  { date:'2026-06-01', title:'Ordix — Reels 01 Maio 2026',                           produto:'Ordix' },
+  { date:'2026-06-01', title:'Ordix — Reels 02 Maio 2026',                           produto:'Ordix' },
+  { date:'2026-06-01', title:'Ordix — Estático Feed+Story Maio 2026',                produto:'Ordix' },
+  { date:'2026-06-01', title:'Tron Box — Vídeo 1 Feed+Story BSB',                    produto:'Box' },
+  { date:'2026-06-01', title:'TGC Eos GO — Automação Inteligente',                   produto:'TGC' },
+  { date:'2026-06-01', title:'TGC Eos GO — Zan',                                     produto:'TGC' },
+  { date:'2026-06-01', title:'Fidel TGC — Vídeo 1 Feed+Story GO',                    produto:'TGC' },
+  { date:'2026-06-01', title:'Material Rico: Tarefeiro ao Consultor — Reels 01',     produto:'Editorial' },
+  { date:'2026-06-01', title:'Material Rico: Tarefeiro ao Consultor — Reels 02',     produto:'Editorial' },
+  { date:'2026-06-01', title:'Material Rico: Apagando Incêndios — Feed',             produto:'Editorial' },
+  { date:'2026-06-01', title:'Material Rico: Apagando Incêndio — Carrossel',         produto:'Editorial' },
+  { date:'2026-06-02', title:'IG DP: Convite Webinar — Atualizações Trab. 2026',     produto:'DP' },
+  { date:'2026-06-02', title:'Blog MoFu: Indicadores todo escritório contábil',      produto:'Editorial' },
+  { date:'2026-06-03', title:'IG MOFU: Retrabalho fiscal — quanto custa?',           produto:'Editorial' },
+  { date:'2026-06-03', title:'IG: Comunicado Corpus Christi',                        produto:'Editorial' },
+  { date:'2026-06-03', title:'IG DP Fora da Caixa: Cortes NR-1 e Riscos Psicossociais', produto:'DP' },
+  { date:'2026-06-03', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-04', title:'Corpus Christi',                                       produto:'Comemorativa' },
+  { date:'2026-06-04', title:'Blog MoFu: Distribuição de lucros até 2028',           produto:'Editorial' },
+  { date:'2026-06-04', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
+  { date:'2026-06-05', title:'Dia Mundial do Meio Ambiente',                         produto:'Comemorativa' },
+  { date:'2026-06-05', title:'IG MOFU: eSocial — erro começa no cadastro',           produto:'DP' },
+  { date:'2026-06-05', title:'IG Shorts DP: NR-1 Riscos Psicossociais',              produto:'DP' },
+  { date:'2026-06-05', title:'IG DP: Convite Webinar — Atualizações Trab.',          produto:'DP' },
+  { date:'2026-06-05', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-07', title:'IG Shorts DP: NR-1 Riscos Psicossociais',              produto:'DP' },
+  // ── Semana 2 (08–14) ────────────────────
+  { date:'2026-06-08', title:'IG TOFU: Hora extra virou rotina — por quê?',          produto:'DP' },
+  { date:'2026-06-08', title:'IG DP: Convite Webinar — Atualizações Trab.',          produto:'DP' },
+  { date:'2026-06-08', title:'Ordix na Mídia: Banner Portal Contábeis',              produto:'Ordix' },
+  { date:'2026-06-08', title:'Ordix na Mídia: Instagram Portal Contábeis',           produto:'Ordix' },
+  { date:'2026-06-08', title:'Ordix na Mídia: Whatsapp Portal Contábeis',            produto:'Ordix' },
+  { date:'2026-06-08', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
+  { date:'2026-06-09', title:'Webinar TOFU: DP Fora da Caixa — Atualizações Trabalhistas 2026', produto:'DP' },
+  { date:'2026-06-09', title:'IG Shorts DP: NR-1 Riscos Psicossociais',              produto:'DP' },
+  { date:'2026-06-09', title:'Blog MoFu: Como utilizar dados contábeis nas decisões',produto:'Editorial' },
+  { date:'2026-06-10', title:'IG TOFU: Férias vencidas — risco trabalhista',         produto:'DP' },
+  { date:'2026-06-10', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
+  { date:'2026-06-10', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-11', title:'Blog ToFu: O que diferencia um escritório estratégico',produto:'Editorial' },
+  { date:'2026-06-11', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
+  { date:'2026-06-12', title:'Dia dos Namorados',                                    produto:'Comemorativa' },
+  { date:'2026-06-12', title:'Dia Mundial de Combate ao Trabalho Infantil',          produto:'Comemorativa' },
   { date:'2026-06-12', title:'IG MOFU: IRPF, lucros e dividendos — risco erros manuais', produto:'Editorial' },
-  { date:'2026-06-12', title:'IG Shorts DP: Atualizações Trabalhistas',        produto:'DP' },
-  { date:'2026-06-12', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-14', title:'IG BOFU Ordix: Tributação dividendos até 2028',  produto:'Ordix' },
-  { date:'2026-06-15', title:'Ordix na Mídia: Artigo Portal Contábeis',        produto:'Ordix' },
-  { date:'2026-06-15', title:'IG BOFU: Ordix',                                 produto:'Ordix' },
-  { date:'2026-06-15', title:'IG QIAE: Benefício dos produtos',                produto:'QIAE' },
-  { date:'2026-06-16', title:'Blog MoFu: Como aumentar valor percebido do serviço', produto:'Editorial' },
-  { date:'2026-06-16', title:'IG DP: Convite Webinar — IA aplicada ao DP',    produto:'DP' },
-  { date:'2026-06-17', title:'IG Shorts DP: Atualizações Trabalhistas',        produto:'DP' },
-  { date:'2026-06-17', title:'IG BOFU: Tron Box — Falta de integração',        produto:'Box' },
-  { date:'2026-06-18', title:'Blog ToFu: Reduzir gargalos na rotina contábil', produto:'Editorial' },
-  { date:'2026-06-18', title:'IG BOFU: Ordix',                                 produto:'Ordix' },
-  { date:'2026-06-19', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-19', title:'IG MoFu: Tron Box — Documentos fiscais e reforma trib.', produto:'Box' },
-  { date:'2026-06-22', title:'IG QIAE: Benefício dos produtos',                produto:'QIAE' },
-  { date:'2026-06-22', title:'IG BOFU Ordix: Emissão notas na Reforma Tributária', produto:'Ordix' },
-  { date:'2026-06-23', title:'Blog ToFu: Crescimento sem caos',                produto:'Editorial' },
-  { date:'2026-06-23', title:'IG Shorts DP: Atualizações Trabalhistas',        produto:'DP' },
-  { date:'2026-06-23', title:'IG DP: Convite Webinar — IA aplicada ao DP',    produto:'DP' },
-  { date:'2026-06-24', title:'Blog ToFu: O papel da padronização na produtividade', produto:'Editorial' },
-  { date:'2026-06-24', title:'IG MoFu: Automação DP — reduz erros no fechamento', produto:'DP' },
-  { date:'2026-06-24', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-26', title:'IG Shorts DP: Atualizações Trabalhistas',        produto:'DP' },
-  { date:'2026-06-26', title:'IG BOFU: Gestão — Turnover e dados da folha',    produto:'DP' },
-  { date:'2026-06-26', title:'IG BOFU: Tron Box',                              produto:'Box' },
-  { date:'2026-06-29', title:'IG: Dia da Telefonista',                         produto:'Editorial' },
-  { date:'2026-06-29', title:'IG QIAE: Benefício dos produtos',                produto:'QIAE' },
-  { date:'2026-06-29', title:'IG DP: Convite Webinar — IA aplicada ao DP',    produto:'DP' },
-  { date:'2026-06-29', title:'IG ToFu: Organizar DP para evitar riscos legais', produto:'DP' },
-  { date:'2026-06-30', title:'Webinar TOFU: DP — IA aplicada ao DP (ao vivo)', produto:'DP' },
-  { date:'2026-06-30', title:'Blog ToFu: Riscos fiscais na emissão de notas',  produto:'Editorial' },
+  { date:'2026-06-12', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
+  { date:'2026-06-12', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-14', title:'Dia Mundial do Doador de Sangue',                      produto:'Comemorativa' },
+  { date:'2026-06-14', title:'IG BOFU Ordix: Tributação dividendos até 2026',        produto:'Ordix' },
+  // ── Semana 3 (15–21) ────────────────────
+  { date:'2026-06-15', title:'Ordix na Mídia: Artigo Portal Contábeis',              produto:'Ordix' },
+  { date:'2026-06-15', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
+  { date:'2026-06-15', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
+  { date:'2026-06-16', title:'IG DP: Convite Webinar — IA aplicada ao DP',          produto:'DP' },
+  { date:'2026-06-16', title:'Blog MoFu: Como aumentar valor percebido do serviço',  produto:'Editorial' },
+  { date:'2026-06-17', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
+  { date:'2026-06-17', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-17', title:'IG BOFU: Tron Box — Falta de integração entre sistemas',produto:'Box' },
+  { date:'2026-06-18', title:'Blog ToFu: Reduzir gargalos na rotina contábil',       produto:'Editorial' },
+  { date:'2026-06-18', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
+  { date:'2026-06-19', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-19', title:'IG MoFu: Tron Box — Documentos fiscais e Reforma Trib.',produto:'Box' },
+  { date:'2026-06-21', title:'Início do Inverno',                                    produto:'Comemorativa' },
+  // ── Semana 4 (22–28) ────────────────────
+  { date:'2026-06-22', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
+  { date:'2026-06-22', title:'IG BOFU Ordix: Emissão notas na Reforma Tributária',   produto:'Ordix' },
+  { date:'2026-06-23', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
+  { date:'2026-06-23', title:'IG DP: Convite Webinar — IA aplicada ao DP',          produto:'DP' },
+  { date:'2026-06-23', title:'Blog ToFu: Crescimento sem caos',                      produto:'Editorial' },
+  { date:'2026-06-24', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-24', title:'IG MoFu: Automação DP — reduz erros no fechamento',   produto:'DP' },
+  { date:'2026-06-25', title:'Blog ToFu: O papel da padronização na produtividade',  produto:'Editorial' },
+  { date:'2026-06-26', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
+  { date:'2026-06-26', title:'IG BOFU: Gestão — Turnover e dados da folha',         produto:'DP' },
+  { date:'2026-06-26', title:'IG BOFU: Tron Box',                                    produto:'Box' },
+  { date:'2026-06-28', title:'Dia Internacional do Orgulho Gay',                     produto:'Comemorativa' },
+  // ── Semana 5 (29–30) ────────────────────
+  { date:'2026-06-29', title:'IG: Dia da Telefonista',                               produto:'Editorial' },
+  { date:'2026-06-29', title:'IG DP: Convite Webinar — IA aplicada ao DP',          produto:'DP' },
+  { date:'2026-06-29', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
+  { date:'2026-06-29', title:'IG ToFu: Organizar DP para evitar riscos legais',      produto:'DP' },
+  { date:'2026-06-30', title:'Webinar TOFU: DP Fora da Caixa — IA aplicada ao DP',  produto:'DP' },
+  { date:'2026-06-30', title:'Blog ToFu: Riscos fiscais na emissão de notas',        produto:'Editorial' },
   // ══════════════ JULHO 2026 ══════════════
   { date:'2026-07-01', title:'IG BOFU: Tron Box',                              produto:'Box' },
   { date:'2026-07-02', title:'IG Shorts DP: IA aplicada ao DP',                produto:'DP' },
@@ -5325,47 +5338,18 @@ function renderCalendario() {
 
   // ── Paleta por produto ──────────────────────────────
   var PRODUTO_COLORS = {
-    TGC:      ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
-    DP:       ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
-    Box:      ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
-    Ordix:    ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
-    QIAE:     ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
-    Editorial:['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
-    Meta:     ['rgba(99,102,241,0.13)',  '#A5B4FC', '#6366F1']
+    TGC:         ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
+    DP:          ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
+    Box:         ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
+    Ordix:       ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
+    QIAE:        ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
+    Editorial:   ['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
+    Meta:        ['rgba(99,102,241,0.13)',  '#A5B4FC', '#6366F1'],
+    Comemorativa:['rgba(132,204,22,0.13)',  '#BEF264', '#84CC16']
   };
 
-  function detectProduto(caption) {
-    var c = (caption || '').toLowerCase();
-    if (/\btgc\b|gestão\s+cont|contab|mei|abertura.*empresa|empresa.*abertura|fiscal|imposto|tribut|nota fiscal/.test(c)) return 'TGC';
-    if (/\bdp\b|departamento\s+pessoal|folha|férias|rescis|holerite|fgts|pró-labore|pro-labore|admissão|demissão|clt|esocial|inss|salário.*dif|dif.*salário/.test(c)) return 'DP';
-    if (/\bbox\b/.test(c)) return 'Box';
-    if (/\bordix\b/.test(c)) return 'Ordix';
-    if (/\bqiae\b|\bia\b|inteligência\s+artif|automação|chatgpt|machine\s+learning/.test(c)) return 'QIAE';
-    return 'Editorial';
-  }
-
-  // ── Mapear posts por dia do mês/ano atual ──────────
-  var byDay = {};
-  igPosts.forEach(function(p) {
-    var d = new Date(p.timestamp);
-    if (d.getFullYear() !== _calYear || d.getMonth() + 1 !== _calMonth) return;
-    var day = d.getDate();
-    if (!byDay[day]) byDay[day] = [];
-    var caption = (p.caption || '').replace(/\n/g,' ').trim();
-    var title5w = caption.split(/\s+/).slice(0, 5).join(' ') || 'Post IG';
-    byDay[day].push({ title: title5w, url: p.url || '', produto: detectProduto(caption) });
-  });
-  fbPosts.forEach(function(p) {
-    var d = new Date(p.timestamp);
-    if (d.getFullYear() !== _calYear || d.getMonth() + 1 !== _calMonth) return;
-    var day = d.getDate();
-    if (!byDay[day]) byDay[day] = [];
-    var caption = (p.message || '').replace(/\n/g,' ').trim();
-    var title5w = caption.split(/\s+/).slice(0, 5).join(' ') || 'Post Facebook';
-    byDay[day].push({ title: title5w, url: '', produto: detectProduto(caption) });
-  });
-
   // ── Mesclar eventos Always On do mês/ano atual ──────
+  var byDay = {};
   var monthPad = String(_calMonth).padStart(2,'0');
   var monthPrefix = _calYear + '-' + monthPad + '-';
   ALWAYS_ON_DATA.forEach(function(ev) {
@@ -5373,6 +5357,18 @@ function renderCalendario() {
     var day = parseInt(ev.date.slice(8,10), 10);
     if (!byDay[day]) byDay[day] = [];
     byDay[day].push({ title: ev.title, url: '', produto: ev.produto, ao: true });
+  });
+
+  // ── Mesclar posts adicionados manualmente (localStorage) ─
+  var localAoData = loadAoData();
+  Object.keys(localAoData).forEach(function(dateStr) {
+    if (!dateStr.startsWith(monthPrefix)) return;
+    var day = parseInt(dateStr.slice(8,10), 10);
+    if (!byDay[day]) byDay[day] = [];
+    (localAoData[dateStr] || []).forEach(function(a) {
+      var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
+      byDay[day].push({ title: a.title, url: '', produto: null, ao: true, pal: [t.color + '15', t.color, t.color] });
+    });
   });
 
   // ── Calcular estrutura do mês dinamicamente ─────────
@@ -5386,73 +5382,95 @@ function renderCalendario() {
   var isThisMonth = (_calYear === now.getFullYear() && _calMonth === now.getMonth() + 1);
   var todayDate  = isThisMonth ? now.getDate() : -1;
 
+  var isMobile = window.innerWidth < 640;
   var cells = '';
 
-  // Dias do mês anterior (overflow inicial)
+  // ── Montar todas as células em sequência ─────────────
+  var allCells = [];
+
+  // Dias do mês anterior
   if (firstDay > 0) {
     var prevTotal = new Date(_calYear, _calMonth - 1, 0).getDate();
     for (var pv = prevTotal - firstDay + 1; pv <= prevTotal; pv++) {
-      cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid rgba(99,102,241,0.08)">'
-        + '<div class="text-[11px] font-semibold" style="color:#374151">' + pv + '</div>'
-        + '</div>';
+      allCells.push({ type: 'faded', num: pv });
     }
   }
 
-  // Dias do mês
+  // Dias do mês atual
   for (var d = 1; d <= totalDays; d++) {
-    var ps      = byDay[d] || [];
-    var col     = (firstDay + d - 1) % 7;
-    var isSun   = col === 0;
-    var isSat   = col === 6;
-    var isToday = (d === todayDate);
-    var dStr    = _calYear + '-' + pad(_calMonth) + '-' + pad(d);
-    var isSel   = (_calSelectedDay === dStr);
-    var numColor = isToday ? '#EC4899' : (isSun || isSat ? '#F87171' : '#D1D5DB');
-    var cellStyle = 'min-height:90px;border-bottom:1px solid rgba(99,102,241,0.12);cursor:pointer;transition:background 0.15s;';
-    if (isToday)         cellStyle += 'background:rgba(236,72,153,0.06);outline:1.5px solid #EC4899;outline-offset:-1px;';
-    if (isSel && !isToday) cellStyle += 'background:rgba(99,102,241,0.10);outline:1.5px solid #6366F1;outline-offset:-1px;';
-
-    var isMobile = window.innerWidth < 640;
-    var maxVisible = isMobile ? 2 : ps.length;
-    var shownPs = ps.slice(0, maxVisible);
-    var hiddenCount = ps.length - shownPs.length;
-
-    cells += '<div class="p-1.5" onclick="selectCalDay(\'' + dStr + '\')" style="' + cellStyle + '">'
-      + '<div class="text-[12px] font-bold mb-1" style="color:' + (isSel ? '#818CF8' : numColor) + '">' + d + '</div>';
-
-    shownPs.forEach(function(p) {
-      var pal = PRODUTO_COLORS[p.produto] || PRODUTO_COLORS.Editorial;
-      var inner = p.url
-        ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:' + pal[1] + ';text-decoration:none">' + p.title + '</a>'
-        : p.title;
-      if (p.ao) {
-        // Always On — borda tracejada, fundo mais sutil, badge "Plan"
-        cells += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:transparent;border:1px dashed ' + pal[2] + '33;border-left:2px solid ' + pal[2] + '">'
-          + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + pal[2] + ';opacity:.6"></span>'
-          + '<span class="text-[10px] font-medium leading-tight" style="color:' + pal[1] + ';opacity:.75;word-break:break-word">' + inner + '</span>'
-          + '</div>';
-      } else {
-        cells += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:' + pal[0] + '">'
-          + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + pal[2] + '"></span>'
-          + '<span class="text-[10px] font-semibold leading-tight" style="color:' + pal[1] + ';word-break:break-word">' + inner + '</span>'
-          + '</div>';
-      }
-    });
-
-    if (hiddenCount > 0) {
-      cells += '<div style="font-size:9px;font-weight:700;color:#6B7280;padding:1px 2px">+' + hiddenCount + ' mais</div>';
-    }
-
-    cells += '</div>';
+    allCells.push({ type: 'day', num: d });
   }
 
-  // Dias do próximo mês (overflow final)
+  // Dias do próximo mês
   var lastCol   = (firstDay + totalDays - 1) % 7;
   var remaining = lastCol === 6 ? 0 : 6 - lastCol;
   for (var nx = 1; nx <= remaining; nx++) {
-    cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid rgba(99,102,241,0.08)">'
-      + '<div class="text-[11px] font-semibold" style="color:#374151">' + nx + '</div>'
-      + '</div>';
+    allCells.push({ type: 'faded', num: nx });
+  }
+
+  // ── Renderizar com rótulo de semana a cada 7 células ─
+  var weekNum = 0;
+  for (var i = 0; i < allCells.length; i++) {
+    if (i % 7 === 0) {
+      weekNum++;
+      var wLabel = isMobile
+        ? ('S' + String(weekNum).padStart(2,'0'))
+        : ('Semana ' + String(weekNum).padStart(2,'0'));
+      cells += '<div class="cal-week-label" style="background:#000000;border-bottom:1px solid #2A2D3E;border-right:1px solid rgba(0,226,139,0.2);display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;transform:rotate(180deg);font-size:11px;font-weight:800;color:#00E28B;letter-spacing:0.1em;text-transform:uppercase;user-select:none;padding:4px 0">'
+        + wLabel + '</div>';
+    }
+
+    var cell = allCells[i];
+    if (cell.type === 'faded') {
+      cells += '<div class="p-1.5" style="min-height:90px;border-bottom:1px solid rgba(99,102,241,0.08)">'
+        + '<div class="text-[11px] font-semibold" style="color:#374151">' + cell.num + '</div>'
+        + '</div>';
+    } else {
+      var dayNum  = cell.num;
+      var ps      = byDay[dayNum] || [];
+      var col     = (firstDay + dayNum - 1) % 7;
+      var isSun   = col === 0;
+      var isSat   = col === 6;
+      var isToday = (dayNum === todayDate);
+      var dStr    = _calYear + '-' + pad(_calMonth) + '-' + pad(dayNum);
+      var isSel   = (_calSelectedDay === dStr);
+      var numColor  = isToday ? '#EC4899' : (isSun || isSat ? '#F87171' : '#D1D5DB');
+      var cellStyle = 'min-height:90px;border-bottom:1px solid rgba(99,102,241,0.12);cursor:pointer;transition:background 0.15s;';
+      if (isSel) cellStyle += 'background:rgba(99,102,241,0.10);outline:1.5px solid #6366F1;outline-offset:-1px;';
+
+      var maxVisible  = isMobile ? 2 : ps.length;
+      var shownPs     = ps.slice(0, maxVisible);
+      var hiddenCount = ps.length - shownPs.length;
+
+      var todayDot = isToday ? '<span style="display:block;width:5px;height:5px;border-radius:50%;background:#EC4899;margin:1px auto 2px"></span>' : '';
+      cells += '<div class="p-1.5" onclick="selectCalDay(\'' + dStr + '\')" style="' + cellStyle + '">'
+        + '<div class="text-[12px] font-bold mb-0" style="color:' + (isSel ? '#818CF8' : numColor) + '">' + dayNum + '</div>'
+        + todayDot;
+
+      shownPs.forEach(function(p) {
+        var pal = p.pal || PRODUTO_COLORS[p.produto] || PRODUTO_COLORS.Editorial;
+        var inner = p.url
+          ? '<a href="' + p.url + '" target="_blank" rel="noopener" style="color:' + pal[1] + ';text-decoration:none">' + p.title + '</a>'
+          : p.title;
+        if (p.ao) {
+          cells += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:transparent;border:1px dashed ' + pal[2] + '33;border-left:2px solid ' + pal[2] + '">'
+            + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + pal[2] + ';opacity:.6"></span>'
+            + '<span class="text-[10px] font-medium leading-tight" style="color:' + pal[1] + ';opacity:.75;word-break:break-word">' + inner + '</span>'
+            + '</div>';
+        } else {
+          cells += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:' + pal[0] + '">'
+            + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + pal[2] + '"></span>'
+            + '<span class="text-[10px] font-semibold leading-tight" style="color:' + pal[1] + ';word-break:break-word">' + inner + '</span>'
+            + '</div>';
+        }
+      });
+
+      if (hiddenCount > 0) {
+        cells += '<div style="font-size:9px;font-weight:700;color:#6B7280;padding:1px 2px">+' + hiddenCount + ' mais</div>';
+      }
+
+      cells += '</div>';
+    }
   }
 
   grid.innerHTML = cells;
@@ -5468,7 +5486,7 @@ function renderAlwaysOnList() {
 
   var PROD_COLORS = {
     TGC:'#06B6D4', DP:'#EC4899', Box:'#A855F7',
-    Ordix:'#EF4444', QIAE:'#F59E0B', Editorial:'#F43F5E', Meta:'#6366F1'
+    Ordix:'#EF4444', QIAE:'#F59E0B', Editorial:'#F43F5E', Meta:'#6366F1', Comemorativa:'#84CC16'
   };
   var DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   var MES_NAMES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -5520,7 +5538,7 @@ function renderAlwaysOnList() {
       var c = PROD_COLORS[ev.produto] || '#9CA3AF';
       html += '<div class="flex items-center gap-2 px-3 py-1.5">';
       html += '<span class="flex-shrink-0 w-1.5 h-1.5 rounded-full" style="background:' + c + '"></span>';
-      html += '<span class="text-[11px] font-medium flex-1" style="color:' + (isPast ? '#4B5563' : '#D1D5DB') + '">' + ev.title + '</span>';
+      html += '<span class="text-[11px] font-medium flex-1" style="color:#ffffff">' + ev.title + '</span>';
       html += '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style="background:' + c + '1A;color:' + c + '">' + ev.produto + '</span>';
       html += '</div>';
     });
@@ -5945,6 +5963,8 @@ function renderAlwaysOn() {
 
   var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   if (lbl) lbl.textContent = MONTH_NAMES[_aoMonth - 1] + ' ' + _aoYear;
+  var subtitle = document.getElementById('aoCardSubtitle');
+  if (subtitle) subtitle.textContent = MONTH_NAMES[_aoMonth - 1] + ' ' + _aoYear;
 
   var data = loadAoData();
   var firstDay = new Date(_aoYear, _aoMonth - 1, 1).getDay();
@@ -6025,12 +6045,38 @@ function selectAoType(key) {
 
 function renderAoModalList(dateStr) {
   var data = loadAoData();
-  var actions = data[dateStr] || [];
+  var userActions = data[dateStr] || [];
   var listEl = document.getElementById('aoModalList');
   if (!listEl) return;
-  if (!actions.length) { listEl.innerHTML = ''; return; }
-  listEl.innerHTML = '<div style="border-top:1px solid #2A2D3E;padding-top:12px;margin-top:4px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações do dia</div>'
-    + actions.map(function(a, i) {
+
+  // Ações planejadas do ALWAYS_ON_DATA para esta data
+  var plannedActions = ALWAYS_ON_DATA.filter(function(ev) { return ev.date === dateStr; });
+
+  var PROD_COLORS_MODAL = {
+    TGC:'#06B6D4', DP:'#EC4899', Box:'#A855F7',
+    Ordix:'#EF4444', QIAE:'#F59E0B', Editorial:'#F43F5E', Meta:'#6366F1', Comemorativa:'#84CC16'
+  };
+
+  var html = '';
+
+  if (plannedActions.length) {
+    html += '<div style="border-top:1px solid #2A2D3E;padding-top:12px;margin-top:4px">';
+    html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações Planejadas</div>';
+    html += plannedActions.map(function(ev) {
+      var c = PROD_COLORS_MODAL[ev.produto] || '#9CA3AF';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + c + '11;border:1px solid ' + c + '33;margin-bottom:4px">'
+        + '<span style="width:6px;height:6px;border-radius:50%;background:' + c + ';flex-shrink:0"></span>'
+        + '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + ev.title + '</span>'
+        + '<span style="font-size:9px;color:' + c + ';font-weight:600">' + ev.produto + '</span>'
+        + '</div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  if (userActions.length) {
+    html += '<div style="border-top:1px solid #2A2D3E;padding-top:12px;margin-top:4px">';
+    html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações Adicionadas</div>';
+    html += userActions.map(function(a, i) {
       var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
       return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:4px">'
         + '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>'
@@ -6038,7 +6084,11 @@ function renderAoModalList(dateStr) {
         + '<span style="font-size:9px;color:' + t.color + ';font-weight:600">' + t.label + '</span>'
         + '<button onclick="deleteAoAction(\'' + dateStr + '\',' + i + ')" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:14px;line-height:1;padding:0 2px" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#6B7280\'">&times;</button>'
         + '</div>';
-    }).join('') + '</div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  listEl.innerHTML = html;
 }
 
 function saveAoAction() {
@@ -6052,6 +6102,7 @@ function saveAoAction() {
   if (input) input.value = '';
   renderAoModalList(_aoSelectedDate);
   renderAlwaysOn();
+  renderCalendario();
 }
 
 function deleteAoAction(dateStr, idx) {
@@ -6063,11 +6114,32 @@ function deleteAoAction(dateStr, idx) {
   saveAoData(data);
   renderAoModalList(dateStr);
   renderAlwaysOn();
+  renderCalendario();
 }
 
 function closeAoModal() {
   var modal = document.getElementById('aoModal');
   if (modal) modal.style.display = 'none';
+}
+
+// ── Post Modal helpers (fallback) ─────────────────────────────────────────────
+function openPostModal() {
+  var el = document.getElementById('postModal');
+  if (!el) return;
+  el.style.display = 'flex';
+  el.style.alignItems = 'flex-start';
+  document.body.style.overflow = 'hidden';
+  try {
+    var min = new Date(Date.now() + 600000);
+    var p = function(n){ return String(n).padStart(2,'0'); };
+    var d = document.getElementById('postScheduleAt');
+    if (d) d.min = min.getFullYear()+'-'+p(min.getMonth()+1)+'-'+p(min.getDate())+'T'+p(min.getHours())+':'+p(min.getMinutes());
+  } catch(e){}
+}
+function closePostModal() {
+  var el = document.getElementById('postModal');
+  if (el) { el.classList.remove('modal-open'); el.style.display = 'none'; }
+  document.body.style.overflow = '';
 }
 
 
@@ -6076,8 +6148,8 @@ function closeAoModal() {
 <!-- ══════════════════════════════════════════════════════════════════════
      MODAL — NOVO POST / AGENDAR
 ═══════════════════════════════════════════════════════════════════════ -->
-<div id="postModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);overflow-y:auto" onclick="if(event.target===this)closePostModal()">
-  <div style="max-width:860px;margin:40px auto;background:#1A1D27;border-radius:20px;border:1px solid #2A2D3E;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)">
+<div id="postModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);overflow-y:auto;justify-content:center" onclick="if(event.target===this)closePostModal()">
+  <div style="max-width:860px;width:100%;margin:40px 20px;background:#1A1D27;border-radius:20px;border:1px solid #2A2D3E;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6);flex-shrink:0">
 
     <!-- Header -->
     <div style="padding:20px 28px;border-bottom:1px solid #2A2D3E;display:flex;align-items:center;justify-content:space-between">
@@ -6229,18 +6301,21 @@ var _postImage = null;
 var _schedMode = 'now';
 
 function openPostModal() {
-  document.getElementById('postModal').style.display = 'block';
+  var el = document.getElementById('postModal');
+  if (!el) return;
+  el.classList.add('modal-open');
   document.body.style.overflow = 'hidden';
-  // Data/hora mínima = agora + 10 min
-  var min = new Date(Date.now() + 10 * 60000);
-  var pad = n => String(n).padStart(2, '0');
-  document.getElementById('postScheduleAt').min =
-    min.getFullYear() + '-' + pad(min.getMonth()+1) + '-' + pad(min.getDate()) +
-    'T' + pad(min.getHours()) + ':' + pad(min.getMinutes());
+  try {
+    var min = new Date(Date.now() + 10 * 60000);
+    var pad = function(n){ return String(n).padStart(2, '0'); };
+    var dtInput = document.getElementById('postScheduleAt');
+    if (dtInput) dtInput.min = min.getFullYear()+'-'+pad(min.getMonth()+1)+'-'+pad(min.getDate())+'T'+pad(min.getHours())+':'+pad(min.getMinutes());
+  } catch(e){}
 }
 
 function closePostModal() {
-  document.getElementById('postModal').style.display = 'none';
+  var el = document.getElementById('postModal');
+  if (el) { el.classList.remove('modal-open'); el.style.display = 'none'; }
   document.body.style.overflow = '';
 }
 
