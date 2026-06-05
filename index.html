@@ -5929,14 +5929,19 @@ function syncAoFromBase() {
   var changed = false;
   ALWAYS_ON_DATA.forEach(function(ev) {
     var key = ev.date + '|||' + ev.title;
-    if (deleted.indexOf(key) !== -1) return; // usuário deletou explicitamente
+    if (deleted.indexOf(key) !== -1) return;
     if (!stored[ev.date]) stored[ev.date] = [];
-    // Verifica por título — mesmo que o dia já exista, pode ter itens faltando
-    var exists = stored[ev.date].some(function(a) {
-      return (a.title || '').trim() === (ev.title || '').trim();
+    var found = null;
+    stored[ev.date].forEach(function(a) {
+      if ((a.title || '').trim() === (ev.title || '').trim()) found = a;
     });
-    if (!exists) {
+    if (!found) {
+      // Item ausente — adiciona
       stored[ev.date].push({ type: _detectAoType(ev.title), title: ev.title, produto: ev.produto });
+      changed = true;
+    } else if (!found.produto && ev.produto) {
+      // Item existe mas sem produto — corrige
+      found.produto = ev.produto;
       changed = true;
     }
   });
