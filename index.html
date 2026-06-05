@@ -638,28 +638,19 @@
 </div>
 
 <!-- Modal Always On -->
-<div id="aoModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="if(event.target===this)closeAoModal()">
-  <div style="background:#1A1D27;border:1px solid #2A2D3E;border-radius:16px;padding:24px;width:340px;max-width:90vw;max-height:90vh;overflow-y:auto">
-    <div class="flex items-center justify-between mb-4">
-      <div class="text-sm font-bold text-white" id="aoModalTitle">Nova ação</div>
-      <button onclick="closeAoModal()" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:18px;line-height:1">&times;</button>
-    </div>
-    <div class="space-y-3">
-      <div>
-        <div class="text-[10px] font-semibold mb-1.5" style="color:#9CA3AF">TIPO</div>
-        <div class="grid grid-cols-3 gap-1.5" id="aoTypeButtons"></div>
+<div id="aoModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="if(event.target===this)closeAoModal()">
+  <div style="background:#1A1D27;border:1px solid #2A2D3E;border-radius:16px;width:520px;max-width:96vw;max-height:88vh;overflow:hidden;display:flex;flex-direction:column">
+    <!-- Header -->
+    <div style="padding:14px 18px;border-bottom:1px solid #2A2D3E;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="navAoModalMonth(-1)" style="background:#2A2D3E;border:none;color:#9CA3AF;cursor:pointer;border-radius:6px;width:26px;height:26px;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">‹</button>
+        <span id="aoModalTitle" style="color:#E5E7EB;font-size:13px;font-weight:700;min-width:130px;text-align:center">Junho 2026</span>
+        <button onclick="navAoModalMonth(1)" style="background:#2A2D3E;border:none;color:#9CA3AF;cursor:pointer;border-radius:6px;width:26px;height:26px;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center">›</button>
       </div>
-      <div>
-        <div class="text-[10px] font-semibold mb-1.5" style="color:#9CA3AF">TÍTULO</div>
-        <input id="aoTitleInput" type="text" placeholder="Ex: Newsletter Junho..." style="width:100%;background:#0F1117;border:1px solid #2A2D3E;border-radius:8px;padding:8px 10px;color:#E5E7EB;font-size:12px;font-family:Montserrat,sans-serif;outline:none;box-sizing:border-box" onkeydown="if(event.key==='Enter')saveAoAction()" />
-      </div>
+      <button onclick="closeAoModal()" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:20px;line-height:1">&times;</button>
     </div>
-    <div class="flex gap-2 mt-4">
-      <button onclick="saveAoAction()" style="flex:1;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">Salvar</button>
-      <button onclick="closeAoModal()" style="background:#2A2D3E;color:#9CA3AF;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:Montserrat,sans-serif">Cancelar</button>
-    </div>
-    <!-- Lista de ações do dia -->
-    <div id="aoModalList" class="mt-4 space-y-1.5"></div>
+    <!-- Scrollable content -->
+    <div id="aoModalList" style="overflow-y:auto;flex:1;padding:10px 14px"></div>
   </div>
 </div>
 
@@ -5902,7 +5893,10 @@ var _aoYear  = new Date().getFullYear();
 var _aoMonth = new Date().getMonth() + 1;
 var _aoSelectedDate = null;
 var _aoSelectedType = 'email';
-var _aoEditState = null; // { dateStr, idx }
+var _aoEditState  = null; // { dateStr, idx }
+var _aoModalMonth = new Date().getMonth() + 1;
+var _aoModalYear  = new Date().getFullYear();
+var _aoInlineType = {};
 
 function loadAoData() {
   try { return JSON.parse(localStorage.getItem('tron_always_on') || '{}'); } catch(e) { return {}; }
@@ -6000,121 +5994,131 @@ function renderAlwaysOn() {
 
 function openAoModal(dateStr) {
   _aoSelectedDate = dateStr;
-  _aoSelectedType = 'email';
-  var modal = document.getElementById('aoModal');
-  var titleEl = document.getElementById('aoModalTitle');
-  var input = document.getElementById('aoTitleInput');
   var parts = dateStr.split('-');
-  var MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  if (titleEl) titleEl.textContent = parseInt(parts[2]) + ' de ' + MONTHS[parseInt(parts[1])-1] + ' ' + parts[0];
-  if (input) input.value = '';
-
-  // Botões de tipo
-  var btns = document.getElementById('aoTypeButtons');
-  if (btns) {
-    btns.innerHTML = AO_TYPES.map(function(t) {
-      return '<button onclick="selectAoType(\'' + t.key + '\')" id="aoTypBtn_' + t.key + '" style="padding:5px 4px;border-radius:7px;border:1px solid ' + t.color + '44;background:' + (t.key === _aoSelectedType ? t.color + '22' : 'transparent') + ';color:' + t.color + ';font-size:9px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;transition:all .15s">' + t.label + '</button>';
-    }).join('');
+  _aoModalYear  = parseInt(parts[0]);
+  _aoModalMonth = parseInt(parts[1]);
+  _aoEditState  = null;
+  var modal = document.getElementById('aoModal');
+  renderAoModalFull();
+  if (modal) {
+    modal.style.display = 'flex';
+    // Scroll to the clicked day after render
+    setTimeout(function() {
+      var d = parseInt(parts[2]);
+      var dayEl = document.getElementById('aoDay_' + dateStr);
+      if (dayEl) dayEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 60);
   }
-
-  // Lista de ações existentes
-  renderAoModalList(dateStr);
-
-  if (modal) { modal.style.display = 'flex'; setTimeout(function(){ if(input) input.focus(); }, 50); }
 }
 
-function selectAoType(key) {
-  _aoSelectedType = key;
-  AO_TYPES.forEach(function(t) {
-    var btn = document.getElementById('aoTypBtn_' + t.key);
-    if (!btn) return;
-    btn.style.background = t.key === key ? t.color + '22' : 'transparent';
-    btn.style.borderColor = t.key === key ? t.color : t.color + '44';
-  });
-}
-
-function renderAoModalList(dateStr) {
-  var data = loadAoData();
-  var actions = data[dateStr] || [];
+function renderAoModalFull() {
   var listEl = document.getElementById('aoModalList');
   if (!listEl) return;
+  var data = loadAoData();
+  var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var DAY_NAMES   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-  if (!actions.length) {
-    listEl.innerHTML = '<div style="color:#6B7280;font-size:11px;text-align:center;padding:16px 0">Nenhuma ação para este dia.</div>';
-    return;
+  // Update header title
+  var titleEl = document.getElementById('aoModalTitle');
+  if (titleEl) titleEl.textContent = MONTH_NAMES[_aoModalMonth-1] + ' ' + _aoModalYear;
+
+  var daysInMonth = new Date(_aoModalYear, _aoModalMonth, 0).getDate();
+  var html = '';
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var mm = String(_aoModalMonth).padStart(2,'0');
+    var dd = String(d).padStart(2,'0');
+    var ds = _aoModalYear + '-' + mm + '-' + dd;
+    var dayOfWeek = new Date(_aoModalYear, _aoModalMonth-1, d).getDay();
+    var actions = data[ds] || [];
+    var hasActions = actions.length > 0;
+
+    html += '<div id="aoDay_' + ds + '" style="margin-bottom:' + (hasActions ? '8px' : '2px') + ';padding:7px 10px;border-radius:10px;background:' + (hasActions ? '#1E2130' : 'transparent') + ';border:1px solid ' + (hasActions ? '#2A2D3E' : 'transparent') + '">';
+
+    // Day header row
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:' + (hasActions ? '6px' : '0') + '">';
+    html += '<div style="display:flex;align-items:center;gap:6px">';
+    html += '<span style="font-size:13px;font-weight:700;color:' + (hasActions ? '#E5E7EB' : '#6B7280') + ';min-width:20px">' + d + '</span>';
+    html += '<span style="font-size:10px;color:#6B7280;font-weight:500">' + DAY_NAMES[dayOfWeek] + '</span>';
+    if (hasActions) html += '<span style="font-size:9px;color:#9CA3AF;background:#2A2D3E;border-radius:4px;padding:1px 5px">' + actions.length + (actions.length===1?' ação':' ações') + '</span>';
+    html += '</div>';
+    html += '<button onclick="openAddAoInline(\'' + ds + '\')" title="Adicionar" style="background:none;border:1px solid #3A3D52;color:#6B7280;cursor:pointer;border-radius:5px;width:20px;height:20px;font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0" onmouseover="this.style.borderColor=\'#10B981\';this.style.color=\'#10B981\'" onmouseout="this.style.borderColor=\'#3A3D52\';this.style.color=\'#6B7280\'">+</button>';
+    html += '</div>';
+
+    // Items list
+    actions.forEach(function(a, i) {
+      var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
+      var isEditing = _aoEditState && _aoEditState.dateStr === ds && _aoEditState.idx === i;
+      var safeTitle = (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+      html += '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:3px">';
+      html += '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>';
+      if (isEditing) {
+        html += '<input id="aoEditInput" value="' + safeTitle + '" onkeydown="if(event.key===\'Enter\')confirmEditAoFull(\'' + ds + '\',' + i + ');if(event.key===\'Escape\')cancelEditAoFull()" style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:5px;padding:2px 6px;font-family:inherit;outline:none">';
+        html += '<button onclick="confirmEditAoFull(\'' + ds + '\',' + i + ')" style="background:#10B981;border:none;color:#fff;cursor:pointer;font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;flex-shrink:0">✓</button>';
+        html += '<button onclick="cancelEditAoFull()" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:16px;line-height:1;padding:0 3px;flex-shrink:0">✕</button>';
+      } else {
+        html += '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + (a.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span>';
+        html += '<span style="font-size:9px;color:' + t.color + ';font-weight:600;flex-shrink:0;margin-right:4px">' + t.label + '</span>';
+        html += '<button onclick="startEditAoFull(\'' + ds + '\',' + i + ')" title="Editar" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:12px;padding:0 3px;line-height:1;flex-shrink:0" onmouseover="this.style.color=\'#9CA3AF\'" onmouseout="this.style.color=\'#4B5563\'">✏</button>';
+        html += '<button onclick="deleteAoFull(\'' + ds + '\',' + i + ')" title="Remover" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#4B5563\'">&times;</button>';
+      }
+      html += '</div>';
+    });
+
+    // Inline add form (hidden by default)
+    html += '<div id="aoAddInline_' + ds + '" style="display:none;margin-top:6px">';
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">';
+    AO_TYPES.forEach(function(t) {
+      var isSel = (!_aoInlineType[ds] && t.key==='email') || (_aoInlineType[ds]===t.key);
+      html += '<button onclick="setAoInlineType(\'' + ds + '\',\'' + t.key + '\')" id="aoInlineTypBtn_' + ds + '_' + t.key + '" style="padding:3px 7px;border-radius:6px;border:1px solid ' + t.color + (isSel?'':'44') + ';background:' + (isSel ? t.color+'22' : 'transparent') + ';color:' + t.color + ';font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">' + t.label + '</button>';
+    });
+    html += '</div>';
+    html += '<div style="display:flex;gap:6px;align-items:center">';
+    html += '<input id="aoInlineInput_' + ds + '" placeholder="Título da ação..." onkeydown="if(event.key===\'Enter\')addAoInline(\'' + ds + '\');if(event.key===\'Escape\')closeAddAoInline(\'' + ds + '\')" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid #3A3D52;border-radius:6px;padding:5px 8px;font-size:11px;color:#E5E7EB;font-family:inherit;outline:none">';
+    html += '<button onclick="addAoInline(\'' + ds + '\')" style="background:#10B981;border:none;color:#fff;cursor:pointer;font-size:11px;font-weight:700;border-radius:5px;padding:5px 10px;font-family:inherit;white-space:nowrap">Salvar</button>';
+    html += '<button onclick="closeAddAoInline(\'' + ds + '\')" style="background:none;border:1px solid #3A3D52;color:#6B7280;cursor:pointer;font-size:11px;border-radius:5px;padding:5px 8px;font-family:inherit">✕</button>';
+    html += '</div>';
+    html += '</div>';
+
+    html += '</div>'; // end day div
   }
 
-  var html = '<div style="border-top:1px solid #2A2D3E;padding-top:10px;margin-top:4px">';
-  html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações</div>';
-
-  actions.forEach(function(a, i) {
-    var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
-    var isEditing = _aoEditState && _aoEditState.dateStr === dateStr && _aoEditState.idx === i;
-    var safeTitle = (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-
-    html += '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:4px">';
-    html += '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>';
-
-    if (isEditing) {
-      html += '<input id="aoEditInput" value="' + safeTitle + '" onkeydown="if(event.key===\'Enter\')confirmEditAo(\'' + dateStr + '\',' + i + ');if(event.key===\'Escape\')cancelEditAo()" style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:5px;padding:2px 6px;font-family:inherit;outline:none">';
-      html += '<button onclick="confirmEditAo(\'' + dateStr + '\',' + i + ')" title="Salvar" style="background:#10B981;border:none;color:#fff;cursor:pointer;font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;font-family:inherit;flex-shrink:0">✓</button>';
-      html += '<button onclick="cancelEditAo()" title="Cancelar" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:16px;line-height:1;padding:0 3px;flex-shrink:0">✕</button>';
-    } else {
-      html += '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span>';
-      html += '<span style="font-size:9px;color:' + t.color + ';font-weight:600;flex-shrink:0">' + t.label + '</span>';
-      html += '<button onclick="startEditAo(\'' + dateStr + '\',' + i + ')" title="Editar" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:12px;padding:0 3px;line-height:1;flex-shrink:0" onmouseover="this.style.color=\'#9CA3AF\'" onmouseout="this.style.color=\'#4B5563\'">✏</button>';
-      html += '<button onclick="deleteAoAction(\'' + dateStr + '\',' + i + ')" title="Remover" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#4B5563\'">&times;</button>';
-    }
-    html += '</div>';
-  });
-
-  html += '</div>';
   listEl.innerHTML = html;
 
-  if (_aoEditState && _aoEditState.dateStr === dateStr) {
+  // Focus edit input if editing
+  if (_aoEditState) {
     var inp = document.getElementById('aoEditInput');
     if (inp) { inp.focus(); inp.select(); }
   }
 }
 
 function saveAoAction() {
+  // Legacy: kept for compatibility but no longer called by modal UI
   var input = document.getElementById('aoTitleInput');
   var title = (input ? input.value.trim() : '');
-  if (!title) { if(input) input.focus(); return; }
+  if (!title || !_aoSelectedDate) return;
   var data = loadAoData();
   if (!data[_aoSelectedDate]) data[_aoSelectedDate] = [];
-  data[_aoSelectedDate].push({ type: _aoSelectedType, title: title });
+  data[_aoSelectedDate].push({ type: _aoSelectedType || 'email', title: title });
   saveAoData(data);
   if (input) input.value = '';
-  renderAoModalList(_aoSelectedDate);
+  renderAoModalFull();
   renderAlwaysOn();
   renderCalendario();
 }
 
-function deleteAoAction(dateStr, idx) {
-  var data = loadAoData();
-  if (data[dateStr]) {
-    data[dateStr].splice(idx, 1);
-    if (!data[dateStr].length) delete data[dateStr];
-  }
-  saveAoData(data);
-  renderAoModalList(dateStr);
-  renderAlwaysOn();
-  renderCalendario();
-}
-
-function startEditAo(dateStr, idx) {
+function startEditAoFull(dateStr, idx) {
   _aoEditState = { dateStr: dateStr, idx: idx };
-  renderAoModalList(dateStr);
+  renderAoModalFull();
 }
 
-function cancelEditAo() {
-  var dateStr = _aoEditState ? _aoEditState.dateStr : null;
+function cancelEditAoFull() {
   _aoEditState = null;
-  if (dateStr) renderAoModalList(dateStr);
+  renderAoModalFull();
 }
 
-function confirmEditAo(dateStr, idx) {
+function confirmEditAoFull(dateStr, idx) {
   var inp = document.getElementById('aoEditInput');
   var newTitle = inp ? inp.value.trim() : '';
   if (!newTitle) { if (inp) { inp.focus(); inp.select(); } return; }
@@ -6124,9 +6128,71 @@ function confirmEditAo(dateStr, idx) {
     saveAoData(data);
   }
   _aoEditState = null;
-  renderAoModalList(dateStr);
+  renderAoModalFull();
   renderAlwaysOn();
   try { renderAlwaysOnList(); } catch(e) {}
+}
+
+function deleteAoFull(dateStr, idx) {
+  if (!confirm('Remover esta ação?')) return;
+  var data = loadAoData();
+  if (data[dateStr]) {
+    data[dateStr].splice(idx, 1);
+    if (!data[dateStr].length) delete data[dateStr];
+  }
+  saveAoData(data);
+  renderAoModalFull();
+  renderAlwaysOn();
+  renderCalendario();
+}
+
+function openAddAoInline(dateStr) {
+  var el = document.getElementById('aoAddInline_' + dateStr);
+  if (!el) return;
+  el.style.display = 'block';
+  if (!_aoInlineType[dateStr]) _aoInlineType[dateStr] = 'email';
+  setTimeout(function() {
+    var inp = document.getElementById('aoInlineInput_' + dateStr);
+    if (inp) inp.focus();
+  }, 30);
+}
+
+function closeAddAoInline(dateStr) {
+  var el = document.getElementById('aoAddInline_' + dateStr);
+  if (el) el.style.display = 'none';
+}
+
+function setAoInlineType(dateStr, key) {
+  _aoInlineType[dateStr] = key;
+  AO_TYPES.forEach(function(t) {
+    var btn = document.getElementById('aoInlineTypBtn_' + dateStr + '_' + t.key);
+    if (!btn) return;
+    btn.style.background   = t.key === key ? t.color + '22' : 'transparent';
+    btn.style.borderColor  = t.key === key ? t.color : t.color + '44';
+  });
+}
+
+function addAoInline(dateStr) {
+  var inp = document.getElementById('aoInlineInput_' + dateStr);
+  var title = inp ? inp.value.trim() : '';
+  if (!title) { if (inp) inp.focus(); return; }
+  var type = _aoInlineType[dateStr] || 'email';
+  var data = loadAoData();
+  if (!data[dateStr]) data[dateStr] = [];
+  data[dateStr].push({ type: type, title: title });
+  saveAoData(data);
+  _aoEditState = null;
+  renderAoModalFull();
+  renderAlwaysOn();
+  renderCalendario();
+}
+
+function navAoModalMonth(dir) {
+  _aoModalMonth += dir;
+  if (_aoModalMonth > 12) { _aoModalMonth = 1; _aoModalYear++; }
+  if (_aoModalMonth < 1)  { _aoModalMonth = 12; _aoModalYear--; }
+  _aoEditState = null;
+  renderAoModalFull();
 }
 
 function closeAoModal() {
