@@ -6064,12 +6064,23 @@ function renderAoModalFull() {
   var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   var DAY_NAMES   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
+  // ── Legenda de cores (sticky no topo da lista) ──
+  var legendOrder = ['TGC','DP','Box','Ordix','QIAE','Editorial','Meta'];
+  var html = '<div style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 4px 8px;border-bottom:1px solid #2A2D3E;margin-bottom:8px;position:sticky;top:0;z-index:2;background:#1A1D27">';
+  legendOrder.forEach(function(p) {
+    var pal = PRODUTO_COLORS[p];
+    html += '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 6px;border-radius:20px;background:' + pal[0] + ';border:1px solid ' + pal[2] + '44">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:' + pal[2] + ';flex-shrink:0"></span>'
+      + '<span style="font-size:9px;font-weight:700;color:' + pal[1] + ';letter-spacing:.02em">' + p + '</span>'
+      + '</span>';
+  });
+  html += '</div>';
+
   // Update header title
   var titleEl = document.getElementById('aoModalTitle');
   if (titleEl) titleEl.textContent = MONTH_NAMES[_aoModalMonth-1] + ' ' + _aoModalYear;
 
   var daysInMonth = new Date(_aoModalYear, _aoModalMonth, 0).getDate();
-  var html = '';
 
   for (var d = 1; d <= daysInMonth; d++) {
     var mm = String(_aoModalMonth).padStart(2,'0');
