@@ -5519,10 +5519,16 @@ function renderAlwaysOnList() {
 
     grouped[dateStr].forEach(function(ev) {
       var c = PROD_COLORS[ev.produto] || '#9CA3AF';
-      html += '<div class="flex items-center gap-2 px-3 py-1.5">';
+      // Busca título atualizado no localStorage (caso tenha sido editado)
+      var lsData = loadAoData();
+      var lsItems = lsData[dateStr] || [];
+      var lsMatch = lsItems.find(function(x){ return x.title === ev.title || x._origTitle === ev.title; });
+      var displayTitle = (lsMatch && lsMatch.title) ? lsMatch.title : ev.title;
+      html += '<div class="flex items-center gap-2 px-3 py-1.5" style="cursor:pointer" onclick="openAoModal(\'' + dateStr + '\')" title="Clique para editar">';
       html += '<span class="flex-shrink-0 w-1.5 h-1.5 rounded-full" style="background:' + c + '"></span>';
-      html += '<span class="text-[11px] font-medium flex-1" style="color:#ffffff">' + ev.title + '</span>';
+      html += '<span class="text-[11px] font-medium flex-1" style="color:#ffffff">' + displayTitle.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span>';
       html += '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style="background:' + c + '1A;color:' + c + '">' + ev.produto + '</span>';
+      html += '<span style="color:#4B5563;font-size:11px;flex-shrink:0;margin-left:2px">✏</span>';
       html += '</div>';
     });
 
@@ -5896,6 +5902,7 @@ var _aoYear  = new Date().getFullYear();
 var _aoMonth = new Date().getMonth() + 1;
 var _aoSelectedDate = null;
 var _aoSelectedType = 'email';
+var _aoEditState = null; // { dateStr, idx }
 
 function loadAoData() {
   try { return JSON.parse(localStorage.getItem('tron_always_on') || '{}'); } catch(e) { return {}; }
@@ -6028,50 +6035,46 @@ function selectAoType(key) {
 
 function renderAoModalList(dateStr) {
   var data = loadAoData();
-  var userActions = data[dateStr] || [];
+  var actions = data[dateStr] || [];
   var listEl = document.getElementById('aoModalList');
   if (!listEl) return;
 
-  // Ações planejadas do ALWAYS_ON_DATA para esta data
-  var plannedActions = ALWAYS_ON_DATA.filter(function(ev) { return ev.date === dateStr; });
-
-  var PROD_COLORS_MODAL = {
-    TGC:'#06B6D4', DP:'#EC4899', Box:'#A855F7',
-    Ordix:'#EF4444', QIAE:'#F59E0B', Editorial:'#F43F5E', Meta:'#6366F1'
-  };
-
-  var html = '';
-
-  if (plannedActions.length) {
-    html += '<div style="border-top:1px solid #2A2D3E;padding-top:12px;margin-top:4px">';
-    html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações Planejadas</div>';
-    html += plannedActions.map(function(ev) {
-      var c = PROD_COLORS_MODAL[ev.produto] || '#9CA3AF';
-      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + c + '11;border:1px solid ' + c + '33;margin-bottom:4px">'
-        + '<span style="width:6px;height:6px;border-radius:50%;background:' + c + ';flex-shrink:0"></span>'
-        + '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + ev.title + '</span>'
-        + '<span style="font-size:9px;color:' + c + ';font-weight:600">' + ev.produto + '</span>'
-        + '</div>';
-    }).join('');
-    html += '</div>';
+  if (!actions.length) {
+    listEl.innerHTML = '<div style="color:#6B7280;font-size:11px;text-align:center;padding:16px 0">Nenhuma ação para este dia.</div>';
+    return;
   }
 
-  if (userActions.length) {
-    html += '<div style="border-top:1px solid #2A2D3E;padding-top:12px;margin-top:4px">';
-    html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações Adicionadas</div>';
-    html += userActions.map(function(a, i) {
-      var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
-      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:4px">'
-        + '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>'
-        + '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + a.title + '</span>'
-        + '<span style="font-size:9px;color:' + t.color + ';font-weight:600">' + t.label + '</span>'
-        + '<button onclick="deleteAoAction(\'' + dateStr + '\',' + i + ')" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:14px;line-height:1;padding:0 2px" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#6B7280\'">&times;</button>'
-        + '</div>';
-    }).join('');
-    html += '</div>';
-  }
+  var html = '<div style="border-top:1px solid #2A2D3E;padding-top:10px;margin-top:4px">';
+  html += '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6B7280;margin-bottom:8px">Ações</div>';
 
+  actions.forEach(function(a, i) {
+    var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
+    var isEditing = _aoEditState && _aoEditState.dateStr === dateStr && _aoEditState.idx === i;
+    var safeTitle = (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:4px">';
+    html += '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>';
+
+    if (isEditing) {
+      html += '<input id="aoEditInput" value="' + safeTitle + '" onkeydown="if(event.key===\'Enter\')confirmEditAo(\'' + dateStr + '\',' + i + ');if(event.key===\'Escape\')cancelEditAo()" style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:5px;padding:2px 6px;font-family:inherit;outline:none">';
+      html += '<button onclick="confirmEditAo(\'' + dateStr + '\',' + i + ')" title="Salvar" style="background:#10B981;border:none;color:#fff;cursor:pointer;font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;font-family:inherit;flex-shrink:0">✓</button>';
+      html += '<button onclick="cancelEditAo()" title="Cancelar" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:16px;line-height:1;padding:0 3px;flex-shrink:0">✕</button>';
+    } else {
+      html += '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span>';
+      html += '<span style="font-size:9px;color:' + t.color + ';font-weight:600;flex-shrink:0">' + t.label + '</span>';
+      html += '<button onclick="startEditAo(\'' + dateStr + '\',' + i + ')" title="Editar" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:12px;padding:0 3px;line-height:1;flex-shrink:0" onmouseover="this.style.color=\'#9CA3AF\'" onmouseout="this.style.color=\'#4B5563\'">✏</button>';
+      html += '<button onclick="deleteAoAction(\'' + dateStr + '\',' + i + ')" title="Remover" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#4B5563\'">&times;</button>';
+    }
+    html += '</div>';
+  });
+
+  html += '</div>';
   listEl.innerHTML = html;
+
+  if (_aoEditState && _aoEditState.dateStr === dateStr) {
+    var inp = document.getElementById('aoEditInput');
+    if (inp) { inp.focus(); inp.select(); }
+  }
 }
 
 function saveAoAction() {
@@ -6100,7 +6103,34 @@ function deleteAoAction(dateStr, idx) {
   renderCalendario();
 }
 
+function startEditAo(dateStr, idx) {
+  _aoEditState = { dateStr: dateStr, idx: idx };
+  renderAoModalList(dateStr);
+}
+
+function cancelEditAo() {
+  var dateStr = _aoEditState ? _aoEditState.dateStr : null;
+  _aoEditState = null;
+  if (dateStr) renderAoModalList(dateStr);
+}
+
+function confirmEditAo(dateStr, idx) {
+  var inp = document.getElementById('aoEditInput');
+  var newTitle = inp ? inp.value.trim() : '';
+  if (!newTitle) { if (inp) { inp.focus(); inp.select(); } return; }
+  var data = loadAoData();
+  if (data[dateStr] && data[dateStr][idx] !== undefined) {
+    data[dateStr][idx].title = newTitle;
+    saveAoData(data);
+  }
+  _aoEditState = null;
+  renderAoModalList(dateStr);
+  renderAlwaysOn();
+  try { renderAlwaysOnList(); } catch(e) {}
+}
+
 function closeAoModal() {
+  _aoEditState = null;
   var modal = document.getElementById('aoModal');
   if (modal) modal.style.display = 'none';
 }
