@@ -5920,15 +5920,19 @@ function _detectAoType(title) {
 }
 // Merge ALWAYS_ON_DATA → localStorage sempre que o modal abrir.
 // Respeita itens deletados pelo usuário (ao_deleted).
+// Garante que todos os itens base estejam presentes, mesmo que o dia já exista.
 function syncAoFromBase() {
   var stored  = loadAoData();
   var deleted = loadAoDeleted();
   var changed = false;
   ALWAYS_ON_DATA.forEach(function(ev) {
     var key = ev.date + '|||' + ev.title;
-    if (deleted.indexOf(key) !== -1) return; // usuário deletou, não readiciona
+    if (deleted.indexOf(key) !== -1) return; // usuário deletou explicitamente
     if (!stored[ev.date]) stored[ev.date] = [];
-    var exists = stored[ev.date].some(function(a) { return a.title === ev.title; });
+    // Verifica por título — mesmo que o dia já exista, pode ter itens faltando
+    var exists = stored[ev.date].some(function(a) {
+      return (a.title || '').trim() === (ev.title || '').trim();
+    });
     if (!exists) {
       stored[ev.date].push({ type: _detectAoType(ev.title), title: ev.title });
       changed = true;
@@ -5940,8 +5944,10 @@ function syncAoFromBase() {
 
 // ── Seed: popula o calendário do Daily com os dados do Always On.xlsx ──
 function seedAlwaysOnFromXlsx() {
-  var FLAG = 'tron_ao_seeded_v2'; // incrementar para forçar re-seed
+  var FLAG = 'tron_ao_seeded_v3'; // incrementar para forçar re-seed
   try { if (localStorage.getItem(FLAG)) return; } catch(e) { return; }
+  // Limpa flag antiga para garantir re-seed limpo
+  try { localStorage.removeItem('tron_ao_seeded_v2'); } catch(e) {}
 
   function detectAoType(title) {
     var t = (title || '').toLowerCase();
