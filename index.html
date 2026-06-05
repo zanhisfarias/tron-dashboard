@@ -5269,6 +5269,17 @@ var ALWAYS_ON_DATA = [
   { date:'2026-08-12', title:'IG BOFU: Tron Box',                              produto:'Box' },
 ];
 
+// ── Paleta global por produto (usada no calendário e no modal) ──────────────
+var PRODUTO_COLORS = {
+  TGC:       ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
+  DP:        ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
+  Box:       ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
+  Ordix:     ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
+  QIAE:      ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
+  Editorial: ['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
+  Meta:      ['rgba(99,102,241,0.13)',  '#A5B4FC', '#6366F1']
+};
+
 // ── Estado do calendário ──────────────────────────────
 var _calYear  = new Date().getFullYear();
 var _calMonth = new Date().getMonth() + 1; // 1–12
@@ -5311,16 +5322,7 @@ function renderCalendario() {
   if (nextBtn) { nextBtn.style.opacity = atEnd ? '0.3' : '1'; nextBtn.style.cursor = atEnd ? 'default' : 'pointer'; }
   prevBtns.forEach(function(b) { b.style.opacity = atStart ? '0.3' : '1'; b.style.cursor = atStart ? 'default' : 'pointer'; });
 
-  // ── Paleta por produto ──────────────────────────────
-  var PRODUTO_COLORS = {
-    TGC:         ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
-    DP:          ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
-    Box:         ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
-    Ordix:       ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
-    QIAE:        ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
-    Editorial:   ['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
-    Meta:        ['rgba(99,102,241,0.13)',  '#A5B4FC', '#6366F1']
-  };
+  // PRODUTO_COLORS definido globalmente acima
 
   // ── Mesclar eventos Always On do mês/ano atual ──────
   var byDay = {};
@@ -5934,7 +5936,7 @@ function syncAoFromBase() {
       return (a.title || '').trim() === (ev.title || '').trim();
     });
     if (!exists) {
-      stored[ev.date].push({ type: _detectAoType(ev.title), title: ev.title });
+      stored[ev.date].push({ type: _detectAoType(ev.title), title: ev.title, produto: ev.produto });
       changed = true;
     }
   });
@@ -5964,7 +5966,7 @@ function seedAlwaysOnFromXlsx() {
     // Evita duplicatas pelo título
     var alreadyExists = existing[ev.date].some(function(a) { return a.title === ev.title; });
     if (!alreadyExists) {
-      existing[ev.date].push({ type: detectAoType(ev.title), title: ev.title });
+      existing[ev.date].push({ type: detectAoType(ev.title), title: ev.title, produto: ev.produto });
     }
   });
 
@@ -6084,21 +6086,26 @@ function renderAoModalFull() {
     html += '<button onclick="openAddAoInline(\'' + ds + '\')" title="Adicionar" style="background:none;border:1px solid #3A3D52;color:#6B7280;cursor:pointer;border-radius:5px;width:20px;height:20px;font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0" onmouseover="this.style.borderColor=\'#10B981\';this.style.color=\'#10B981\'" onmouseout="this.style.borderColor=\'#3A3D52\';this.style.color=\'#6B7280\'">+</button>';
     html += '</div>';
 
-    // Items list
+    // Items list — mesmas cores do calendário (PRODUTO_COLORS por produto)
     actions.forEach(function(a, i) {
-      var t = AO_TYPES.find(function(x){ return x.key === a.type; }) || AO_TYPES[5];
-      var isEditing = _aoEditState && _aoEditState.dateStr === ds && _aoEditState.idx === i;
-      var safeTitle = (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      var pal = (a.produto && PRODUTO_COLORS[a.produto]) ? PRODUTO_COLORS[a.produto]
+              : (function(){ var t = AO_TYPES.find(function(x){return x.key===a.type;})||AO_TYPES[5]; return [t.color+'15',t.color,t.color]; })();
+      var colorBg     = pal[0];
+      var colorText   = pal[1];
+      var colorAccent = pal[2];
+      var label       = a.produto || (AO_TYPES.find(function(x){return x.key===a.type;})||AO_TYPES[5]).label;
+      var isEditing   = _aoEditState && _aoEditState.dateStr === ds && _aoEditState.idx === i;
+      var safeTitle   = (a.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
-      html += '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:' + t.color + '11;border:1px solid ' + t.color + '33;margin-bottom:3px">';
-      html += '<span style="width:6px;height:6px;border-radius:50%;background:' + t.color + ';flex-shrink:0"></span>';
+      html += '<div style="display:flex;align-items:center;gap:7px;padding:4px 8px 4px 6px;border-radius:5px;background:transparent;border:1px dashed ' + colorAccent + '33;border-left:2px solid ' + colorAccent + ';margin-bottom:3px">';
+      html += '<span style="width:6px;height:6px;border-radius:50%;background:' + colorAccent + ';opacity:.7;flex-shrink:0"></span>';
       if (isEditing) {
-        html += '<input id="aoEditInput" value="' + safeTitle + '" onkeydown="if(event.key===\'Enter\')confirmEditAoFull(\'' + ds + '\',' + i + ');if(event.key===\'Escape\')cancelEditAoFull()" style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:5px;padding:2px 6px;font-family:inherit;outline:none">';
+        html += '<input id="aoEditInput" value="' + safeTitle + '" onkeydown="if(event.key===\'Enter\')confirmEditAoFull(\'' + ds + '\',' + i + ');if(event.key===\'Escape\')cancelEditAoFull()" style="font-size:10px;font-weight:600;color:#E5E7EB;flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:5px;padding:2px 6px;font-family:inherit;outline:none">';
         html += '<button onclick="confirmEditAoFull(\'' + ds + '\',' + i + ')" style="background:#10B981;border:none;color:#fff;cursor:pointer;font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;flex-shrink:0">✓</button>';
         html += '<button onclick="cancelEditAoFull()" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:16px;line-height:1;padding:0 3px;flex-shrink:0">✕</button>';
       } else {
-        html += '<span style="font-size:11px;font-weight:600;color:#E5E7EB;flex:1">' + (a.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span>';
-        html += '<span style="font-size:9px;color:' + t.color + ';font-weight:600;flex-shrink:0;margin-right:4px">' + t.label + '</span>';
+        html += '<span style="font-size:10px;font-weight:500;color:' + colorText + ';opacity:.85;flex:1;word-break:break-word;leading-tight">' + (a.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span>';
+        html += '<span style="font-size:9px;color:' + colorAccent + ';font-weight:700;flex-shrink:0;margin-right:4px;opacity:.8">' + label + '</span>';
         html += '<button onclick="startEditAoFull(\'' + ds + '\',' + i + ')" title="Editar" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:12px;padding:0 3px;line-height:1;flex-shrink:0" onmouseover="this.style.color=\'#9CA3AF\'" onmouseout="this.style.color=\'#4B5563\'">✏</button>';
         html += '<button onclick="deleteAoFull(\'' + ds + '\',' + i + ')" title="Remover" style="background:none;border:none;color:#4B5563;cursor:pointer;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0" onmouseover="this.style.color=\'#EF4444\'" onmouseout="this.style.color=\'#4B5563\'">&times;</button>';
       }
