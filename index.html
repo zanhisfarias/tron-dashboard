@@ -5904,6 +5904,39 @@ function loadAoData() {
 function saveAoData(data) {
   try { localStorage.setItem('tron_always_on', JSON.stringify(data)); } catch(e) {}
 }
+function loadAoDeleted() {
+  try { return JSON.parse(localStorage.getItem('ao_deleted') || '[]'); } catch(e) { return []; }
+}
+function saveAoDeleted(a) {
+  try { localStorage.setItem('ao_deleted', JSON.stringify(a)); } catch(e) {}
+}
+function _detectAoType(title) {
+  var t = (title || '').toLowerCase();
+  if (/\bblog\b/.test(t))                        return 'blog';
+  if (/webinar/.test(t))                         return 'webinar';
+  if (/meta ads|campanhas ativas/.test(t))       return 'outro';
+  if (/ordix na m.dia|portal cont.beis/.test(t)) return 'outro';
+  return 'social';
+}
+// Merge ALWAYS_ON_DATA → localStorage sempre que o modal abrir.
+// Respeita itens deletados pelo usuário (ao_deleted).
+function syncAoFromBase() {
+  var stored  = loadAoData();
+  var deleted = loadAoDeleted();
+  var changed = false;
+  ALWAYS_ON_DATA.forEach(function(ev) {
+    var key = ev.date + '|||' + ev.title;
+    if (deleted.indexOf(key) !== -1) return; // usuário deletou, não readiciona
+    if (!stored[ev.date]) stored[ev.date] = [];
+    var exists = stored[ev.date].some(function(a) { return a.title === ev.title; });
+    if (!exists) {
+      stored[ev.date].push({ type: _detectAoType(ev.title), title: ev.title });
+      changed = true;
+    }
+  });
+  if (changed) saveAoData(stored);
+  return stored;
+}
 
 // ── Seed: popula o calendário do Daily com os dados do Always On.xlsx ──
 function seedAlwaysOnFromXlsx() {
@@ -6014,7 +6047,7 @@ function openAoModal(dateStr) {
 function renderAoModalFull() {
   var listEl = document.getElementById('aoModalList');
   if (!listEl) return;
-  var data = loadAoData();
+  var data = syncAoFromBase();
   var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   var DAY_NAMES   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
@@ -6136,11 +6169,22 @@ function confirmEditAoFull(dateStr, idx) {
 function deleteAoFull(dateStr, idx) {
   if (!confirm('Remover esta ação?')) return;
   var data = loadAoData();
-  if (data[dateStr]) {
+  if (data[dateStr] && data[dateStr][idx] !== undefined) {
+    var item = data[dateStr][idx];
+    // Se for item base (ALWAYS_ON_DATA), marca como deletado para não voltar
+    var isBase = ALWAYS_ON_DATA.some(function(ev) {
+      return ev.date === dateStr && ev.title === item.title;
+    });
+    if (isBase) {
+      var deleted = loadAoDeleted();
+      var key = dateStr + '|||' + item.title;
+      if (deleted.indexOf(key) === -1) deleted.push(key);
+      saveAoDeleted(deleted);
+    }
     data[dateStr].splice(idx, 1);
     if (!data[dateStr].length) delete data[dateStr];
+    saveAoData(data);
   }
-  saveAoData(data);
   renderAoModalFull();
   renderAlwaysOn();
   renderCalendario();
