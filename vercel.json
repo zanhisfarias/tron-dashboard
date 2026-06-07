@@ -16,6 +16,7 @@
     { "src": "/api/post-media",     "dest": "/api/post-media.js" },
     { "src": "/api/get-scheduled",  "dest": "/api/get-scheduled.js" },
     { "src": "/api/cancel-post",    "dest": "/api/cancel-post.js" },
+    { "src": "/api/always-on",      "dest": "/api/always-on.js" },
     { "src": "/api/cron-publish",   "dest": "/api/cron-publish.js" },
     { "src": "/(.*)",               "dest": "/index.html" }
   ]

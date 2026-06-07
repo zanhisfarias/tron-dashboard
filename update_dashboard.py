@@ -323,20 +323,24 @@ def fetch_total_daily_budget(adsets=None):
 # ─────────────────────────────────────────────────────────
 
 def fetch_creatives():
-    """Busca anúncios com thumbnail e leads gerados em 2026."""
+    """Busca anúncios com thumbnail e leads gerados em 2026, com breakdown mensal."""
     today = date.today()
     date_range = {"since": "2026-01-01", "until": today.isoformat()}
+    mes_nomes = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 
-    # Insights por anúncio (nível ad) para todo o ano
-    print("  → Insights por anúncio (2026 YTD)...")
-    ad_insights = {}
+    # Insights por anúncio com breakdown mensal (uma única chamada)
+    print("  → Insights por anúncio (2026 YTD, breakdown mensal)...")
+    ad_insights_ytd   = {}   # aid → {spend, leads, impressions, clicks}
+    ad_insights_month = {}   # aid → {"2026-01": {...}, ...}
+
     cursor = None
     while True:
         params = {
-            "level":  "ad",
-            "fields": "ad_id,ad_name,impressions,clicks,spend,actions",
-            "time_range": json.dumps(date_range),
-            "limit": "100",
+            "level":          "ad",
+            "fields":         "ad_id,impressions,clicks,spend,actions",
+            "time_range":     json.dumps(date_range),
+            "time_increment": "monthly",
+            "limit":          "500",
         }
         if cursor:
             params["after"] = cursor
@@ -346,13 +350,26 @@ def fetch_creatives():
             print(f"    ERRO insights: {e}")
             break
         for row in resp.get("data", []):
-            aid   = row["ad_id"]
-            spend = float(row.get("spend", 0))
-            leads = get_leads(row.get("actions"))
-            impr  = int(row.get("impressions", 0))
-            click = int(row.get("clicks", 0))
-            cpl   = spend / leads if leads else None
-            ad_insights[aid] = {
+            aid       = row["ad_id"]
+            spend     = float(row.get("spend", 0))
+            leads     = get_leads(row.get("actions"))
+            impr      = int(row.get("impressions", 0))
+            click     = int(row.get("clicks", 0))
+            cpl       = spend / leads if leads else None
+            month_key = row.get("date_start", "")[:7]  # "2026-01"
+
+            # Acumula YTD
+            if aid not in ad_insights_ytd:
+                ad_insights_ytd[aid] = {"spend": 0.0, "leads": 0, "impressions": 0, "clicks": 0}
+            ad_insights_ytd[aid]["spend"]       += spend
+            ad_insights_ytd[aid]["leads"]       += leads
+            ad_insights_ytd[aid]["impressions"] += impr
+            ad_insights_ytd[aid]["clicks"]      += click
+
+            # Por mês
+            if aid not in ad_insights_month:
+                ad_insights_month[aid] = {}
+            ad_insights_month[aid][month_key] = {
                 "spend": spend, "leads": leads,
                 "impressions": impr, "clicks": click, "cpl": cpl,
             }
@@ -361,8 +378,14 @@ def fetch_creatives():
         if not paging.get("next"):
             break
 
+    # Calcula CPL YTD
+    for aid, ins in ad_insights_ytd.items():
+        ins["cpl"] = ins["spend"] / ins["leads"] if ins["leads"] else None
+
     # Busca anúncios com thumbnail por campanha
-    creatives = []
+    ad_meta   = {}   # aid → {id, name, camp, status, thumbnail}
+    creatives_ytd = []
+
     for code, camp_id in CAMPAIGN_IDS.items():
         print(f"  → Anúncios/thumbnails: {code}...")
         cursor = None
@@ -380,33 +403,56 @@ def fetch_creatives():
                 break
             for ad in resp.get("data", []):
                 aid = ad["id"]
-                ins = ad_insights.get(aid, {})
+                ins = ad_insights_ytd.get(aid, {})
                 if not ins.get("spend", 0):
                     continue  # ignora anúncios sem gasto em 2026
-                thumbnail = (
-                    ad.get("creative", {}).get("thumbnail_url") or ""
-                )
-                creatives.append({
+                thumbnail = ad.get("creative", {}).get("thumbnail_url") or ""
+                meta = {
                     "id":        aid,
                     "name":      ad.get("name", ""),
                     "camp":      code,
                     "status":    "active" if ad.get("effective_status") == "ACTIVE" else "paused",
                     "thumbnail": thumbnail,
-                    "spend":     ins.get("spend", 0),
-                    "leads":     ins.get("leads", 0),
-                    "cpl":       ins.get("cpl"),
+                }
+                ad_meta[aid] = meta
+                creatives_ytd.append({
+                    **meta,
+                    "spend":       ins.get("spend", 0),
+                    "leads":       ins.get("leads", 0),
+                    "cpl":         ins.get("cpl"),
                     "impressions": ins.get("impressions", 0),
-                    "clicks":    ins.get("clicks", 0),
+                    "clicks":      ins.get("clicks", 0),
                 })
             paging = resp.get("paging", {})
             cursor = paging.get("cursors", {}).get("after")
             if not paging.get("next"):
                 break
 
-    # Ordena por leads desc, depois por spend desc
-    creatives.sort(key=lambda x: (-x["leads"], -x["spend"]))
-    print(f"      {len(creatives)} criativos com gasto em 2026.")
-    return creatives
+    # Constrói CREATIVES_BY_MONTH — Jan até mês corrente
+    by_month = {}
+    for month in range(1, today.month + 1):
+        month_key = f"2026-{month:02d}"
+        month_list = []
+        for aid, meta in ad_meta.items():
+            m_ins = ad_insights_month.get(aid, {}).get(month_key)
+            if not m_ins or not m_ins.get("spend", 0):
+                continue
+            month_list.append({
+                **meta,
+                "spend":       m_ins["spend"],
+                "leads":       m_ins["leads"],
+                "cpl":         m_ins["cpl"],
+                "impressions": m_ins["impressions"],
+                "clicks":      m_ins["clicks"],
+            })
+        month_list.sort(key=lambda x: (-x["leads"], -x["spend"]))
+        by_month[month_key] = month_list
+        leads_mes = sum(c["leads"] for c in month_list)
+        print(f"      {mes_nomes[month-1]}/2026: {len(month_list)} criativos | {leads_mes} leads")
+
+    creatives_ytd.sort(key=lambda x: (-x["leads"], -x["spend"]))
+    print(f"      Total YTD: {len(creatives_ytd)} criativos com gasto em 2026.")
+    return creatives_ytd, by_month
 
 # ─────────────────────────────────────────────────────────
 # 5b. LEADBOARD — NECTAR CRM
@@ -826,7 +872,7 @@ def fetch_rv_data():
 # 7. GERAÇÃO DO BLOCO JS
 # ─────────────────────────────────────────────────────────
 
-def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, nectar=None, total_budget=0, rv_data=None, organic=None):
+def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, creatives_by_month=None, nectar=None, total_budget=0, rv_data=None, organic=None):
     """Gera o bloco de dados JS para injetar no HTML."""
 
     # CAMPAIGNS com orçamentos reais
@@ -860,6 +906,9 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 
     # CREATIVES
     creatives_js = "var CREATIVES = " + json.dumps(creatives, ensure_ascii=False, separators=(',', ':')) + ";"
+
+    # CREATIVES_BY_MONTH
+    creatives_by_month_js = "var CREATIVES_BY_MONTH = " + json.dumps(creatives_by_month or {}, ensure_ascii=False, separators=(',', ':')) + ";"
 
     # NECTAR LEADBOARD
     if not nectar:
@@ -925,6 +974,8 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 {metrics_js}
 
 {creatives_js}
+
+{creatives_by_month_js}
 
 {nectar_js}
 
@@ -1236,7 +1287,7 @@ def main():
     print(f"      {len(adset_metrics)} adsets com métricas.")
 
     print("\n[4/8] Buscando criativos e thumbnails...")
-    creatives = fetch_creatives()
+    creatives, creatives_by_month = fetch_creatives()
 
     print("\n[5/8] Buscando Leadboard do Nectar CRM...")
     nectar = fetch_nectar_leadboard()
@@ -1251,7 +1302,7 @@ def main():
     camp_budgets = fetch_campaign_budgets()
     budgets = calc_budgets(adsets, camp_budgets)
     total_budget = fetch_total_daily_budget(adsets)
-    js_block = build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, nectar,
+    js_block = build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, creatives_by_month, nectar,
                                total_budget=total_budget, rv_data=rv_data, organic=organic)
     update_html(js_block)
 
