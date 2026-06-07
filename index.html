@@ -3151,7 +3151,8 @@ function getActiveMonthNum() {
 // ── Day Picker ─────────────────────────────────────────────
 var _dpTab = 'semana'; // aba ativa do day-picker: 'dia' | 'semana'
 
-function switchDpTab(tab, pickerId, context, selectedDate) {
+function switchDpTab(tab, pickerId, context, selectedDate, e) {
+  if (e) e.stopPropagation(); // impede que o click feche o picker após innerHTML ser reescrito
   _dpTab = tab;
   var picker = document.getElementById(pickerId);
   if (picker) picker.innerHTML = buildDayPickerContent(pickerId, context, selectedDate);
@@ -3165,8 +3166,8 @@ function buildDayPickerContent(pickerId, context, selectedDate) {
   var sd   = selectedDate || '';
 
   var html = '<div style="display:flex;gap:4px;margin-bottom:8px">'
-    + '<button onclick="switchDpTab(\'dia\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\')" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + dAct + ';color:' + dCol + '">Dia</button>'
-    + '<button onclick="switchDpTab(\'semana\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\')" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + sAct + ';color:' + sCol + '">Semana</button>'
+    + '<button onclick="switchDpTab(\'dia\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\',event)" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + dAct + ';color:' + dCol + '">Dia</button>'
+    + '<button onclick="switchDpTab(\'semana\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\',event)" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + sAct + ';color:' + sCol + '">Semana</button>'
     + '</div>';
 
   if (_dpTab === 'semana') {
