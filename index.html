@@ -159,6 +159,8 @@
     body.light .tbl tbody td { color: #111827; }
     /* Textos gerais — branco vira cinza escuro, muted fica legível */
     body.light .text-white  { color: #111827 !important; }
+    /* Exceção: banner CRM tem fundo preto fixo — texto deve continuar branco */
+    body.light #crmMain .text-white { color: #ffffff !important; }
     body.light .text-muted  { color: #4B5563 !important; }
     body.light [style*="color:#fff"]     { color: #111827 !important; }
     body.light [style*="color: #fff"]    { color: #111827 !important; }
