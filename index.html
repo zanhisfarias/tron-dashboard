@@ -414,20 +414,18 @@
 
 /* Botão recolher sidebar (desktop) */
 #sbCollapseBtn {
-  position: sticky;
-  bottom: 0;
-  padding: 10px 16px;
-  background: #0A0D14;
-  border-top: 1px solid #1E2130;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   cursor: pointer;
   flex-shrink: 0;
-  margin-top: auto;
   user-select: none;
+  transition: background 0.15s;
 }
-#sbCollapseBtn:hover { background: rgba(255,255,255,0.03); }
+#sbCollapseBtn:hover { background: rgba(255,255,255,0.08); }
 #sbCollapseArrow { transition: transform 0.28s ease; color: #4B5563; }
 #sbCollapseBtn:hover #sbCollapseArrow { color: #9CA3AF; }
 
@@ -450,7 +448,6 @@
   body.sb-collapsed .sb-item-label { display: none; }
   body.sb-collapsed .sb-soon-badge { display: none; }
   body.sb-collapsed .sb-divider { margin: 2px 0; }
-  body.sb-collapsed #sbCollapseBtn { justify-content: center; padding: 10px 0; }
   body.sb-collapsed #sbCollapseArrow { transform: rotate(180deg); }
 
   /* Tooltip nos itens quando recolhido */
@@ -551,12 +548,17 @@
 
 <!-- Sidebar -->
 <aside id="sidebar">
-  <!-- Logo -->
+  <!-- Logo + botão recolher -->
   <div class="sb-logo">
     <img src="Logo/Favcon.png" alt="Tron" />
-    <div>
+    <div style="flex:1;min-width:0">
       <div class="sb-logo-text">Tron</div>
       <div class="sb-logo-sub">Dashboard de Performance</div>
+    </div>
+    <div id="sbCollapseBtn" onclick="collapseToggle()" title="Recolher menu">
+      <svg id="sbCollapseArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
     </div>
   </div>
 
@@ -638,12 +640,6 @@
     </div>
   </div>
 
-  <!-- Botão recolher (desktop) -->
-  <div id="sbCollapseBtn" onclick="collapseToggle()">
-    <svg id="sbCollapseArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="15 18 9 12 15 6"/>
-    </svg>
-  </div>
 </aside>
 
 <!-- Pickers flutuantes globais -->
