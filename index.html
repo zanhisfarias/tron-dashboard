@@ -5863,15 +5863,16 @@ function renderAlwaysOnList() {
     var isPast  = d < today;
     var isToday = d.getTime() === today.getTime();
 
-    var dateBg   = isToday ? 'rgba(236,72,153,0.12)' : (isPast ? 'rgba(255,255,255,0.02)' : 'rgba(99,102,241,0.06)');
-    var dateColor = isToday ? '#EC4899' : (isPast ? '#4B5563' : '#9CA3AF');
+    var dateBg   = isToday ? 'rgba(236,72,153,0.10)' : (isPast ? 'rgba(255,255,255,0.01)' : 'rgba(99,102,241,0.04)');
+    var dateColor = isToday ? '#EC4899' : (isPast ? 'rgba(255,255,255,0.35)' : '#ffffff');
+    var borderColor = isToday ? 'rgba(236,72,153,0.25)' : 'rgba(255,255,255,0.03)';
 
-    html += '<div class="rounded-lg overflow-hidden mb-2" style="background:' + dateBg + ';border:1px solid ' + (isToday ? 'rgba(236,72,153,0.3)' : 'rgba(255,255,255,0.05)') + '">';
-    html += '<div class="flex items-center gap-2 px-3 py-1.5" style="background:rgba(0,0,0,0.15)">';
+    html += '<div class="rounded-lg overflow-hidden mb-2" style="background:' + dateBg + ';border:1px solid ' + borderColor + '">';
+    html += '<div class="flex items-center gap-2 px-3 py-1.5" style="background:rgba(0,0,0,0.12)">';
     html += '<span class="text-[11px] font-black" style="color:' + dateColor + '">' + String(dayNum).padStart(2,'0') + '</span>';
-    html += '<span class="text-[10px] font-semibold" style="color:' + dateColor + ';opacity:.7">' + mesAbbr + ' · ' + dayName + (isToday ? ' — Hoje' : '') + '</span>';
+    html += '<span class="text-[10px] font-semibold" style="color:' + dateColor + ';opacity:.65">' + mesAbbr + ' · ' + dayName + (isToday ? ' — Hoje' : '') + '</span>';
     html += '</div>';
-    html += '<div class="divide-y" style="border-color:rgba(255,255,255,0.04)">';
+    html += '<div class="divide-y" style="border-color:rgba(255,255,255,0.025)">';
 
     grouped[dateStr].forEach(function(ev) {
       var c = PROD_COLORS[ev.produto] || '#9CA3AF';
