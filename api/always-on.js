@@ -17,10 +17,12 @@ async function kvGet() {
 
 async function kvSet(value) {
   if (!KV_URL) return;
-  await fetch(`${KV_URL}/set/${KV_KEY}`, {
+  // Upstash REST API pipeline — formato correto para armazenar string JSON
+  const str = JSON.stringify(value);
+  await fetch(`${KV_URL}/pipeline`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify([['SET', KV_KEY, str]]),
   });
 }
 

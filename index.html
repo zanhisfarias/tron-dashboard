@@ -301,6 +301,185 @@
       #calGrid > div:not(.cal-week-label) { min-height:70px !important; }
       #crmKpiRow { grid-template-columns: repeat(4, 1fr) !important; }
     }
+
+/* ── Sidebar ─────────────────────────────────────────── */
+#sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 220px;
+  background: #0A0D14;
+  border-right: 1px solid #1E2130;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.25s ease;
+}
+#sidebar::-webkit-scrollbar { width: 3px; }
+#sidebar::-webkit-scrollbar-thumb { background: #2A2D3E; border-radius: 2px; }
+
+#sidebarOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 44;
+}
+
+.sb-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #1E2130;
+  flex-shrink: 0;
+}
+.sb-logo img { width: 28px; height: 28px; border-radius: 8px; background: #fff; object-fit: contain; }
+.sb-logo-text { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; }
+.sb-logo-sub  { font-size: 9px; color: #6B7280; font-weight: 500; }
+
+.sb-section { padding: 10px 0 4px; }
+.sb-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #4B5563;
+  text-transform: uppercase;
+  padding: 0 16px 4px;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background .12s, color .12s;
+  user-select: none;
+  position: relative;
+  white-space: nowrap;
+}
+.sb-item:hover { background: rgba(255,255,255,0.04); color: #D1D5DB; }
+.sb-item.active {
+  color: #fff;
+  background: rgba(99,102,241,0.12);
+}
+.sb-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 3px;
+  background: #6366F1;
+  border-radius: 0 3px 3px 0;
+}
+.sb-item.soon { opacity: 0.38; cursor: not-allowed; }
+.sb-item.soon:hover { background: transparent; color: #6B7280; }
+.sb-item-icon { width: 15px; height: 15px; flex-shrink: 0; }
+.sb-soon-badge {
+  margin-left: auto;
+  font-size: 8px;
+  font-weight: 700;
+  color: #4B5563;
+  background: #1E2130;
+  border-radius: 4px;
+  padding: 1px 4px;
+  letter-spacing: .02em;
+}
+
+/* Plataforma ativa — cor por plataforma */
+.sb-item[data-plat="meta"].active::before    { background: #0082FB; }
+.sb-item[data-plat="meta"].active            { background: rgba(0,130,251,0.1); color: #60A5FA; }
+.sb-item[data-plat="google"].active::before  { background: #E8710A; }
+.sb-item[data-plat="google"].active          { background: rgba(232,113,10,0.1); color: #FCA34D; }
+.sb-item[data-plat="instagram"].active::before { background: #dd2a7b; }
+.sb-item[data-plat="instagram"].active       { background: rgba(221,42,123,0.1); color: #F472B6; }
+.sb-item[data-plat="facebook"].active::before { background: #1877F2; }
+.sb-item[data-plat="facebook"].active        { background: rgba(24,119,242,0.1); color: #60A5FA; }
+.sb-item[data-plat="social"].active::before  { background: #10B981; }
+.sb-item[data-plat="social"].active          { background: rgba(16,185,129,0.1); color: #34D399; }
+.sb-item[data-plat="onepager"].active::before { background: #F59E0B; }
+.sb-item[data-plat="onepager"].active        { background: rgba(245,158,11,0.1); color: #FCD34D; }
+.sb-item[data-plat="crm"].active::before     { background: #8B5CF6; }
+.sb-item[data-plat="crm"].active             { background: rgba(139,92,246,0.1); color: #C4B5FD; }
+
+.sb-divider { height: 1px; background: #1E2130; margin: 4px 0; }
+
+/* Botão recolher sidebar (desktop) */
+#sbCollapseBtn {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 16px;
+  background: #0A0D14;
+  border-top: 1px solid #1E2130;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: auto;
+  user-select: none;
+}
+#sbCollapseBtn:hover { background: rgba(255,255,255,0.03); }
+#sbCollapseArrow { transition: transform 0.28s ease; color: #4B5563; }
+#sbCollapseBtn:hover #sbCollapseArrow { color: #9CA3AF; }
+
+/* Desktop: sidebar sempre visível, content com margin */
+@media (min-width: 768px) {
+  #sidebar { transform: translateX(0) !important; transition: width 0.28s ease; }
+  #sidebarOverlay { display: none !important; }
+  body { padding-left: 220px; transition: padding-left 0.28s ease; }
+  #sbHamburger { display: none !important; }
+
+  /* Estado recolhido */
+  body.sb-collapsed { padding-left: 54px; }
+  body.sb-collapsed #sidebar { width: 54px; }
+  body.sb-collapsed .sb-logo { justify-content: center; padding: 14px 0 10px; gap: 0; }
+  body.sb-collapsed .sb-logo-text,
+  body.sb-collapsed .sb-logo-sub { display: none; }
+  body.sb-collapsed .sb-section { padding: 6px 0 2px; }
+  body.sb-collapsed .sb-section-label { display: none; }
+  body.sb-collapsed .sb-item { justify-content: center; padding: 9px 0; gap: 0; }
+  body.sb-collapsed .sb-item-label { display: none; }
+  body.sb-collapsed .sb-soon-badge { display: none; }
+  body.sb-collapsed .sb-divider { margin: 2px 0; }
+  body.sb-collapsed #sbCollapseBtn { justify-content: center; padding: 10px 0; }
+  body.sb-collapsed #sbCollapseArrow { transform: rotate(180deg); }
+
+  /* Tooltip nos itens quando recolhido */
+  body.sb-collapsed .sb-item[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 62px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1E2130;
+    color: #E5E7EB;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 7px;
+    white-space: nowrap;
+    border: 1px solid #2A2D3E;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+}
+
+/* Mobile: sidebar oculto por padrão — cobre tudo do topo */
+@media (max-width: 767px) {
+  #sidebar { transform: translateX(-100%); top: 0; z-index: 55; }
+  #sidebarOverlay { z-index: 54; }
+  body.sb-open #sidebar { transform: translateX(0); }
+  body.sb-open #sidebarOverlay { display: block; }
+  #sbCollapseBtn { display: none; }
+}
   </style>
 </head>
 <body class="light min-h-screen">
@@ -316,15 +495,10 @@
         <div class="hidden md:block text-[10px] text-muted font-medium">Dashboard de Performance</div>
       </div>
     </div>
-    <!-- Plataformas -->
-    <div class="flex items-center gap-1.5 flex-shrink-0">
-      <button id="platSocial" onclick="selectPlatform('social')" class="camp-btn">Always On</button>
-      <button id="platOrganico" onclick="selectPlatform('organico')" class="camp-btn"><span style="background:linear-gradient(90deg,#f58529,#dd2a7b,#8134af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">Orgânico</span></button>
-      <button id="platMeta" onclick="selectPlatform('meta')" class="camp-btn">Meta Ads</button>
-      <button id="platGoogle" onclick="selectPlatform('google')" class="camp-btn">Google Ads</button>
-      <button id="platCrm" onclick="selectPlatform('crm')" class="camp-btn">KPIs CRM</button>
-      <button id="platOnePager" onclick="selectPlatform('onepager')" class="camp-btn" style="font-weight:700">Daily</button>
-    </div>
+    <!-- Hamburger mobile -->
+    <button id="sbHamburger" onclick="toggleSidebar()" class="flex items-center justify-center" style="width:34px;height:34px;background:#1E2130;border:1px solid #2A2D3E;border-radius:8px;cursor:pointer;flex-shrink:0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <div class="flex items-center gap-2 flex-shrink-0 ml-auto md:ml-0">
       <div class="hidden md:block text-xs text-muted font-medium" id="headerDate"></div>
       <!-- Indicador ao vivo -->
@@ -369,6 +543,107 @@
   <!-- periodBar oculto — seletor de período movido para cada aba -->
   <div id="periodBar" style="display:none"></div>
 </header>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <!-- Logo -->
+  <div class="sb-logo">
+    <img src="Logo/Favcon.png" alt="Tron" />
+    <div>
+      <div class="sb-logo-text">Tron</div>
+      <div class="sb-logo-sub">Dashboard de Performance</div>
+    </div>
+  </div>
+
+  <!-- Mídia Paga -->
+  <div class="sb-section">
+    <div class="sb-section-label">Mídia Paga</div>
+    <div class="sb-item" data-plat="meta" data-tip="Meta Ads" id="snav-meta" onclick="navTo('meta')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      <span class="sb-item-label">Meta Ads</span>
+    </div>
+    <div class="sb-item" data-plat="google" data-tip="Google Ads" id="snav-google" onclick="navTo('google')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="sb-item-label">Google Ads</span>
+    </div>
+    <div class="sb-item soon" data-tip="LinkedIn Ads">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      <span class="sb-item-label">LinkedIn Ads</span>
+      <span class="sb-soon-badge">Em breve</span>
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <!-- Orgânico -->
+  <div class="sb-section">
+    <div class="sb-section-label">Orgânico</div>
+    <div class="sb-item" data-plat="instagram" data-tip="Instagram" id="snav-instagram" onclick="navTo('organico','instagram')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+      <span class="sb-item-label">Instagram</span>
+    </div>
+    <div class="sb-item" data-plat="facebook" data-tip="Facebook" id="snav-facebook" onclick="navTo('organico','facebook')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      <span class="sb-item-label">Facebook</span>
+    </div>
+    <div class="sb-item soon" data-tip="Site">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span class="sb-item-label">Site</span>
+      <span class="sb-soon-badge">Em breve</span>
+    </div>
+    <div class="sb-item soon" data-tip="RD Station">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.79a16 16 0 0 0 5.3 5.3l1.13-.98a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.42z"/></svg>
+      <span class="sb-item-label">RD Station</span>
+      <span class="sb-soon-badge">Em breve</span>
+    </div>
+    <div class="sb-item soon" data-tip="Bitly">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span class="sb-item-label">Bitly</span>
+      <span class="sb-soon-badge">Em breve</span>
+    </div>
+    <div class="sb-item soon" data-tip="TikTok">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12 6.5 19 12 16l5.5 3L15 12l4-4-5.5-.5L12 2l-1.5 5.5L5 8l4 4z"/></svg>
+      <span class="sb-item-label">TikTok</span>
+      <span class="sb-soon-badge">Em breve</span>
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <!-- Planejamento -->
+  <div class="sb-section">
+    <div class="sb-section-label">Planejamento</div>
+    <div class="sb-item" data-plat="social" data-tip="Always On" id="snav-social" onclick="navTo('social')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="sb-item-label">Always On</span>
+    </div>
+    <div class="sb-item" data-plat="onepager" data-tip="Daily" id="snav-onepager" onclick="navTo('onepager')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="sb-item-label">Daily</span>
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <!-- CRM -->
+  <div class="sb-section">
+    <div class="sb-section-label">CRM</div>
+    <div class="sb-item" data-plat="crm" data-tip="KPIs CRM" id="snav-crm" onclick="navTo('crm')">
+      <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="sb-item-label">KPIs CRM</span>
+    </div>
+  </div>
+
+  <!-- Botão recolher (desktop) -->
+  <div id="sbCollapseBtn" onclick="collapseToggle()">
+    <svg id="sbCollapseArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </div>
+</aside>
 
 <!-- Pickers flutuantes globais -->
 <div id="calPicker" class="day-picker"></div>
@@ -7304,6 +7579,67 @@ function renderOnePager() {
       + '</table></div>';
   }
 }
+
+// ── Sidebar ──────────────────────────────────────────────
+function toggleSidebar() {
+  document.body.classList.toggle('sb-open');
+}
+
+function navTo(plat, subPlat) {
+  // Fecha sidebar no mobile
+  document.body.classList.remove('sb-open');
+
+  // Atualiza item ativo no sidebar
+  document.querySelectorAll('.sb-item').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  if (subPlat) {
+    var subEl = document.getElementById('snav-' + subPlat);
+    if (subEl) subEl.classList.add('active');
+  } else {
+    var platEl = document.getElementById('snav-' + plat);
+    if (platEl) platEl.classList.add('active');
+  }
+
+  // Navega
+  selectPlatform(plat);
+  if (subPlat) {
+    setTimeout(function() {
+      try { selectOrgPlat(subPlat); } catch(e) {}
+    }, 30);
+  }
+}
+
+// Sincroniza sidebar ao chamar selectPlatform diretamente
+var _origSelectPlatform = selectPlatform;
+selectPlatform = function(plat, skipHash) {
+  _origSelectPlatform(plat, skipHash);
+  // Atualiza sidebar sem loop
+  document.querySelectorAll('.sb-item').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  var el = document.getElementById('snav-' + plat);
+  if (el) el.classList.add('active');
+};
+
+// Restaura estado ativo do sidebar no load
+(function() {
+  var saved = localStorage.getItem('tron_active_platform') || 'meta';
+  var el = document.getElementById('snav-' + saved);
+  if (el) el.classList.add('active');
+})();
+
+function collapseToggle() {
+  var collapsed = document.body.classList.toggle('sb-collapsed');
+  localStorage.setItem('tron_sb_collapsed', collapsed ? '1' : '0');
+}
+
+// Restaura estado recolhido no load (desktop)
+(function() {
+  if (localStorage.getItem('tron_sb_collapsed') === '1') {
+    document.body.classList.add('sb-collapsed');
+  }
+})();
 </script>
 </body>
 </html>
