@@ -159,14 +159,19 @@
     body.light .tbl tbody td { color: #111827; }
     /* Textos gerais — branco vira cinza escuro, muted fica legível */
     body.light .text-white  { color: #111827 !important; }
-    /* Exceção: banner CRM tem fundo preto fixo — texto deve continuar branco */
-    body.light #crmMain .text-white { color: #ffffff !important; }
     body.light .text-muted  { color: #4B5563 !important; }
     body.light [style*="color:#fff"]     { color: #111827 !important; }
     body.light [style*="color: #fff"]    { color: #111827 !important; }
     body.light [style*="color:#ffffff"]  { color: #111827 !important; }
     body.light [style*="color:#E5E7EB"]  { color: #1F2937 !important; }
     body.light [style*="color:#9CA3AF"]  { color: #4B5563 !important; }
+    /* Exceção: toda a seção CRM tem fundos escuros fixos — manter texto claro */
+    body.light #crmMain .text-white                     { color: #ffffff !important; }
+    body.light #crmMain [style*="color:#E5E7EB"]        { color: #E5E7EB !important; }
+    body.light #crmMain [style*="color: #E5E7EB"]       { color: #E5E7EB !important; }
+    body.light #crmMain [style*="color:#9CA3AF"]        { color: #9CA3AF !important; }
+    body.light #crmMain [style*="color:#fff"]           { color: #ffffff !important; }
+    body.light #crmMain [style*="color:#ffffff"]        { color: #ffffff !important; }
     body.light [style*="color:#6B7280"]  { color: #4B5563 !important; }
     body.light [style*="color: #E5E7EB"] { color: #1F2937 !important; }
     body.light [style*="color: #9CA3AF"] { color: #4B5563 !important; }
