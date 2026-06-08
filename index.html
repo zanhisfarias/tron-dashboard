@@ -73,6 +73,14 @@
     .funnel-bar { border-radius: 4px; transition: width 0.8s ease; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     .fade-up { animation: fadeUp 0.4s ease both; }
+    #creativesSection { overflow-x: auto; }
+    #creativesSection::-webkit-scrollbar { height: 4px; }
+    #creativesSection::-webkit-scrollbar-thumb { background: #2A2D3E; border-radius: 2px; }
+    .creative-card {
+      flex-shrink: 0; background: #0F1117; border: 1px solid #2A2D3E;
+      border-radius: 10px; overflow: hidden; transition: border-color 0.15s, transform 0.15s;
+    }
+    .creative-card:hover { border-color: #6366F1; transform: translateY(-2px); }
     /* Score: mobile visivel por padrao */
     .score-mobile  { display: flex; }
     .score-desktop { display: none; }
@@ -696,6 +704,27 @@
 
   <!-- KPIs Anuais e Mensais -->
   <div id="annualSummary" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+  <!-- Criativos — todos os anúncios com leads (YTD) -->
+  <div class="card p-3 md:p-5 fade-up" style="animation-delay:0.15s">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="text-sm font-semibold text-white">Criativos 2026</div>
+        <span id="creativesCount" class="text-[10px] font-semibold px-2 py-0.5 rounded-full" style="background:#2A2D3E;color:#9CA3AF"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center" style="background:#2A2D3E;border-radius:8px;padding:2px;gap:2px">
+          <button id="crf-all"    onclick="setCreativesFilter('all')"    style="border:none;cursor:pointer;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;transition:all .15s;background:#6366F1;color:#fff">Todos</button>
+          <button id="crf-active" onclick="setCreativesFilter('active')" style="border:none;cursor:pointer;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;transition:all .15s;background:transparent;color:#6B7280">Ativos</button>
+          <button id="crf-paused" onclick="setCreativesFilter('paused')" style="border:none;cursor:pointer;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;transition:all .15s;background:transparent;color:#6B7280">Pausados</button>
+        </div>
+        <button onclick="scrollCreatives(-1)" style="background:#2A2D3E;border:none;color:#9CA3AF;cursor:pointer;border-radius:6px;width:26px;height:26px;font-size:16px;display:flex;align-items:center;justify-content:center">&#8249;</button>
+        <button onclick="scrollCreatives(1)"  style="background:#2A2D3E;border:none;color:#9CA3AF;cursor:pointer;border-radius:6px;width:26px;height:26px;font-size:16px;display:flex;align-items:center;justify-content:center">&#8250;</button>
+      </div>
+    </div>
+    <div id="creativesSection" class="flex gap-3 pb-2" style="overflow-x:auto;scrollbar-width:thin;scrollbar-color:#3A3D52 transparent"></div>
+  </div>
 
   <!-- Tipo de Lead: Forms Nativos vs Frios/Nutrição -->
   <div id="leadTypeSection" class="fade-up" style="animation-delay:0.17s"></div>
@@ -4117,6 +4146,78 @@ function adsetChangePage(dir) {
   renderTable();
 }
 
+var _creativesFilter = 'all'; // 'all' | 'active' | 'paused'
+
+function setCreativesFilter(f) {
+  _creativesFilter = f;
+  var colors = { all: '#6366F1', active: '#10B981', paused: '#6B7280' };
+  ['all','active','paused'].forEach(function(k) {
+    var btn = document.getElementById('crf-' + k);
+    if (!btn) return;
+    if (k === f) { btn.style.background = colors[k]; btn.style.color = '#fff'; }
+    else         { btn.style.background = 'transparent'; btn.style.color = '#6B7280'; }
+  });
+  renderCreatives();
+}
+
+function renderCreatives() {
+  var section = document.getElementById('creativesSection');
+  var countEl = document.getElementById('creativesCount');
+  var cardW = IS_MOBILE ? '145px' : '200px';
+  var imgH  = IS_MOBILE ? '90px'  : '120px';
+
+  if (!CREATIVES || CREATIVES.length === 0) {
+    countEl.textContent = '0 criativos';
+    section.innerHTML = '<div class="flex items-center justify-center w-full py-8 text-muted text-sm font-medium">Dados de criativos ser\u00e3o carregados na pr\u00f3xima atualiza\u00e7\u00e3o</div>';
+    return;
+  }
+  var filtered = _creativesFilter === 'all'
+    ? CREATIVES
+    : CREATIVES.filter(function(c) { return c.status === _creativesFilter; });
+  var sorted = [].concat(filtered).sort(function(a, b) { return (b.leads || 0) - (a.leads || 0); });
+  countEl.textContent = sorted.length + ' criativos';
+  if (sorted.length === 0) {
+    section.innerHTML = '<div class="flex items-center justify-center w-full py-8 text-muted text-sm font-medium">Nenhum criativo ' + (_creativesFilter === 'active' ? 'ativo' : 'pausado') + ' encontrado.</div>';
+    return;
+  }
+  var CAMP_FALLBACK = { MR:'TGC', EMP:'DP', C01:'TGC', C00:'TGC', INST:'Institucional',
+                        CONT_RV:'TGC', EMP_RV:'DP' };
+  function detectProduct(name, camp) {
+    var n = (name || '').toLowerCase();
+    if (/ordix/.test(n))                                          return 'Ordix';
+    if (/tron\s*box|\bbox\b|sittax|xml\s*na\s*nuvem|automatize[\s-]xml/.test(n)) return 'Box';
+    if (/\bdp\b|tron\s*dp|folha[\s-]?pagamento|retrabalho[\s-]?dp|e[\s-]?social|esocial/.test(n)) return 'DP';
+    if (/\btgc\b|fidel\s*tgc|tgc\s*eos/.test(n))                 return 'TGC';
+    if (/cont[aá]b|fiscal|intelig[eê]n|rotina|buscador|xml|produtividade|apagando\s*inc|tarefeiro|zan\b/.test(n)) return 'TGC';
+    if (/laris/.test(n))                                          return 'Laris';
+    if (/qiae/.test(n))                                           return 'QIAE';
+    return CAMP_FALLBACK[camp] || '';
+  }
+  section.innerHTML = sorted.map(function(cr) {
+    var camp    = CAMPAIGNS[cr.camp] || { label: cr.camp || '\u2014', color: '#6B7280' };
+    var produto = detectProduct(cr.name, cr.camp);
+    var cplC    = cr.cpl ? colorForMetric('cpl', cr.cpl) : '#6B7280';
+    var stBg    = cr.status === 'active' ? 'background:rgba(16,185,129,0.15);color:#10B981' : 'background:rgba(107,114,128,0.15);color:#6B7280';
+    var thumb   = cr.thumbnail || cr.thumbnail_url || '';
+    var imgHtml = thumb
+      ? '<img src="' + thumb + '" alt="' + (cr.name||'') + '" style="width:' + cardW + ';height:' + imgH + ';object-fit:cover;display:block;" />'
+      : '<div style="width:' + cardW + ';height:' + imgH + ';background:#2A2D3E;display:flex;align-items:center;justify-content:center;">' +
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="1.5">' +
+        '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+    var badgeLine = '<span class="inline-block text-[9px] md:text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style="background:' + camp.color + '22;color:' + camp.color + '">' + camp.label + '</span>'
+      + (produto ? ' <span class="inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(255,255,255,0.06);color:#9CA3AF">' + produto + '</span>' : '');
+    return '<div class="creative-card" style="width:' + cardW + '">' + imgHtml +
+      '<div class="p-2 space-y-1.5">' +
+      '<div class="text-[11px] md:text-xs font-semibold text-white leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (cr.name||'Sem nome') + '</div>' +
+      '<div class="flex items-center gap-1 flex-wrap">' + badgeLine + '</div>' +
+      '<div class="flex items-center justify-between pt-0.5">' +
+      '<div class="text-center"><div class="text-[9px] text-muted font-medium">Leads</div><div class="text-xs md:text-sm font-bold" style="color:#10B981">' + (cr.leads||0) + '</div></div>' +
+      '<div class="text-center"><div class="text-[9px] text-muted font-medium">CPL</div><div class="text-xs md:text-sm font-bold" style="color:' + cplC + '">' + (cr.cpl ? fmt.brl(cr.cpl) : '\u2014') + '</div></div>' +
+      '<span class="text-[9px] md:text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style="' + stBg + '">' + (cr.status==='active'?'Ativo':'Pausado') + '</span>' +
+      '</div></div></div>';
+  }).join('');
+}
+
 function renderNectarLeadboard() {
   var el = document.getElementById('nectarSection');
   if (!el) return;
@@ -4765,6 +4866,11 @@ function renderCampScores() {
   }).join('');
 }
 
+function scrollCreatives(dir) {
+  var el = document.getElementById('creativesSection');
+  if (el) el.scrollBy({ left: dir * 220, behavior: 'smooth' });
+}
+
 function changeSummaryMonth(dir) {
   var next = state.summaryMonth + dir;
   if (next < 1 || next > CURRENT_MONTH) return;
@@ -4983,6 +5089,7 @@ function renderAll() {
   try { renderScore(); } catch(e) {}
   try { renderKPIs(); } catch(e) {}
   try { renderAnnualSummary(); } catch(e) {}
+  try { renderCreatives(); } catch(e) {}
   try { renderBudgetPacing(); } catch(e) {}
   try { renderVerbaProduto(); } catch(e) {}
   try { renderLeadsChart(); } catch(e) {}
