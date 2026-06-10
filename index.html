@@ -1019,6 +1019,13 @@
   </div>
 </div>
 
+<!-- Modal Detalhe de Ação — Always On -->
+<div id="aoDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.80);backdrop-filter:blur(6px);align-items:center;justify-content:center" onclick="if(event.target===this)closeAoDetailModal()">
+  <div style="background:#1A1D27;border:1px solid #2A2D3E;border-radius:16px;width:560px;max-width:96vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+    <div id="aoDetailContent" style="overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════════════
      ORGÂNICO — Instagram, Facebook, RD Station, Bitly, TikTok, LinkedIn, YouTube
 ════════════════════════════════════════════════════════════ -->
@@ -3220,7 +3227,7 @@ function getActiveMonthNum() {
 }
 
 // ── Day Picker ─────────────────────────────────────────────
-var _dpTab = 'dia'; // aba ativa do day-picker: 'dia' | 'semana' | 'periodo'
+var _dpTab = 'periodo'; // aba ativa do day-picker: 'dia' | 'semana' | 'periodo'
 var _rangeStart  = null;   // 'YYYY-MM-DD' — primeiro clique da seleção de período
 var _dpRangeYear  = new Date().getFullYear();
 var _dpRangeMonth = new Date().getMonth(); // 0-indexed
@@ -3252,9 +3259,9 @@ function buildDayPickerContent(pickerId, context, selectedDate) {
   var sd   = selectedDate || '';
 
   var html = '<div style="display:flex;gap:4px;margin-bottom:8px">'
+    + '<button onclick="switchDpTab(\'periodo\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\',event)" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + pAct + ';color:' + pCol + '">Per&#237;odo</button>'
     + '<button onclick="switchDpTab(\'dia\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\',event)" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + dAct + ';color:' + dCol + '">Dia</button>'
     + '<button onclick="switchDpTab(\'semana\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\',event)" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + sAct + ';color:' + sCol + '">Semana</button>'
-    + '<button onclick="switchDpTab(\'periodo\',\'' + pickerId + '\',\'' + context + '\',\'' + sd + '\',event)" style="flex:1;padding:5px 0;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:' + pAct + ';color:' + pCol + '">Per&#237;odo</button>'
     + '</div>';
 
   if (_dpTab === 'semana') {
@@ -3387,11 +3394,9 @@ function toggleDayPicker(pickerId, btnIdOrEl, context) {
   var selectedDate = context === 'main' ? (state.since === state.until ? state.since : '')
     : context === 'ao' ? (_aoDaySelected || '')
     : rvDaySelected;
-  // Se o período ativo é 'periodo-', abre direto na aba Período
-  if (context === 'main' && (state.activePeriodKey || '').startsWith('periodo-')) {
-    _dpTab = 'periodo';
-    var n2 = new Date(); _dpRangeYear = n2.getFullYear(); _dpRangeMonth = n2.getMonth();
-  }
+  // Sempre abre na aba Período e inicializa o calendário no mês atual
+  _dpTab = 'periodo';
+  var _n = new Date(); _dpRangeYear = _n.getFullYear(); _dpRangeMonth = _n.getMonth();
   picker.innerHTML = buildDayPickerContent(pickerId, context, selectedDate);
   if (_dpTab === 'periodo') addRangeHoverListeners(pickerId, context);
   var rect = btn.getBoundingClientRect();
@@ -6232,7 +6237,8 @@ function renderAlwaysOnList() {
       var sc = STATUS_MAP[sk] || AO_STATUS[0];
       var title = (item.title || '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
-      html += '<div style="background:#1E2130;border:1px solid #2A2D3E;border-radius:8px;padding:10px;cursor:pointer" onclick="openAoModal(\'' + dateStr + '\')" title="Clique para editar">';
+      var safeOrig = (item.title||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      html += '<div style="background:#1E2130;border:1px solid #2A2D3E;border-radius:8px;padding:10px;cursor:pointer" onclick="openAoDetailModal(\'' + dateStr + '\',\'' + safeOrig + '\')" title="Clique para ver detalhes">';
 
       // Linha 1 — título + badges
       html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:' + (item.canal||item.formato||item.objetivo||item.responsavel||item.obs ? '7' : '0') + 'px">';
@@ -7190,10 +7196,185 @@ function closeAoModal() {
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
+    var det = document.getElementById('aoDetailModal');
+    if (det && det.style.display !== 'none') { closeAoDetailModal(); return; }
     var modal = document.getElementById('aoModal');
     if (modal && modal.style.display !== 'none') closeAoModal();
   }
 });
+
+// ══════════════════════════════════════════════════════
+// Always On — Modal de detalhe por ação
+// ══════════════════════════════════════════════════════
+var _aoDetailDate  = '';
+var _aoDetailOrig  = '';
+
+function openAoDetailModal(dateStr, origTitle) {
+  _aoDetailDate = dateStr;
+  _aoDetailOrig = origTitle;
+  var modal = document.getElementById('aoDetailModal');
+  if (!modal) return;
+  renderAoDetailModal();
+  modal.style.display = 'flex';
+}
+
+function closeAoDetailModal() {
+  var modal = document.getElementById('aoDetailModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _findAoDetailItem() {
+  var lsData = loadAoData();
+  var items = lsData[_aoDetailDate] || [];
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].title === _aoDetailOrig || items[i]._origTitle === _aoDetailOrig) return { idx: i, item: items[i] };
+  }
+  // Item está só no base — retorna base sem idx
+  var base = null;
+  ALWAYS_ON_DATA.forEach(function(ev) { if (ev.date === _aoDetailDate && ev.title === _aoDetailOrig) base = ev; });
+  return base ? { idx: -1, item: base } : null;
+}
+
+function renderAoDetailModal() {
+  var el = document.getElementById('aoDetailContent');
+  if (!el) return;
+
+  var found = _findAoDetailItem();
+  var item  = found ? found.item : { title: _aoDetailOrig, produto: '', date: _aoDetailDate };
+
+  var PROD_COLORS = { TGC:'#06B6D4', DP:'#EC4899', Box:'#A855F7', Ordix:'#EF4444', QIAE:'#F59E0B', Editorial:'#F43F5E', Meta:'#6366F1' };
+  var DAY_NAMES   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  var MES_NAMES   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  var d = new Date(_aoDetailDate + 'T00:00:00');
+  var dateLabel = DAY_NAMES[d.getDay()] + ', ' + d.getDate() + ' de ' + MES_NAMES[d.getMonth()] + ' ' + d.getFullYear();
+
+  var pc = PROD_COLORS[item.produto] || '#9CA3AF';
+  var sk = item.status || 'pendente';
+  var sc = { pendente:{label:'Pendente',color:'#6B7280'}, producao:{label:'Em produção',color:'#F59E0B'}, aprovado:{label:'Aprovado',color:'#6366F1'}, publicado:{label:'Publicado',color:'#10B981'} };
+  var scur = sc[sk] || sc['pendente'];
+
+  var iStyle = 'background:rgba(255,255,255,0.06);border:1px solid #2A2D3E;border-radius:8px;padding:8px 12px;font-size:12px;color:#E5E7EB;font-family:inherit;outline:none;width:100%;box-sizing:border-box;transition:border-color .15s';
+  var sStyle = 'background:#0F1117;border:1px solid #2A2D3E;color:#E5E7EB;border-radius:8px;padding:7px 10px;font-size:11px;font-family:inherit;outline:none;width:100%;box-sizing:border-box';
+  var lblStyle = 'font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block';
+
+  var html = '';
+
+  // ── Header ──────────────────────────────────────
+  html += '<div style="padding:16px 20px;border-bottom:1px solid #2A2D3E;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;background:#13151F;border-radius:16px 16px 0 0">';
+  html += '<div style="flex:1;min-width:0">';
+  html += '<div style="font-size:10px;color:#6B7280;margin-bottom:4px">' + dateLabel + '</div>';
+  html += '<div style="font-size:14px;font-weight:700;color:#E5E7EB;line-height:1.3;word-break:break-word">' + (item.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
+  html += '<div style="display:flex;gap:5px;margin-top:8px">';
+  if (item.produto) html += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:' + pc + '22;color:' + pc + '">' + item.produto + '</span>';
+  html += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:' + scur.color + '22;color:' + scur.color + '">' + scur.label + '</span>';
+  if (item.canal)   html += '<span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.05);color:#9CA3AF">' + item.canal + '</span>';
+  if (item.formato) html += '<span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.05);color:#9CA3AF">' + item.formato + '</span>';
+  html += '</div>';
+  html += '</div>';
+  html += '<button onclick="closeAoDetailModal()" style="background:none;border:none;color:#6B7280;cursor:pointer;font-size:22px;line-height:1;flex-shrink:0;padding:0">&times;</button>';
+  html += '</div>';
+
+  // ── Formulário ──────────────────────────────────
+  html += '<div style="padding:20px;display:flex;flex-direction:column;gap:14px">';
+
+  // Título editável
+  html += '<div><label style="' + lblStyle + '">Título</label>';
+  html += '<input id="aoDetailTitle" value="' + (item.title||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" style="' + iStyle + '"></div>';
+
+  // Status + Produto
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  html += '<div><label style="' + lblStyle + '">Status</label>';
+  html += '<select id="aoDetailStatus" style="' + sStyle + '">';
+  AO_STATUS.forEach(function(s) { html += '<option value="' + s.key + '"' + (sk===s.key?' selected':'') + '>' + s.label + '</option>'; });
+  html += '</select></div>';
+
+  html += '<div><label style="' + lblStyle + '">Responsável</label>';
+  html += '<input id="aoDetailResp" value="' + (item.responsavel||'').replace(/"/g,'&quot;') + '" placeholder="Nome..." style="' + iStyle + '"></div>';
+  html += '</div>';
+
+  // Canal + Formato
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  html += '<div><label style="' + lblStyle + '">Canal</label>';
+  html += '<select id="aoDetailCanal" style="' + sStyle + '"><option value="">Selecione...</option>';
+  AO_CANAIS.forEach(function(c) { html += '<option value="' + c + '"' + ((item.canal||'')===c?' selected':'') + '>' + c + '</option>'; });
+  html += '</select></div>';
+
+  html += '<div><label style="' + lblStyle + '">Formato</label>';
+  html += '<select id="aoDetailFormato" style="' + sStyle + '"><option value="">Selecione...</option>';
+  AO_FORMATOS.forEach(function(f) { html += '<option value="' + f + '"' + ((item.formato||'')===f?' selected':'') + '>' + f + '</option>'; });
+  html += '</select></div>';
+  html += '</div>';
+
+  // Objetivo
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  html += '<div><label style="' + lblStyle + '">Objetivo</label>';
+  html += '<select id="aoDetailObjetivo" style="' + sStyle + '"><option value="">Selecione...</option>';
+  AO_OBJETIVOS.forEach(function(o) { html += '<option value="' + o + '"' + ((item.objetivo||'')===o?' selected':'') + '>' + o + '</option>'; });
+  html += '</select></div>';
+  html += '<div></div>';
+  html += '</div>';
+
+  // Como será feito
+  html += '<div><label style="' + lblStyle + '">Como será feito</label>';
+  html += '<textarea id="aoDetailComo" placeholder="Descreva como esta ação será executada: abordagem, referências, tom, formato de entrega, ferramentas..." style="' + iStyle + ';resize:vertical;min-height:90px;line-height:1.5">' + (item.como||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</textarea></div>';
+
+  // Observações
+  html += '<div><label style="' + lblStyle + '">Observações</label>';
+  html += '<textarea id="aoDetailObs" placeholder="Informações adicionais, links, referências..." style="' + iStyle + ';resize:vertical;min-height:60px;line-height:1.5">' + (item.obs||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</textarea></div>';
+
+  // Botões
+  html += '<div style="display:flex;gap:8px;padding-top:4px">';
+  html += '<button onclick="saveAoDetail()" style="flex:1;background:#6366F1;border:none;color:#fff;cursor:pointer;font-size:12px;font-weight:700;border-radius:8px;padding:10px 16px;font-family:inherit;transition:background .15s" onmouseover="this.style.background=\'#4F46E5\'" onmouseout="this.style.background=\'#6366F1\'">Salvar alterações</button>';
+  html += '<button onclick="closeAoDetailModal()" style="background:none;border:1px solid #2A2D3E;color:#6B7280;cursor:pointer;font-size:12px;border-radius:8px;padding:10px 16px;font-family:inherit">Cancelar</button>';
+  html += '</div>';
+
+  html += '</div>'; // end form
+
+  el.innerHTML = html;
+  // Focus no campo "Como será feito" se já tiver dados básicos
+  setTimeout(function() {
+    var f = document.getElementById('aoDetailComo');
+    if (f && !f.value) f.focus();
+  }, 60);
+}
+
+function saveAoDetail() {
+  var newTitle = (document.getElementById('aoDetailTitle')||{}).value || '';
+  if (!newTitle.trim()) { var t = document.getElementById('aoDetailTitle'); if(t){t.focus();} return; }
+
+  var data = loadAoData();
+  if (!data[_aoDetailDate]) data[_aoDetailDate] = [];
+
+  // Localiza o item existente ou cria a partir do base
+  var found = _findAoDetailItem();
+  var idx = found ? found.idx : -1;
+
+  var newItem = {
+    title:       newTitle.trim(),
+    _origTitle:  _aoDetailOrig,
+    produto:     found && found.item.produto ? found.item.produto : '',
+    type:        found && found.item.type    ? found.item.type    : 'social',
+    status:      (document.getElementById('aoDetailStatus') ||{}).value || 'pendente',
+    canal:       (document.getElementById('aoDetailCanal')  ||{}).value || '',
+    formato:     (document.getElementById('aoDetailFormato')||{}).value || '',
+    objetivo:    (document.getElementById('aoDetailObjetivo')||{}).value || '',
+    responsavel: (document.getElementById('aoDetailResp')   ||{}).value || '',
+    como:        (document.getElementById('aoDetailComo')   ||{}).value || '',
+    obs:         (document.getElementById('aoDetailObs')    ||{}).value || '',
+  };
+
+  if (idx >= 0) {
+    data[_aoDetailDate][idx] = newItem;
+  } else {
+    data[_aoDetailDate].push(newItem);
+  }
+
+  saveAoData(data);
+  closeAoDetailModal();
+  try { renderAlwaysOnList(); } catch(e) {}
+  try { renderAlwaysOn(); } catch(e) {}
+}
 
 
 
