@@ -5842,7 +5842,6 @@ document.addEventListener('DOMContentLoaded', function() {
 var ALWAYS_ON_DATA = [
   // ══════════════ JUNHO 2026 ══════════════
   // ── Semana 1 (01–07) ────────────────────
-  { date:'2026-06-01', title:'Meta Ads — Campanhas ativas',                          produto:'Meta' },
   { date:'2026-06-01', title:'IG TOFU: 5 sinais que sua planilha não dá conta',      produto:'Editorial' },
   { date:'2026-06-01', title:'IG BOFU: Conheça o Ordix',                             produto:'Ordix' },
   { date:'2026-06-01', title:'TGC Eos — Reels 01 Junho 2026',                        produto:'TGC' },
@@ -5948,6 +5947,19 @@ var ALWAYS_ON_DATA = [
   { date:'2026-08-05', title:'IG BOFU: Tron Box',                              produto:'Box' },
   { date:'2026-08-12', title:'IG BOFU: Tron Box',                              produto:'Box' },
 ];
+
+// Injeta "Meta Ads — Campanhas ativas" em todos os dias de 2026
+(function() {
+  var d = new Date('2026-01-01T00:00:00');
+  var end = new Date('2026-12-31T00:00:00');
+  while (d <= end) {
+    var ds = d.getFullYear() + '-' +
+             String(d.getMonth() + 1).padStart(2, '0') + '-' +
+             String(d.getDate()).padStart(2, '0');
+    ALWAYS_ON_DATA.push({ date: ds, title: 'Meta Ads — Campanhas ativas', produto: 'Meta' });
+    d.setDate(d.getDate() + 1);
+  }
+})();
 
 // ── Paleta global por produto (usada no calendário e no modal) ──────────────
 var PRODUTO_COLORS = {
