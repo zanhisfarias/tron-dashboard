@@ -6211,6 +6211,17 @@ function renderAlwaysOnList() {
     });
   });
 
+  // Deduplicar por título dentro de cada data
+  Object.keys(grouped).forEach(function(dateStr) {
+    var seen = {};
+    grouped[dateStr] = grouped[dateStr].filter(function(item) {
+      var key = (item.title || '').trim();
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  });
+
   if (!Object.keys(grouped).length) {
     el.innerHTML = '<div class="text-center py-6 text-[12px]" style="color:#6B7280">Nenhuma ação planejada para este período.</div>';
     return;
