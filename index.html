@@ -75,11 +75,11 @@
     .fade-up { animation: fadeUp 0.4s ease both; }
     #aoDetailModal .ao-detail-header,
     #aoDetailModal .ao-detail-header * { color: #ffffff !important; }
-    #creativesSection { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-    @media (max-width: 1024px) { #creativesSection { grid-template-columns: repeat(4, 1fr); } }
-    @media (max-width: 640px)  { #creativesSection { grid-template-columns: repeat(3, 1fr); } }
+    #creativesSection { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #3A3D52 transparent; }
+    #creativesSection::-webkit-scrollbar { height: 4px; }
+    #creativesSection::-webkit-scrollbar-thumb { background: #2A2D3E; border-radius: 2px; }
     .creative-card {
-      background: #0F1117; border: 1px solid #2A2D3E;
+      flex-shrink: 0; width: 160px; background: #0F1117; border: 1px solid #2A2D3E;
       border-radius: 10px; overflow: hidden; transition: border-color 0.15s, transform 0.15s;
     }
     /* Score: mobile visivel por padrao */
@@ -781,6 +781,8 @@
           <button id="crf-active" onclick="setCreativesFilter('active')" style="border:none;cursor:pointer;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;transition:all .15s;background:transparent;color:#6B7280">Ativos</button>
           <button id="crf-paused" onclick="setCreativesFilter('paused')" style="border:none;cursor:pointer;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;transition:all .15s;background:transparent;color:#6B7280">Pausados</button>
         </div>
+        <button onclick="scrollCreatives(-1)" style="background:#2A2D3E;border:none;color:#9CA3AF;cursor:pointer;border-radius:6px;width:26px;height:26px;font-size:16px;display:flex;align-items:center;justify-content:center">&#8249;</button>
+        <button onclick="scrollCreatives(1)"  style="background:#2A2D3E;border:none;color:#9CA3AF;cursor:pointer;border-radius:6px;width:26px;height:26px;font-size:16px;display:flex;align-items:center;justify-content:center">&#8250;</button>
       </div>
     </div>
     <div id="creativesSection"></div>
@@ -5278,6 +5280,11 @@ function renderCampScores() {
       '</div>' +
       '</div>';
   }).join('');
+}
+
+function scrollCreatives(dir) {
+  var el = document.getElementById('creativesSection');
+  if (el) el.scrollBy({ left: dir * 180, behavior: 'smooth' });
 }
 
 function changeSummaryMonth(dir) {
