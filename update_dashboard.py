@@ -391,7 +391,7 @@ def fetch_creatives():
         cursor = None
         while True:
             params = {
-                "fields": "id,name,status,effective_status,creative{thumbnail_url}",
+                "fields": "id,name,status,effective_status,creative{thumbnail_url,image_url}",
                 "limit": "50",
             }
             if cursor:
@@ -406,7 +406,11 @@ def fetch_creatives():
                 ins = ad_insights_ytd.get(aid, {})
                 if not ins.get("spend", 0):
                     continue  # ignora anúncios sem gasto em 2026
-                thumbnail = ad.get("creative", {}).get("thumbnail_url") or ""
+                creative = ad.get("creative", {})
+                # Prefere image_url (alta resolução); fallback para thumbnail_url com upscale
+                raw_thumb = creative.get("image_url") or creative.get("thumbnail_url") or ""
+                # Substitui p64x64 por p320x320 na URL do CDN do Facebook para alta resolução
+                thumbnail = raw_thumb.replace("p64x64", "p320x320").replace("_p64x64_", "_p320x320_")
                 meta = {
                     "id":        aid,
                     "name":      ad.get("name", ""),
