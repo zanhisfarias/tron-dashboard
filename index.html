@@ -426,6 +426,8 @@
 .sb-item[data-plat="crm"].active             { background: rgba(139,92,246,0.1); color: #C4B5FD; }
 .sb-item[data-plat="ga4"].active::before     { background: #E8710A; }
 .sb-item[data-plat="ga4"].active             { background: rgba(232,113,10,0.1); color: #FCA34D; }
+.sb-item[data-plat="rdstation"].active::before { background: #FF4B00; }
+.sb-item[data-plat="rdstation"].active       { background: rgba(255,75,0,0.1); color: #FF8C66; }
 
 .sb-divider { height: 1px; background: #1E2130; margin: 4px 0; }
 
@@ -680,10 +682,10 @@
       <span class="sb-item-label">Instagram</span>
       <span class="help-tip tip-left" data-tooltip="Métricas orgânicas do perfil Instagram: alcance, engajamento, seguidores e crescimento">?</span>
     </div>
-    <div class="sb-item soon" data-tip="RD Station">
+    <div class="sb-item" data-plat="rdstation" data-tip="RD Station" id="snav-rdstation" onclick="navTo('rdstation')">
       <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.79a16 16 0 0 0 5.3 5.3l1.13-.98a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.42z"/></svg>
       <span class="sb-item-label">RD Station</span>
-      <span class="sb-soon-badge">Em breve</span>
+      <span class="help-tip tip-left" data-tooltip="Email marketing e automação: funil de conversão, campanhas e taxas de abertura/clique via RD Station">?</span>
     </div>
     <div class="sb-item soon" data-tip="Bitly">
       <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
@@ -1578,6 +1580,55 @@
     <div id="crmHistorico" class="space-y-2"></div>
   </div>
 
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     RD STATION — Email Marketing (oculta por padrão)
+════════════════════════════════════════════════════════════ -->
+<div id="rdMain" style="display:none" class="max-w-[1400px] mx-auto px-3 py-3 md:px-6 md:py-6 space-y-4 md:space-y-5">
+
+  <!-- Banner RD Station -->
+  <div class="card p-3 md:p-4 flex items-center gap-3" style="background:#1a0d00;border-color:rgba(255,75,0,0.25)">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(255,75,0,0.12)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF4B00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.79a16 16 0 0 0 5.3 5.3l1.13-.98a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.42z"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-sm font-bold text-white">RD Station <span style="color:#FF4B00">· Email Marketing</span></div>
+      <div id="rdBannerSub" class="text-[11px] mt-0.5" style="color:#FF8C66">Funil de conversão e campanhas de email</div>
+    </div>
+    <div id="rdAuthBadge" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style="background:rgba(239,68,68,0.12);color:#EF4444;display:none">
+      Token expirado
+    </div>
+  </div>
+
+  <!-- Alerta de token expirado -->
+  <div id="rdTokenAlert" style="display:none" class="card p-4 flex items-start gap-3" style="border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <div class="text-sm font-bold" style="color:#EF4444">Reconexão necessária com o RD Station</div>
+      <div class="text-xs mt-1" style="color:#9CA3AF">O token OAuth expirou ou foi revogado. Para restaurar os dados, siga os passos:</div>
+      <ol class="text-xs mt-2 space-y-1" style="color:#9CA3AF;list-style:decimal;padding-left:16px">
+        <li>Acesse o RD Station Marketing → Configurações → Integrações → API</li>
+        <li>Gere um novo código de autorização</li>
+        <li>Atualize <code style="color:#FF8C66">RD_STATION_TOKEN</code> em <code style="color:#FF8C66">meta_ads_config.env</code></li>
+        <li>Execute <code style="color:#FF8C66">python update_dashboard.py</code> para atualizar</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- KPI Cards — Funil -->
+  <div id="rdKpiRow" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+
+  <!-- Campanhas de Email -->
+  <div class="card p-4 md:p-5" style="border-color:rgba(255,75,0,0.15)">
+    <div class="text-xs font-bold uppercase tracking-widest mb-3" style="color:#FF8C66">Campanhas de Email Marketing</div>
+    <div id="rdCampTable" class="overflow-x-auto">
+      <div class="text-xs text-center py-6" style="color:#6B7280">Nenhuma campanha encontrada</div>
+    </div>
+  </div>
+
+  <!-- Nota de integração -->
+  <div class="text-[10px] text-center" style="color:#4B5563">Dados atualizados via RD Station Marketing API · Acesse <span style="color:#FF8C66">rdstation.com.br</span> para detalhes completos</div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -4070,6 +4121,9 @@ function renderKPIs() {
 
   kpis.push(
     { label: 'CPL',             value: agg.cpl,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpl',  trendMetric: 'cpl',    tooltip: 'Custo por Lead: valor m\u00e9dio investido para cada formul\u00e1rio preenchido' },
+    { label: 'CTR',             value: agg.ctr,         fmtFn: function(v) { return fmt.pct(v); }, metric: 'ctr',  trendMetric: 'ctr',    tooltip: 'Taxa de Cliques: % de pessoas que clicaram ap\u00f3s ver o an\u00fancio. Acima de 1% \u00e9 bom.' },
+    { label: 'CPC',             value: agg.cpc,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpc',  trendMetric: 'cpc',    tooltip: 'Custo por Clique: valor m\u00e9dio pago por cada clique no link do an\u00fancio' },
+    { label: 'CPM',             value: agg.cpm,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpm',  trendMetric: 'cpm',    tooltip: 'Custo por Mil Impress\u00f5es: quanto custa exibir o an\u00fancio 1.000 vezes' },
     { label: 'Cliques',         value: agg.clicks,      fmtFn: function(v) { return fmt.num(v); }, metric: null, trendMetric: 'clicks', tooltip: 'Total de cliques no link do an\u00fancio no per\u00edodo selecionado' },
     { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr',   tooltip: 'Estimativa de pessoas \u00fanicas que viram o an\u00fancio (aproximadamente 72% das impress\u00f5es)' },
     { label: 'Receita',         value: receitaMes,
@@ -5692,8 +5746,8 @@ document.querySelectorAll('#campBar .camp-btn').forEach(function(btn) {
 
 // Plataforma tabs
 var activePlatform = 'social';
-var platColors = { social:'#dd2a7b', organico:'#dd2a7b', meta:'#6366F1', google:'#EA4335', tiktok:'#EE1D52', linkedin:'#0A66C2', crm:'#10B981', onepager:'#10B981' };
-var platBtns   = { social:'platSocial', organico:'platOrganico', meta:'platMeta', google:'platGoogle', crm:'platCrm', onepager:'platOnePager' };
+var platColors = { social:'#dd2a7b', organico:'#dd2a7b', meta:'#6366F1', google:'#EA4335', tiktok:'#EE1D52', linkedin:'#0A66C2', crm:'#10B981', onepager:'#10B981', rdstation:'#FF4B00' };
+var platBtns   = { social:'platSocial', organico:'platOrganico', meta:'platMeta', google:'platGoogle', crm:'platCrm', onepager:'platOnePager', rdstation:'platRdStation' };
 
 function selectPlatform(plat, skipHash) {
   activePlatform = plat;
@@ -5710,6 +5764,7 @@ function selectPlatform(plat, skipHash) {
   var tiktokMain   = document.getElementById('tiktokMain');
   var linkedinMain = document.getElementById('linkedinMain');
   var crmMain      = document.getElementById('crmMain');
+  var rdMain       = document.getElementById('rdMain');
   var onePagerMain = document.getElementById('onePagerMain');
 
   // Reset botões
@@ -5731,6 +5786,7 @@ function selectPlatform(plat, skipHash) {
   if (tiktokMain)   tiktokMain.style.display   = 'none';
   if (linkedinMain) linkedinMain.style.display = 'none';
   if (crmMain)      crmMain.style.display      = 'none';
+  if (rdMain)       rdMain.style.display       = 'none';
   if (onePagerMain) onePagerMain.style.display = 'none';
 
   // Mostra a seção certa
@@ -5763,6 +5819,9 @@ function selectPlatform(plat, skipHash) {
   } else if (plat === 'crm') {
     if (crmMain) crmMain.style.display = '';
     renderCRM();
+  } else if (plat === 'rdstation') {
+    if (rdMain) rdMain.style.display = '';
+    renderRDStation();
   } else if (plat === 'onepager') {
     if (onePagerMain) onePagerMain.style.display = '';
     renderOnePager();
