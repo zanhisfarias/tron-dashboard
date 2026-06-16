@@ -4092,7 +4092,44 @@ function renderKPIs() {
     { label: 'CPC',             value: agg.cpc,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpc',  trendMetric: 'cpc',    tooltip: 'Custo por Clique: valor m\u00e9dio pago por cada clique no link do an\u00fancio' },
     { label: 'CPM',             value: agg.cpm,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpm',  trendMetric: 'cpm',    tooltip: 'Custo por Mil Impress\u00f5es: quanto custa exibir o an\u00fancio 1.000 vezes' },
     { label: 'Cliques',         value: agg.clicks,      fmtFn: function(v) { return fmt.num(v); }, metric: null, trendMetric: 'clicks', tooltip: 'Total de cliques no link do an\u00fancio no per\u00edodo selecionado' },
-    { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr',   tooltip: 'Estimativa de pessoas \u00fanicas que viram o an\u00fancio (aproximadamente 72% das impress\u00f5es)' }
+    { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr',   tooltip: 'Estimativa de pessoas \u00fanicas que viram o an\u00fancio (aproximadamente 72% das impress\u00f5es)' },
+    { label: 'Receita',         value: receitaMes,
+      fmtFn: function(v) {
+        if (v === null) return '--';
+        return v >= 1000 ? 'R$' + (v/1000).toFixed(1) + 'k' : fmt.brl(v);
+      },
+      metric: null, trendMetric: null,
+      colorFn: function(v) { return v === null ? '#6B7280' : v > 0 ? '#10B981' : '#EF4444'; },
+      trendOverride: receitaTrend, trendLower: false,
+      tooltip: 'Receita total do m\u00eas (LU + MRR) registrada no Nectar CRM' },
+    { label: 'CAC',             value: cac,
+      fmtFn: function(v) { return v !== null ? fmt.brl(v) : '--'; },
+      metric: null, trendMetric: null,
+      colorFn: function(v) {
+        if (v === null) return '#6B7280';
+        return v <= TICKET_MEDIO * 0.5 ? '#10B981' : v <= TICKET_MEDIO ? '#F59E0B' : '#EF4444';
+      },
+      trendOverride: cacAnt !== null && cac !== null ? ((cac - cacAnt) / cacAnt * 100) : null,
+      trendLower: true,
+      tooltip: 'Custo de Aquisi\u00e7\u00e3o de Cliente: gasto em ads dividido pelo n\u00famero de vendas fechadas' },
+    { label: 'ROAS',            value: roas,
+      fmtFn: function(v) { return v !== null ? v.toFixed(2) + 'x' : '--'; },
+      metric: null, trendMetric: null,
+      colorFn: function(v) {
+        if (v === null) return '#6B7280';
+        return v >= 3 ? '#10B981' : v >= 1 ? '#F59E0B' : '#EF4444';
+      },
+      trendOverride: roasAnt !== null && roas !== null ? ((roas - roasAnt) / roasAnt * 100) : null,
+      trendLower: false,
+      tooltip: 'Return on Ad Spend: receita gerada dividida pelo investimento em an\u00fancios' },
+    { label: 'LTV 36M',         value: ltv72,
+      fmtFn: function(v) {
+        if (!v) return '--';
+        return v >= 1000 ? 'R$' + (v/1000).toFixed(0) + 'k' : fmt.brl(v);
+      },
+      metric: null, trendMetric: null,
+      colorFn: function(v) { return v > 0 ? '#6366F1' : '#6B7280'; },
+      tooltip: 'Lifetime Value estimado em 36 meses (MRR m\u00e9dio por cliente \u00d7 36)' }
   );
   var filteredDates = getFilteredDates();
   var _prevLabel = prevMonthLabel(filteredDates);
