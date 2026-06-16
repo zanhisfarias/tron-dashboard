@@ -823,38 +823,10 @@
   <canvas id="metricChart" style="display:none"></canvas>
   <div id="funnelChart" style="display:none"></div>
 
-  <!-- Tabela -->
-  <div class="card fade-up" style="animation-delay:0.3s">
-    <div class="flex flex-col md:flex-row md:items-center justify-between px-3 md:px-5 py-3 border-b border-border gap-2">
-      <div>
-        <div class="text-sm font-semibold text-white">Conjuntos de An&#250;ncios</div>
-        <div class="text-[10px] text-muted font-medium mt-0.5 hidden md:block">Per&#237;odo selecionado &middot; Clique no cabe&#231;alho para ordenar</div>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <div id="tableCount" class="text-[10px] md:text-xs font-semibold px-2.5 py-1 rounded-full" style="background:#2A2D3E;color:#9CA3AF"></div>
-      </div>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="tbl">
-        <thead><tr>
-          <th class="text-left" data-col="name">Conjunto <span class="sort-icon">&#8597;</span></th>
-          <th class="text-left" data-col="campaign">Camp. <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right" data-col="spend">Gasto <span class="help-tip" data-tooltip="Total investido no per&#237;odo selecionado" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right hidden md:table-cell" data-col="budget">Verba/dia <span class="help-tip" data-tooltip="Or&#231;amento di&#225;rio configurado no conjunto de an&#250;ncios" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right hidden md:table-cell" data-col="impressions">Impress&#245;es <span class="help-tip" data-tooltip="Total de vezes que o an&#250;ncio foi exibido (inclui repeti&#231;&#245;es para a mesma pessoa)" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right" data-col="ctr">CTR <span class="help-tip" data-tooltip="Taxa de Cliques: % de pessoas que clicaram ap&#243;s ver o an&#250;ncio. Acima de 1% &#233; bom." onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right" data-col="cpc">CPC <span class="help-tip" data-tooltip="Custo por Clique: valor m&#233;dio pago por cada clique no link do an&#250;ncio" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right hidden md:table-cell" data-col="cpm">CPM <span class="help-tip" data-tooltip="Custo por Mil Impress&#245;es: quanto custa exibir o an&#250;ncio 1.000 vezes" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right hidden md:table-cell" data-col="clicks">Cliques <span class="help-tip" data-tooltip="Total de cliques no link do an&#250;ncio no per&#237;odo" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right" data-col="leads">Leads <span class="help-tip" data-tooltip="Formul&#225;rios preenchidos: pessoas que demonstraram interesse e deixaram contato" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-right" data-col="cpl">CPL <span class="help-tip" data-tooltip="Custo por Lead: valor m&#233;dio investido para cada formul&#225;rio preenchido (Gasto &#247; Leads)" onclick="event.stopPropagation()">?</span> <span class="sort-icon">&#8597;</span></th>
-          <th class="text-center" data-col="status">Status <span class="sort-icon">&#8597;</span></th>
-        </tr></thead>
-        <tbody id="adsetTableBody"></tbody>
-      </table>
-    </div>
-    <div id="adsetPagination" class="flex items-center justify-between px-4 py-2 border-t border-border" style="display:none"></div>
-  </div>
+  <!-- Tabela Conjuntos de Anúncios (removida) -->
+  <tbody id="adsetTableBody" style="display:none"></tbody>
+  <div id="adsetPagination" style="display:none"></div>
+  <div id="tableCount" style="display:none"></div>
 
   <!-- Nectar CRM — Funil Leadboard + KPIs (oculto) -->
   <div id="nectarSection" class="grid grid-cols-1 md:grid-cols-3 gap-3 fade-up" style="display:none;animation-delay:0.28s"></div>
