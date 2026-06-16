@@ -200,6 +200,9 @@
     body.light [style*="background:#12141C"] { background: #F3F4F6 !important; }
     body.light [style*="background:#1E2130"] { background: #F3F4F6 !important; }
     body.light [style*="background:#2A2D3E"] { background: #E5E7EB !important; }
+    /* Próximas Ações — light mode: corrige texto branco (#F9FAFB e #E5E7EB) em fundos claros */
+    body.light #alwaysOnList [style*="color:#F9FAFB"] { color: #111827 !important; }
+    body.light #alwaysOnList [style*="color:#E5E7EB"] { color: #374151 !important; }
     /* Cards com fundo escuro fixo — manter texto branco mesmo no modo claro */
     body.light [style*="background:#0d1f18"] { background: #0d1f18 !important; }
     body.light [style*="background:#0d1f18"] [style*="color:#ffffff"] { color: #ffffff !important; }
@@ -6310,9 +6313,10 @@ function renderCalendario() {
       var cellStyle = 'min-height:90px;border-bottom:1px solid rgba(99,102,241,0.12);cursor:pointer;transition:background 0.15s;';
       if (isSel) cellStyle += 'background:rgba(99,102,241,0.10);outline:1.5px solid #6366F1;outline-offset:-1px;';
 
-      var maxVisible  = isMobile ? 2 : ps.length;
+      var maxVisible  = isMobile ? 2 : 5;
       var shownPs     = ps.slice(0, maxVisible);
-      var hiddenCount = ps.length - shownPs.length;
+      var extraPs     = ps.slice(maxVisible);
+      var hiddenCount = extraPs.length;
 
       var todayDot = isToday ? '<span style="display:block;width:5px;height:5px;border-radius:50%;background:#EC4899;margin:1px auto 2px"></span>' : '';
       cells += '<div class="p-1.5" onclick="selectCalDay(\'' + dStr + '\')" style="' + cellStyle + '">'
@@ -6338,7 +6342,30 @@ function renderCalendario() {
       });
 
       if (hiddenCount > 0) {
-        cells += '<div style="font-size:9px;font-weight:700;color:#6B7280;padding:1px 2px">+' + hiddenCount + ' mais</div>';
+        var extraId  = 'calEx_' + dStr.replace(/-/g,'');
+        var extraHtml = '';
+        extraPs.forEach(function(ep) {
+          var epal = ep.pal || PRODUTO_COLORS[ep.produto] || PRODUTO_COLORS.Editorial;
+          var einner = ep.url
+            ? '<a href="' + ep.url + '" target="_blank" rel="noopener" style="color:' + epal[1] + ';text-decoration:none">' + ep.title + '</a>'
+            : ep.title;
+          if (ep.ao) {
+            extraHtml += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:transparent;border:1px dashed ' + epal[2] + '33;border-left:2px solid ' + epal[2] + '">'
+              + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + epal[2] + ';opacity:.6"></span>'
+              + '<span class="text-[10px] font-medium leading-tight" style="color:' + epal[1] + ';opacity:.75;word-break:break-word">' + einner + '</span>'
+              + '</div>';
+          } else {
+            extraHtml += '<div class="flex items-start gap-1 mb-1 px-1.5 py-[3px] rounded" style="background:' + epal[0] + '">'
+              + '<span class="mt-[3px] flex-shrink-0 w-[6px] h-[6px] rounded-full" style="background:' + epal[2] + '"></span>'
+              + '<span class="text-[10px] font-semibold leading-tight" style="color:' + epal[1] + ';word-break:break-word">' + einner + '</span>'
+              + '</div>';
+          }
+        });
+        cells += '<div id="' + extraId + '" style="display:none">' + extraHtml + '</div>'
+          + '<button onclick="event.stopPropagation();(function(id,b){var e=document.getElementById(id);if(!e)return;var o=e.style.display!==\'none\';e.style.display=o?\'none\':\'block\';var a=b.querySelector(\'.cx-arrow\');if(a)a.style.transform=o?\'\':\'rotate(180deg)\';}(\'' + extraId + '\',this))"'
+          + ' style="display:flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:#6B7280;background:transparent;border:none;cursor:pointer;padding:1px 2px;margin-top:1px">'
+          + '<span class="cx-arrow" style="font-size:8px;transition:transform 0.2s">&#9660;</span>'
+          + '<span>+' + hiddenCount + ' mais</span></button>';
       }
 
       cells += '</div>';
