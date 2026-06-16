@@ -807,37 +807,9 @@
   <!-- Budget Pacing -->
   <div id="budgetPacing" style="display:none"></div>
 
-  <!-- Graficos -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-    <div class="card p-3 md:p-5 fade-up" style="animation-delay:0.1s">
-      <div class="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-2">
-        <div>
-          <div class="text-sm font-semibold text-white">Evolu&#231;&#227;o de Leads <span class="help-tip tip-down" data-tooltip="Volume di&#225;rio de leads gerados por campanha. Permite identificar picos, quedas e sazonalidade.">?</span></div>
-          <div class="text-[10px] md:text-xs text-muted font-medium mt-0.5">Volume di&#225;rio por campanha 2026</div>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap text-[10px] font-medium text-muted">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background:#6366F1"></span>MR</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background:#F59E0B"></span>Emp</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background:#10B981"></span>Cont&#225;bil</span>
-        </div>
-      </div>
-      <canvas id="leadsChart"></canvas>
-    </div>
-    <div class="card p-3 md:p-5 fade-up" style="animation-delay:0.15s">
-      <div class="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-2">
-        <div>
-          <div class="text-sm font-semibold text-white">CPC &middot; CPM &middot; CTR <span class="help-tip tip-down" data-tooltip="Comparativo de efici&#234;ncia por conjunto: CPC (custo/clique), CPM (custo/mil impress&#245;es), CTR (% de cliques)">?</span></div>
-          <div class="text-[10px] md:text-xs text-muted font-medium mt-0.5">Comparativo por campanha</div>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <button id="metricCPC" class="period-btn active" data-metric="cpc">CPC</button>
-          <button id="metricCPM" class="period-btn" data-metric="cpm">CPM</button>
-          <button id="metricCTR" class="period-btn" data-metric="ctr">CTR</button>
-        </div>
-      </div>
-      <canvas id="metricChart"></canvas>
-    </div>
-  </div>
+  <!-- Graficos (Evolução de Leads e CPC·CPM·CTR removidos) -->
+  <canvas id="leadsChart" style="display:none"></canvas>
+  <canvas id="metricChart" style="display:none"></canvas>
 
   <!-- Funil + Insights -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -4098,9 +4070,6 @@ function renderKPIs() {
 
   kpis.push(
     { label: 'CPL',             value: agg.cpl,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpl',  trendMetric: 'cpl',    tooltip: 'Custo por Lead: valor m\u00e9dio investido para cada formul\u00e1rio preenchido' },
-    { label: 'CTR',             value: agg.ctr,         fmtFn: function(v) { return fmt.pct(v); }, metric: 'ctr',  trendMetric: 'ctr',    tooltip: 'Taxa de Cliques: % de pessoas que clicaram ap\u00f3s ver o an\u00fancio. Acima de 1% \u00e9 bom.' },
-    { label: 'CPC',             value: agg.cpc,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpc',  trendMetric: 'cpc',    tooltip: 'Custo por Clique: valor m\u00e9dio pago por cada clique no link do an\u00fancio' },
-    { label: 'CPM',             value: agg.cpm,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpm',  trendMetric: 'cpm',    tooltip: 'Custo por Mil Impress\u00f5es: quanto custa exibir o an\u00fancio 1.000 vezes' },
     { label: 'Cliques',         value: agg.clicks,      fmtFn: function(v) { return fmt.num(v); }, metric: null, trendMetric: 'clicks', tooltip: 'Total de cliques no link do an\u00fancio no per\u00edodo selecionado' },
     { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr',   tooltip: 'Estimativa de pessoas \u00fanicas que viram o an\u00fancio (aproximadamente 72% das impress\u00f5es)' },
     { label: 'Receita',         value: receitaMes,
