@@ -878,6 +878,9 @@
     <div id="adsetPagination" class="flex items-center justify-between px-4 py-2 border-t border-border" style="display:none"></div>
   </div>
 
+  <!-- Nectar CRM — Funil Leadboard + KPIs -->
+  <div id="nectarSection" class="grid grid-cols-1 md:grid-cols-3 gap-3 fade-up" style="animation-delay:0.28s"></div>
+
   <!-- Tron Rio Verde -->
   <div id="rvSection" class="fade-up" style="animation-delay:0.31s"></div>
 
@@ -5512,6 +5515,7 @@ function renderAll() {
   try { renderMetricChart(); } catch(e) {}
   try { renderFunnel(); } catch(e) {}
   try { renderInsights(); } catch(e) {}
+  try { renderNectarLeadboard(); } catch(e) {}
   try { renderRioVerde(); } catch(e) {}
   try { renderTable(); } catch(e) {}
   try { renderLeadTypes(); } catch(e) {}
