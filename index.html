@@ -4103,6 +4103,15 @@ function renderKPIs() {
     { label: 'CPM',             value: agg.cpm,         fmtFn: function(v) { return fmt.brl(v); }, metric: 'cpm',  trendMetric: 'cpm',    tooltip: 'Custo por Mil Impress\u00f5es: quanto custa exibir o an\u00fancio 1.000 vezes' },
     { label: 'Cliques',         value: agg.clicks,      fmtFn: function(v) { return fmt.num(v); }, metric: null, trendMetric: 'clicks', tooltip: 'Total de cliques no link do an\u00fancio no per\u00edodo selecionado' },
     { label: 'Alcance',         value: agg.impr * 0.72, fmtFn: function(v) { return fmt.k(v); },   metric: null, trendMetric: 'impr',   tooltip: 'Estimativa de pessoas \u00fanicas que viram o an\u00fancio (aproximadamente 72% das impress\u00f5es)' },
+    { label: 'Receita',         value: receitaMes,
+      fmtFn: function(v) {
+        if (v === null) return '--';
+        return v >= 1000 ? 'R$' + (v/1000).toFixed(1) + 'k' : fmt.brl(v);
+      },
+      metric: null, trendMetric: null,
+      colorFn: function(v) { return v === null ? '#6B7280' : v > 0 ? '#10B981' : '#EF4444'; },
+      trendOverride: receitaTrend, trendLower: false,
+      tooltip: 'Receita total do m\u00eas (LU + MRR) registrada no Nectar CRM' }
   );
   var filteredDates = getFilteredDates();
   var _prevLabel = prevMonthLabel(filteredDates);
