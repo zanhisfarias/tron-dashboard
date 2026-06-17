@@ -620,14 +620,6 @@
 <!-- HEADER -->
 <header class="sticky top-0 z-50 border-b border-border" style="background:#0F1117cc;backdrop-filter:blur(12px)">
   <div class="max-w-[1400px] mx-auto px-3 md:px-6 py-2 md:py-0 md:h-14 flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-4">
-    <!-- Logo -->
-    <div class="flex items-center gap-2 flex-shrink-0">
-      <img src="Logo/Favcon.png" alt="Tron" class="w-7 h-7 rounded-lg object-contain" style="background:#fff" />
-      <div>
-        <div class="text-xs md:text-sm font-bold text-white leading-none">Tron</div>
-        <div class="hidden md:block text-[10px] text-muted font-medium">Dashboard de Performance</div>
-      </div>
-    </div>
     <!-- Hamburger mobile -->
     <button id="sbHamburger" onclick="toggleSidebar()" class="flex items-center justify-center" style="width:34px;height:34px;background:#1E2130;border:1px solid #2A2D3E;border-radius:8px;cursor:pointer;flex-shrink:0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -953,14 +945,6 @@
           <div id="calTitleLabel" class="text-lg font-black text-white" style="min-width:120px;text-align:center">Maio 2026</div>
           <button onclick="navCalendario(1)" id="calNextBtn" style="background:#1E2130;border:1px solid #2A2D3E;color:#9CA3AF;border-radius:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" onmouseover="this.style.color='#fff';this.style.borderColor='#6366F1'" onmouseout="this.style.color='#9CA3AF';this.style.borderColor='#2A2D3E'">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <span style="width:1px;height:16px;background:#2A2D3E;flex-shrink:0;align-self:center;margin:0 2px"></span>
-          <button id="aoMonthBtn" onclick="toggleMonthPicker('aoMonthPicker',this,'ao')" class="ds-btn flex items-center gap-1.5" style="padding:4px 9px 4px 11px;font-size:11px">
-            <span id="aoMonthLabel">Junho</span>
-            <svg width="7" height="5" viewBox="0 0 10 6" fill="currentColor" style="opacity:0.5;flex-shrink:0"><path d="M0 0l5 6 5-6z"/></svg>
-          </button>
-          <button onclick="toggleMonthPicker('aoMonthPicker',this,'ao')" id="aoCalBtn" class="ds-btn flex items-center justify-center" style="padding:4px 7px;line-height:0">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           </button>
         </div>
       </div>
@@ -6157,90 +6141,67 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Always On — Planejamento editorial (Always On.xlsx) ──
 var ALWAYS_ON_DATA = [
   // ══════════════ JUNHO 2026 ══════════════
-  // ── Semana 1 (01–07) ────────────────────
-  { date:'2026-06-01', title:'IG TOFU: 5 sinais que sua planilha não dá conta',      produto:'Editorial' },
-  { date:'2026-06-01', title:'IG BOFU: Conheça o Ordix',                             produto:'Ordix' },
-  { date:'2026-06-01', title:'TGC Eos — Reels 01 Junho 2026',                        produto:'TGC' },
-  { date:'2026-06-01', title:'TGC Eos — Estático Feed+Story Junho 2026',             produto:'TGC' },
-  { date:'2026-06-01', title:'Box — Estático Feed+Story Junho 2026',                 produto:'Box' },
-  { date:'2026-06-01', title:'Box — Reels 01 Junho 2026',                            produto:'Box' },
-  { date:'2026-06-01', title:'DP — Retrabalho DP Feed+Story',                        produto:'DP' },
-  { date:'2026-06-01', title:'DP — Folha Pagamento Feed+Story',                      produto:'DP' },
-  { date:'2026-06-01', title:'Ordix — Reels 01 Maio 2026',                           produto:'Ordix' },
-  { date:'2026-06-01', title:'Ordix — Reels 02 Maio 2026',                           produto:'Ordix' },
-  { date:'2026-06-01', title:'Ordix — Estático Feed+Story Maio 2026',                produto:'Ordix' },
-  { date:'2026-06-01', title:'Tron Box — Vídeo 1 Feed+Story BSB',                    produto:'Box' },
-  { date:'2026-06-01', title:'TGC Eos GO — Automação Inteligente',                   produto:'TGC' },
-  { date:'2026-06-01', title:'TGC Eos GO — Zan',                                     produto:'TGC' },
-  { date:'2026-06-01', title:'Fidel TGC — Vídeo 1 Feed+Story GO',                    produto:'TGC' },
-  { date:'2026-06-01', title:'Material Rico: Tarefeiro ao Consultor — Reels 01',     produto:'Editorial' },
-  { date:'2026-06-01', title:'Material Rico: Tarefeiro ao Consultor — Reels 02',     produto:'Editorial' },
-  { date:'2026-06-01', title:'Material Rico: Apagando Incêndios — Feed',             produto:'Editorial' },
-  { date:'2026-06-01', title:'Material Rico: Apagando Incêndio — Carrossel',         produto:'Editorial' },
-  { date:'2026-06-02', title:'IG DP: Convite Webinar — Atualizações Trab. 2026',     produto:'DP' },
-  { date:'2026-06-02', title:'Blog MoFu: Indicadores todo escritório contábil',      produto:'Editorial' },
-  { date:'2026-06-03', title:'IG MOFU: Retrabalho fiscal — quanto custa?',           produto:'Editorial' },
-  { date:'2026-06-03', title:'IG: Comunicado Corpus Christi',                        produto:'Editorial' },
-  { date:'2026-06-03', title:'IG DP Fora da Caixa: Cortes NR-1 e Riscos Psicossociais', produto:'DP' },
-  { date:'2026-06-03', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-04', title:'Blog MoFu: Distribuição de lucros até 2028',           produto:'Editorial' },
-  { date:'2026-06-04', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
-  { date:'2026-06-05', title:'IG MOFU: eSocial — erro começa no cadastro',           produto:'DP' },
-  { date:'2026-06-05', title:'IG Shorts DP: NR-1 Riscos Psicossociais',              produto:'DP' },
-  { date:'2026-06-05', title:'IG DP: Convite Webinar — Atualizações Trab.',          produto:'DP' },
-  { date:'2026-06-05', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-07', title:'IG Shorts DP: NR-1 Riscos Psicossociais',              produto:'DP' },
-  // ── Semana 2 (08–14) ────────────────────
-  { date:'2026-06-08', title:'IG TOFU: Hora extra virou rotina — por quê?',          produto:'DP' },
-  { date:'2026-06-08', title:'IG DP: Convite Webinar — Atualizações Trab.',          produto:'DP' },
-  { date:'2026-06-08', title:'Ordix na Mídia: Banner Portal Contábeis',              produto:'Ordix' },
-  { date:'2026-06-08', title:'Ordix na Mídia: Instagram Portal Contábeis',           produto:'Ordix' },
-  { date:'2026-06-08', title:'Ordix na Mídia: Whatsapp Portal Contábeis',            produto:'Ordix' },
-  { date:'2026-06-08', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
-  { date:'2026-06-09', title:'Webinar TOFU: DP Fora da Caixa — Atualizações Trabalhistas 2026', produto:'DP' },
-  { date:'2026-06-09', title:'IG Shorts DP: NR-1 Riscos Psicossociais',              produto:'DP' },
-  { date:'2026-06-09', title:'Blog MoFu: Como utilizar dados contábeis nas decisões',produto:'Editorial' },
-  { date:'2026-06-10', title:'IG TOFU: Férias vencidas — risco trabalhista',         produto:'DP' },
-  { date:'2026-06-10', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
-  { date:'2026-06-10', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-11', title:'Blog ToFu: O que diferencia um escritório estratégico',produto:'Editorial' },
-  { date:'2026-06-11', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
-  { date:'2026-06-12', title:'IG MOFU: IRPF, lucros e dividendos — risco erros manuais', produto:'Editorial' },
-  { date:'2026-06-12', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
-  { date:'2026-06-12', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-14', title:'IG BOFU Ordix: Tributação dividendos até 2026',        produto:'Ordix' },
-  // ── Semana 3 (15–21) ────────────────────
-  { date:'2026-06-15', title:'Ordix na Mídia: Artigo Portal Contábeis',              produto:'Ordix' },
-  { date:'2026-06-15', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
-  { date:'2026-06-15', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
-  { date:'2026-06-16', title:'IG DP: Convite Webinar — IA aplicada ao DP',          produto:'DP' },
-  { date:'2026-06-16', title:'Blog MoFu: Como aumentar valor percebido do serviço',  produto:'Editorial' },
-  { date:'2026-06-17', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
-  { date:'2026-06-17', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-17', title:'IG BOFU: Tron Box — Falta de integração entre sistemas',produto:'Box' },
-  { date:'2026-06-18', title:'Blog ToFu: Reduzir gargalos na rotina contábil',       produto:'Editorial' },
-  { date:'2026-06-18', title:'IG BOFU: Ordix',                                       produto:'Ordix' },
-  { date:'2026-06-19', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-19', title:'IG MoFu: Tron Box — Documentos fiscais e Reforma Trib.',produto:'Box' },
-  // ── Semana 4 (22–28) ────────────────────
-  { date:'2026-06-22', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
-  { date:'2026-06-22', title:'IG BOFU Ordix: Emissão notas na Reforma Tributária',   produto:'Ordix' },
-  { date:'2026-06-23', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
-  { date:'2026-06-23', title:'IG DP: Convite Webinar — IA aplicada ao DP',          produto:'DP' },
-  { date:'2026-06-23', title:'Blog ToFu: Crescimento sem caos',                      produto:'Editorial' },
-  { date:'2026-06-24', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  { date:'2026-06-24', title:'IG MoFu: Automação DP — reduz erros no fechamento',   produto:'DP' },
-  { date:'2026-06-25', title:'Blog ToFu: O papel da padronização na produtividade',  produto:'Editorial' },
-  { date:'2026-06-26', title:'IG Shorts DP: Atualizações Trabalhistas',              produto:'DP' },
-  { date:'2026-06-26', title:'IG BOFU: Gestão — Turnover e dados da folha',         produto:'DP' },
-  { date:'2026-06-26', title:'IG BOFU: Tron Box',                                    produto:'Box' },
-  // ── Semana 5 (29–30) ────────────────────
-  { date:'2026-06-29', title:'IG: Dia da Telefonista',                               produto:'Editorial' },
-  { date:'2026-06-29', title:'IG DP: Convite Webinar — IA aplicada ao DP',          produto:'DP' },
-  { date:'2026-06-29', title:'IG QIAE: Benefício dos produtos',                      produto:'QIAE' },
-  { date:'2026-06-29', title:'IG ToFu: Organizar DP para evitar riscos legais',      produto:'DP' },
-  { date:'2026-06-30', title:'Webinar TOFU: DP Fora da Caixa — IA aplicada ao DP',  produto:'DP' },
-  { date:'2026-06-30', title:'Blog ToFu: Riscos fiscais na emissão de notas',        produto:'Editorial' },
+  { date:'2026-06-09', title:'[WEBINAR TOFU] DP Fora da Caixa - Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-15', title:'[ORDIX NA MÍDIA] Artigo no Portal Contábeis', produto:'Ordix' },
+  { date:'2026-06-01', title:'[INSTAGRAM - TOFU] (Gestão) 5 sinais de que sua planilha já não dá conta do seu escritório', produto:'Instagram' },
+  { date:'2026-06-03', title:'[INSTAGRAM - MOFU] (Otimização) Retrabalho fiscal: quanto custa corrigir erros que poderiam ser evitados', produto:'Instagram' },
+  { date:'2026-06-05', title:'[INSTAGRAM - MOFU] (eSocial) O erro no eSocial pode começar em um cadastro simples', produto:'Instagram' },
+  { date:'2026-06-08', title:'[INSTAGRAM - TOFU] (Hora Extra) Hora extra virou rotina, você sabe por quê?', produto:'Instagram' },
+  { date:'2026-06-10', title:'[INSTAGRAM - TOFU] (Risco Trabalhista) Férias vencidas: o risco trabalhista que muitas empresas ignoram', produto:'Instagram' },
+  { date:'2026-06-12', title:'[INSTAGRAM - MOFU] (Otimização) IRPF, lucros e dividendos: o risco de erros manuais em um cenário mais rígido', produto:'Instagram' },
+  { date:'2026-06-14', title:'[INSTAGRAM - BOFU] (Ordix) O impacto da tributação de dividendos no planejamento do contador até 2028', produto:'Ordix' },
+  { date:'2026-06-29', title:'[INSTAGRAM] Dia da Telefonista', produto:'Editorial' },
+  { date:'2026-06-01', title:'[INSTAGRAM - BOFU] (Ordix) Conheça o Ordix', produto:'Ordix' },
+  { date:'2026-06-03', title:'[WEBINAR DP Fora da Caixa] CORTES - NR-1 e os Riscos Psicossociais: o que o DP precisa fazer agora', produto:'DP Fora da Caixa' },
+  { date:'2026-06-05', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - NR-1 e os Riscos Psicossociais: o que o DP precisa fazer agora', produto:'DP Fora da Caixa' },
+  { date:'2026-06-07', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - NR-1 e os Riscos Psicossociais: o que o DP precisa fazer agora', produto:'DP Fora da Caixa' },
+  { date:'2026-06-09', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - NR-1 e os Riscos Psicossociais: o que o DP precisa fazer agora', produto:'DP Fora da Caixa' },
+  { date:'2026-06-02', title:'[INSTAGRAM DP Fora da Caixa] Convite WEBINAR: Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-05', title:'[INSTAGRAM DP Fora da Caixa] Convite WEBINAR: Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-08', title:'[INSTAGRAM DP Fora da Caixa] Convite WEBINAR: Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-12', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-17', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-23', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-26', title:'[INSTAGRAM e SHORTS DP Fora da Caixa] CORTES - Atualizações Trabalhistas 2026: o que pode gerar risco no seu DP', produto:'DP Fora da Caixa' },
+  { date:'2026-06-30', title:'[WEBINAR TOFU] DP Fora da Caixa - IA aplicada ao DP: automação, produtividade e o novo profissional', produto:'DP Fora da Caixa' },
+  { date:'2026-06-16', title:'[INSTAGRAM DP Fora da Caixa] Convite WEBINAR: IA aplicada ao DP: automação, produtividade e o novo profissional', produto:'DP Fora da Caixa' },
+  { date:'2026-06-23', title:'[INSTAGRAM DP Fora da Caixa] Convite WEBINAR: IA aplicada ao DP: automação, produtividade e o novo profissional', produto:'DP Fora da Caixa' },
+  { date:'2026-06-29', title:'[INSTAGRAM DP Fora da Caixa] Convite WEBINAR: IA aplicada ao DP: automação, produtividade e o novo profissional', produto:'DP Fora da Caixa' },
+  { date:'2026-06-02', title:'[BLOG MOFU] Indicadores que todo escritório contábil deveria ter', produto:'Blog' },
+  { date:'2026-06-04', title:'[BLOG MOFU] Distribuição de lucros até 2025: como garantir isenção até 2028', produto:'Blog' },
+  { date:'2026-06-09', title:'[BLOG MOFU] Como utilizar dados contábeis para orientar decisões estratégicas', produto:'Blog' },
+  { date:'2026-06-11', title:'[BLOG TOFU] O que diferencia um escritório comum de um escritório estratégico de contabilidade', produto:'Blog' },
+  { date:'2026-06-16', title:'[BLOG MOFU] Como aumentar o valor percebido do seu serviço contábil', produto:'Blog' },
+  { date:'2026-06-18', title:'[BLOG TOFU] Reduzir gargalos operacionais na rotina contábil te garante mais tempo e lucro', produto:'Blog' },
+  { date:'2026-06-23', title:'[BLOG TOFU] Crescimento sem caos: como organizar a operação antes de escalar', produto:'Blog' },
+  { date:'2026-06-25', title:'[BLOG TOFU] O papel da padronização na produtividade contábil', produto:'Blog' },
+  { date:'2026-06-30', title:'[BLOG TOFU] Os principais riscos fiscais que começam na emissão de notas', produto:'Blog' },
+  { date:'2026-06-10', title:'[INSTAGRAM QIAÉ] Benefício dos produtos Gerais', produto:'QIAÉ' },
+  { date:'2026-06-15', title:'[ORDIX NA MÍDIA] Banner no Portal Contábeis', produto:'Ordix' },
+  { date:'2026-06-15', title:'[ORDIX NA MÍDIA] INSTAGRAM do Portal Contábeis', produto:'Ordix' },
+  { date:'2026-06-15', title:'[ORDIX NA MÍDIA] Canal do Whatsapp no Portal Contábeis', produto:'Ordix' },
+  { date:'2026-06-04', title:'[INSTAGRAM BOFU] - Ordix', produto:'Ordix' },
+  { date:'2026-06-08', title:'[INSTAGRAM BOFU] - Ordix', produto:'Ordix' },
+  { date:'2026-06-11', title:'[INSTAGRAM BOFU] - Ordix', produto:'Ordix' },
+  { date:'2026-06-15', title:'[INSTAGRAM BOFU] - Ordix', produto:'Ordix' },
+  { date:'2026-06-18', title:'[INSTAGRAM BOFU] - Ordix', produto:'Ordix' },
+  { date:'2026-06-05', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-12', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-19', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-26', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-03', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-10', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-17', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-24', title:'[INSTAGRAM BOFU] - Tron Box', produto:'Box' },
+  { date:'2026-06-15', title:'[INSTAGRAM QIAÉ] Benefício dos produtos Gerais', produto:'QIAÉ' },
+  { date:'2026-06-22', title:'[INSTAGRAM QIAÉ] Benefício dos produtos Gerais', produto:'QIAÉ' },
+  { date:'2026-06-29', title:'[INSTAGRAM QIAÉ] Benefício dos produtos Gerais', produto:'QIAÉ' },
+  { date:'2026-06-17', title:'[INSTAGRAM BOFU] Tron Box - Falta de integração entre sistemas: o erro que mais gera retrabalho no escritório', produto:'Box' },
+  { date:'2026-06-19', title:'[INSTAGRAM MOFU] Tron Box - Documentos fiscais, auditoria e Reforma Tributária: organização deixa de ser opcional', produto:'Box' },
+  { date:'2026-06-22', title:'[INSTAGRAM BOFU] Ordix - Emissão de notas na Reforma Tributária: o que realmente muda na prática', produto:'Ordix' },
+  { date:'2026-06-24', title:'[INSTAGRAM MOFU] Automação - Como a automação do DP reduz erros e acelera o fechamento da folha', produto:'Instagram' },
+  { date:'2026-06-26', title:'[INSTAGRAM BOFU] Gestão - Turnover alto? Como os dados da sua folha de pagamento explicam por que as pessoas estão saindo', produto:'Instagram' },
+  { date:'2026-06-29', title:'[INSTAGRAM TOFU] Otimização - Como organizar o DP para evitar riscos legais', produto:'Instagram' },
   // ══════════════ JULHO 2026 ══════════════
   { date:'2026-07-01', title:'IG BOFU: Tron Box',                              produto:'Box' },
   { date:'2026-07-02', title:'IG Shorts DP: IA aplicada ao DP',                produto:'DP' },
@@ -6279,13 +6240,17 @@ var ALWAYS_ON_DATA = [
 
 // ── Paleta global por produto (usada no calendário e no modal) ──────────────
 var PRODUTO_COLORS = {
-  TGC:       ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
-  DP:        ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
-  Box:       ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
-  Ordix:     ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
-  QIAE:      ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
-  Editorial: ['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
-  Meta:      ['rgba(99,102,241,0.13)',  '#A5B4FC', '#6366F1']
+  TGC:              ['rgba(6,182,212,0.13)',   '#67E8F9', '#06B6D4'],
+  DP:               ['rgba(236,72,153,0.13)',  '#F9A8D4', '#EC4899'],
+  'DP Fora da Caixa': ['rgba(236,72,153,0.13)', '#F9A8D4', '#EC4899'],
+  Box:              ['rgba(168,85,247,0.13)',  '#C4B5FD', '#A855F7'],
+  Ordix:            ['rgba(239,68,68,0.13)',   '#FCA5A5', '#EF4444'],
+  QIAE:             ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
+  'QIAÉ':           ['rgba(245,158,11,0.13)',  '#FDE68A', '#F59E0B'],
+  Instagram:        ['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
+  Blog:             ['rgba(16,185,129,0.13)',  '#6EE7B7', '#10B981'],
+  Editorial:        ['rgba(244,63,94,0.13)',   '#FDA4AF', '#F43F5E'],
+  Meta:             ['rgba(99,102,241,0.13)',  '#A5B4FC', '#6366F1']
 };
 
 // ── Estado do calendário ──────────────────────────────
