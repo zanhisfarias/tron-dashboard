@@ -56,6 +56,11 @@ NECTAR_TOKEN          = ENV.get("NECTAR_API_TOKEN", "")
 NECTAR_BIG_DATA_TOKEN = ENV.get("NECTAR_BIG_DATA_TOKEN", "")
 NECTAR_BASE   = "https://app.nectarcrm.com.br/crm/api/1"
 
+RD_CLIENT_ID     = ENV.get("RD_CLIENT_ID", "")
+RD_CLIENT_SECRET = ENV.get("RD_CLIENT_SECRET", "")
+RD_REFRESH_TOKEN = ENV.get("RD_STATION_TOKEN", "")
+RD_BASE          = "https://api.rd.services"
+
 LEADBOARD_STAGES = ["Contatos", "Qualificação", "Agendamento", "Qualificada", "Vendida"]
 
 # Mapeamento campanha → código do dashboard
@@ -79,11 +84,13 @@ CAMPAIGN_META = {
 RV_CAMPAIGN_IDS = {
     "CONT_RV": "120247073560660700",
     "EMP_RV":  "120247073793960700",
+    "HCRV":    "120247924431040700",
 }
 
 RV_CAMPAIGN_META = {
-    "CONT_RV": {"label": "Contábil RV",    "color": "#06B6D4"},
-    "EMP_RV":  {"label": "Empresarial RV", "color": "#F97316"},
+    "CONT_RV": {"label": "Contábil RV",          "color": "#06B6D4"},
+    "EMP_RV":  {"label": "Empresarial RV",        "color": "#F97316"},
+    "HCRV":    {"label": "Janela da Esperança",   "color": "#22C55E"},
 }
 
 # ─────────────────────────────────────────────────────────
@@ -407,10 +414,8 @@ def fetch_creatives():
                 if not ins.get("spend", 0):
                     continue  # ignora anúncios sem gasto em 2026
                 creative = ad.get("creative", {})
-                # Prefere image_url (alta resolução); fallback para thumbnail_url com upscale
-                raw_thumb = creative.get("image_url") or creative.get("thumbnail_url") or ""
-                # Substitui p64x64 por p320x320 na URL do CDN do Facebook para alta resolução
-                thumbnail = raw_thumb.replace("p64x64", "p320x320").replace("_p64x64_", "_p320x320_")
+                # Prefere image_url (alta resolução nativa); fallback para thumbnail_url (vídeos)
+                thumbnail = creative.get("image_url") or creative.get("thumbnail_url") or ""
                 meta = {
                     "id":        aid,
                     "name":      ad.get("name", ""),
@@ -477,6 +482,23 @@ def fetch_nectar_leadboard():
     ORIGENS_TRACK = ["Meta Ads", "Google Ads", "Site"]
     ADS_ORIGENS   = set(ORIGENS_TRACK)
 
+    # Mapeamento dos valores reais do Nectar para os rótulos internos
+    ORIGEM_MAP = {
+        "MKT - META ADS":        "Meta Ads",
+        "MKT - FACEBOOK ADS":    "Meta Ads",
+        "MKT - INSTAGRAM ADS":   "Meta Ads",
+        "MKT - GOOGLE ADS":      "Google Ads",
+        "MKT - GOOGLE":          "Google Ads",
+        "MKT - SITE":            "Site",
+        "MKT - BUSCA ORGÂNICA":  "Site",
+        "MKT - ORGANICO":        "Site",
+        "MKT - ORGÂNICO":        "Site",
+        # rótulos legados (caso já existam mapeados)
+        "Meta Ads":    "Meta Ads",
+        "Google Ads":  "Google Ads",
+        "Site":        "Site",
+    }
+
     FASES_ATIVAS  = {"Em Andamento", "Agendada", "Qualificada"}
     FASES_VENDIDA = {"Vendida"}
     FASES_PERDIDA = {"Descartada", "Não Vendida"}
@@ -502,6 +524,10 @@ def fetch_nectar_leadboard():
         "perdidas_historico":      {},
         "receita_hist_by_origem":  {},
         "ticket_por_produto":      {},
+        "top_ufs_mes":             {},
+        "top_vendedores_mes":      {},
+        "top_segmentos_mes":       {},
+        "tempo_qualif_avg":        None,
     }
 
     token = NECTAR_BIG_DATA_TOKEN or NECTAR_TOKEN
@@ -571,27 +597,65 @@ def fetch_nectar_leadboard():
     perdidas_historico       = {}   # { "2026-01": {"Meta Ads": N, ...} }
     receita_hist_by_origem   = {}   # { "2026-01": {"Meta Ads": {"avulso": N, "mrr": N}, ...} }
     ticket_por_produto       = {}
+    top_ufs_mes          = {}   # { "SP": {"leads": N, "vendas": N} }
+    top_vendedores_mes   = {}   # { "Nome": {"leads": N, "vendas": N} }
+    top_segmentos_mes    = {}   # { "Contábil": {"leads": N, "vendas": N} }
+    tempo_qualif_list    = []   # lista de floats para calcular média
 
     for r in rows:
-        origem = r.get("Contato: origem") or ""
+        origem_raw = (r.get("Contato: origem") or "").strip()
+        origem = ORIGEM_MAP.get(origem_raw, "")
+
+        # Histórico total de leads (TODOS as origens, por data de criação)
+        data_criacao = r.get("Leadboard: Data criação") or ""
+        mk_lead = mes_de(data_criacao)
+        if mk_lead:
+            if mk_lead not in leads_historico:
+                leads_historico[mk_lead] = {o: 0 for o in ORIGENS_TRACK}
+                leads_historico[mk_lead]["Total"] = 0
+            leads_historico[mk_lead]["Total"] = leads_historico[mk_lead].get("Total", 0) + 1
+            if origem in ADS_ORIGENS:
+                leads_historico[mk_lead][origem] = leads_historico[mk_lead].get(origem, 0) + 1
+
+        # Demais métricas filtradas apenas para origens rastreadas (Meta / Google / Site)
         if origem not in ADS_ORIGENS:
             continue
 
         fase  = r.get("Leadboard: Fase") or ""
         etapa = (r.get("Leadboard: Etapa") or "").strip().lower()
 
-        # Contagem de leads gerados (por data de criação)
-        data_criacao = r.get("Leadboard: Data criação") or ""
+        # Contagem de leads por origem (mês e ano)
         if origem in ORIGENS_TRACK:
             leads_by_origem_ano[origem] += 1
             if no_mes_atual(data_criacao):
                 leads_by_origem_mes[origem] += 1
-            # Histórico mês a mês
-            mk_lead = mes_de(data_criacao)
-            if mk_lead:
-                if mk_lead not in leads_historico:
-                    leads_historico[mk_lead] = {o: 0 for o in ORIGENS_TRACK}
-                leads_historico[mk_lead][origem] = leads_historico[mk_lead].get(origem, 0) + 1
+
+        # ── UF / Vendedor / Segmento / Tempo (mes atual) ──
+        if no_mes_atual(data_criacao):
+            uf       = (r.get("Contato: UF") or "").strip()
+            vendedor = (r.get("Vendedor do Leadboard") or r.get("Leadboard: Responsável") or "").strip()
+            segmento = (r.get("Contato: segmento") or "").strip()
+            is_venda = fase in FASES_VENDIDA
+
+            if uf:
+                top_ufs_mes.setdefault(uf, {"leads": 0, "vendas": 0})
+                top_ufs_mes[uf]["leads"] += 1
+                if is_venda: top_ufs_mes[uf]["vendas"] += 1
+            if vendedor:
+                top_vendedores_mes.setdefault(vendedor, {"leads": 0, "vendas": 0})
+                top_vendedores_mes[vendedor]["leads"] += 1
+                if is_venda: top_vendedores_mes[vendedor]["vendas"] += 1
+            if segmento:
+                top_segmentos_mes.setdefault(segmento, {"leads": 0, "vendas": 0})
+                top_segmentos_mes[segmento]["leads"] += 1
+                if is_venda: top_segmentos_mes[segmento]["vendas"] += 1
+
+            try:
+                tq = float(str(r.get("Tempo para qualificar (dias)") or "").replace(",", "."))
+                if tq >= 0:
+                    tempo_qualif_list.append(tq)
+            except (ValueError, TypeError):
+                pass
 
         # ── Pipeline ativo ──────────────────────────────
         if fase in FASES_ATIVAS:
@@ -685,6 +749,12 @@ def fetch_nectar_leadboard():
         d["ticket_avulso"] = round(d["avulso"] / n, 2)
         d["ticket_mrr"]    = round(d["mrr"]    / n, 2)
 
+    # Ordena top listas e limita a 5
+    top_ufs_mes        = dict(sorted(top_ufs_mes.items(),       key=lambda x: x[1]["leads"], reverse=True)[:5])
+    top_vendedores_mes = dict(sorted(top_vendedores_mes.items(), key=lambda x: x[1]["leads"], reverse=True)[:8])
+    top_segmentos_mes  = dict(sorted(top_segmentos_mes.items(), key=lambda x: x[1]["leads"], reverse=True)[:5])
+    tempo_qualif_avg   = round(sum(tempo_qualif_list) / len(tempo_qualif_list), 1) if tempo_qualif_list else None
+
     print(f"      Pipeline: {pipeline}")
     print(f"      Pipeline por origem: {pipeline_by_origem}")
     print(f"      Leads mês por origem: {leads_by_origem_mes}")
@@ -715,6 +785,10 @@ def fetch_nectar_leadboard():
         "perdidas_historico":      perdidas_historico,
         "receita_hist_by_origem":  receita_hist_by_origem,
         "ticket_por_produto":      ticket_por_produto,
+        "top_ufs_mes":             top_ufs_mes,
+        "top_vendedores_mes":      top_vendedores_mes,
+        "top_segmentos_mes":       top_segmentos_mes,
+        "tempo_qualif_avg":        tempo_qualif_avg,
     }
 
 
@@ -876,8 +950,27 @@ def fetch_rv_data():
 # 7. GERAÇÃO DO BLOCO JS
 # ─────────────────────────────────────────────────────────
 
-def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, creatives_by_month=None, nectar=None, total_budget=0, rv_data=None, organic=None):
+def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, creatives_by_month=None, nectar=None, total_budget=0, rv_data=None, organic=None, rd_station=None):
     """Gera o bloco de dados JS para injetar no HTML."""
+
+    # NECTAR_CROSS — lê do HTML atual para preservar (não é recalculado aqui)
+    import re as _re
+    _html_path = os.path.join(os.path.dirname(__file__), "index.html")
+    _nectar_cross_js = 'var NECTAR_CROSS = {};'
+    try:
+        with open(_html_path, encoding="utf-8") as _f:
+            _html = _f.read()
+        # Extrai tudo entre "var NECTAR_CROSS = " e o ";" que encerra a linha
+        # Usa busca por marcador de início e fim de linha para suportar JSON aninhado
+        _start = _html.find('var NECTAR_CROSS = ')
+        if _start != -1:
+            _end = _html.find('\n', _start)
+            _line = _html[_start:_end].rstrip()
+            # Só preserva se contiver dados reais (não vazio)
+            if _line and _line != 'var NECTAR_CROSS = {};':
+                _nectar_cross_js = _line
+    except Exception:
+        pass
 
     # CAMPAIGNS com orçamentos reais
     camp_lines = []
@@ -954,6 +1047,10 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
             v["ctr"] = round(v["clicks"] / v["impressions"] * 100, 2) if v["impressions"] else 0
     lead_type_js = "var LEAD_TYPE_DATA = " + json.dumps(lead_type_data, ensure_ascii=False, separators=(',', ':')) + ";"
 
+    # RD STATION
+    _empty_rd = {"auth_ok": False, "funnel": {}, "campaigns": [], "emails": []}
+    rd_station_js = "var RD_STATION_DATA = " + json.dumps(rd_station or _empty_rd, ensure_ascii=False, separators=(',', ':')) + ";"
+
     # ORGÂNICO
     _default_organic = {
         "ig": {"username":"tron_sistemas","followers":8621,"following":412,"follower_gain":236,
@@ -983,6 +1080,8 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 
 {nectar_js}
 
+{_nectar_cross_js}
+
 {total_budget_js}
 {active_ads_js}
 
@@ -992,9 +1091,247 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
 
 {organic_js}
 
+{rd_station_js}
+
 // DATA:END"""
 
     return block
+
+# ─────────────────────────────────────────────────────────
+# 5c. DADOS RD STATION MARKETING
+# ─────────────────────────────────────────────────────────
+
+def fetch_rd_station():
+    """Busca dados do RD Station via MCP proxy (API key)."""
+    import urllib.request as _ureq
+
+    MCP_URL = "https://mcp.rdstationmentor.com/marketing/mcp?key=019ed0a8-caf5-7310-a309-b6f69187aaf3"
+    CACHE_FILE = os.path.join(os.path.dirname(__file__), "rd_data_cache.json")
+
+    _empty = {
+        "auth_ok": False,
+        "total_campaigns": 0,
+        "total_workflows": 0,
+        "workflows_enabled": 0,
+        "total_lps": 0,
+        "lps_published": 0,
+        "recent_campaigns": [],
+        "workflows": [],
+        "mes_stats": {},
+        "funnel": {},
+        "email_metrics": [],
+        "avg_open_rate": None,
+        "avg_click_rate": None,
+        "avg_bounce_rate": None,
+        "avg_delivered_rate": None,
+        "total_delivered": 0,
+        "total_bounced": 0,
+        "total_opened": 0,
+        "total_clicked": 0,
+    }
+
+    def mcp_call(name, args):
+        payload = json.dumps({
+            "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+            "params": {"name": name, "arguments": args}
+        }).encode()
+        req = _ureq.Request(MCP_URL, data=payload,
+            headers={"Content-Type": "application/json",
+                     "Accept": "application/json, text/event-stream"})
+        try:
+            with _ureq.urlopen(req, timeout=30) as r:
+                raw = r.read().decode("utf-8", errors="replace")
+            for line in raw.splitlines():
+                if line.startswith("data:"):
+                    try:
+                        return json.loads(line[5:].strip())
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"    MCP call error: {e}")
+        return None
+
+    def mcp_text(name, args):
+        r = mcp_call(name, args)
+        if not r:
+            return None
+        if r.get("result", {}).get("isError", False):
+            return None
+        text = r.get("result", {}).get("content", [{}])[0].get("text", "")
+        try:
+            return json.loads(text)
+        except Exception:
+            return None
+
+    # Load cache as base
+    cache = {}
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, encoding="utf-8") as f:
+                cache = json.load(f)
+            print(f"      Cache RD carregado: {cache.get('total_campaigns',0)} campanhas")
+        except Exception:
+            pass
+
+    if not cache:
+        print("  ! RD Station: cache não encontrado. Execute a coleta inicial.")
+        return _empty
+
+    today = date.today()
+    result = dict(_empty)
+    result["auth_ok"] = True
+
+    # Preserve base data from cache
+    for key in ["total_campaigns", "total_workflows", "workflows_enabled",
+                "total_lps", "lps_published", "recent_campaigns",
+                "workflows", "mes_stats"]:
+        if key in cache:
+            result[key] = cache[key]
+
+    # Use cached email_metrics if fresh enough (updated today)
+    cache_date = cache.get("_updated_date", "")
+    if cache_date == today.isoformat() and cache.get("email_metrics"):
+        print(f"      Cache de email_metrics já atualizado hoje — reutilizando.")
+        for key in ["email_metrics", "avg_open_rate", "avg_click_rate",
+                    "avg_bounce_rate", "avg_delivered_rate",
+                    "total_delivered", "total_bounced", "total_opened", "total_clicked"]:
+            if key in cache:
+                result[key] = cache[key]
+        return result
+
+    # Fetch analytics for recent campaigns
+    recent = result.get("recent_campaigns", [])[:15]
+    print(f"  → RD Station: buscando métricas de {len(recent)} campanhas recentes...")
+
+    email_metrics = []
+    seen_campaign_ids = set()
+
+    for i, camp in enumerate(recent):
+        email_id = camp.get("id")
+        if not email_id:
+            continue
+
+        if i > 0:
+            time.sleep(1.2)
+
+        # Step 1: get campaign_id from email detail
+        detail = mcp_text("email_get_by_id", {"id": email_id})
+        if not detail:
+            print(f"    ! email {email_id}: sem detalhes (rate limit?)")
+            continue
+
+        campaign_id = detail.get("campaign_id")
+        if not campaign_id or campaign_id in seen_campaign_ids:
+            continue
+        seen_campaign_ids.add(campaign_id)
+
+        email_name = detail.get("name", camp.get("name", ""))
+        send_at    = (detail.get("send_at") or camp.get("send_at") or "")[:10]
+
+        time.sleep(0.8)
+
+        # Step 2: get analytics for this campaign_id
+        try:
+            sd = date.fromisoformat(send_at) if send_at else today
+        except Exception:
+            sd = today
+
+        start_d = (sd - timedelta(days=1)).isoformat()
+        end_d   = min(sd + timedelta(days=7), today).isoformat()
+
+        analytics = mcp_text("emails_by_campaign_analytics", {
+            "start_date":  start_d,
+            "end_date":    end_d,
+            "campaign_id": [campaign_id],
+        })
+
+        if analytics and analytics.get("emails"):
+            em = analytics["emails"][0]
+            entry = {
+                "campaign_id":    campaign_id,
+                "email_id":       email_id,
+                "name":           em.get("campaign_name", email_name),
+                "send_at":        send_at,
+                "contacts_count": em.get("contacts_count", camp.get("leads_count", 0)),
+                "delivered":      em.get("email_delivered_count", 0),
+                "delivered_rate": round(em.get("email_delivered_rate", 0), 1),
+                "bounced":        em.get("email_bounced_count", 0),
+                "opened":         em.get("email_opened_count", 0),
+                "open_rate":      round(em.get("email_opened_rate", 0), 1),
+                "clicked":        em.get("email_clicked_count", 0),
+                "click_rate":     round(em.get("email_clicked_rate", 0), 2),
+                "unsubscribed":   em.get("email_unsubscribed_count", 0),
+                "spam_reported":  em.get("email_spam_reported_count", 0),
+                "spam_rate":      round(em.get("email_spam_reported_rate", 0), 3),
+            }
+            email_metrics.append(entry)
+            print(f"    ✓ {email_name[:38]}: abertura={entry['open_rate']}% "
+                  f"click={entry['click_rate']}% bounce={entry['bounced']}")
+        else:
+            # Basic entry without analytics
+            email_metrics.append({
+                "campaign_id":    campaign_id,
+                "email_id":       email_id,
+                "name":           email_name,
+                "send_at":        send_at,
+                "contacts_count": camp.get("leads_count", 0),
+                "delivered":      None,
+                "delivered_rate": None,
+                "bounced":        None,
+                "opened":         None,
+                "open_rate":      None,
+                "clicked":        None,
+                "click_rate":     None,
+                "unsubscribed":   None,
+                "spam_reported":  None,
+                "spam_rate":      None,
+            })
+            print(f"    - {email_name[:38]}: sem analytics")
+
+    result["email_metrics"] = email_metrics
+
+    # Aggregate stats (only from campaigns with real data)
+    valid = [m for m in email_metrics if m.get("open_rate") is not None]
+    if valid:
+        result["avg_open_rate"]      = round(sum(m["open_rate"] for m in valid) / len(valid), 1)
+        result["avg_click_rate"]     = round(sum(m["click_rate"] for m in valid) / len(valid), 2)
+        result["avg_delivered_rate"] = round(sum(m["delivered_rate"] for m in valid) / len(valid), 1)
+        result["total_delivered"]    = sum(m.get("delivered") or 0 for m in valid)
+        result["total_bounced"]      = sum(m.get("bounced")   or 0 for m in valid)
+        result["total_opened"]       = sum(m.get("opened")    or 0 for m in valid)
+        result["total_clicked"]      = sum(m.get("clicked")   or 0 for m in valid)
+        bounce_rates = [
+            (m.get("bounced") or 0) / max(m.get("contacts_count") or 1, 1) * 100
+            for m in valid if m.get("bounced")
+        ]
+        result["avg_bounce_rate"] = round(sum(bounce_rates) / len(bounce_rates), 1) if bounce_rates else 0
+
+    # Save updated cache
+    try:
+        cache.update({
+            "email_metrics":      email_metrics,
+            "avg_open_rate":      result.get("avg_open_rate"),
+            "avg_click_rate":     result.get("avg_click_rate"),
+            "avg_bounce_rate":    result.get("avg_bounce_rate"),
+            "avg_delivered_rate": result.get("avg_delivered_rate"),
+            "total_delivered":    result.get("total_delivered"),
+            "total_bounced":      result.get("total_bounced"),
+            "total_opened":       result.get("total_opened"),
+            "total_clicked":      result.get("total_clicked"),
+            "_updated_date":      today.isoformat(),
+        })
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+        print(f"      Cache RD atualizado com email_metrics.")
+    except Exception as e:
+        print(f"    ! Cache save error: {e}")
+
+    print(f"      Email analytics: {len(valid)} campanhas | "
+          f"avg abertura={result.get('avg_open_rate')}% "
+          f"click={result.get('avg_click_rate')}% "
+          f"bounce={result.get('avg_bounce_rate')}%")
+    return result
+
 
 # ─────────────────────────────────────────────────────────
 # 5b. DADOS ORGÂNICOS — Instagram e Facebook
@@ -1302,12 +1639,15 @@ def main():
     print("\n[7/8] Buscando dados orgânicos (Instagram + Facebook)...")
     organic = fetch_organic_data()
 
+    print("\n[7b] Buscando dados do RD Station Marketing...")
+    rd_station = fetch_rd_station()
+
     print("\n[8/8] Calculando orçamentos e atualizando HTML...")
     camp_budgets = fetch_campaign_budgets()
     budgets = calc_budgets(adsets, camp_budgets)
     total_budget = fetch_total_daily_budget(adsets)
     js_block = build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creatives, creatives_by_month, nectar,
-                               total_budget=total_budget, rv_data=rv_data, organic=organic)
+                               total_budget=total_budget, rv_data=rv_data, organic=organic, rd_station=rd_station)
     update_html(js_block)
 
     print("\n" + "=" * 60)
