@@ -41,5 +41,20 @@
   to   = "/.netlify/functions/verify-otp"
   status = 200
 
+[[redirects]]
+  from = "/api/post-media"
+  to   = "/.netlify/functions/post-media"
+  status = 200
+
+[[redirects]]
+  from = "/api/get-scheduled"
+  to   = "/.netlify/functions/get-scheduled"
+  status = 200
+
+[[redirects]]
+  from = "/api/cancel-scheduled"
+  to   = "/.netlify/functions/cancel-scheduled"
+  status = 200
+
 [build.environment]
   NODE_VERSION = "20"
