@@ -73,11 +73,11 @@ CAMPAIGN_IDS = {
 }
 
 CAMPAIGN_META = {
-    "MR":   {"label": "MR Contábil",     "color": "#6366F1"},
-    "EMP":  {"label": "Empresarial",     "color": "#F59E0B"},
-    "C01":  {"label": "Contábil 01",     "color": "#10B981"},
-    "C00":  {"label": "Contábil 00",     "color": "#8B5CF6"},
-    "INST": {"label": "Institucional",   "color": "#64748B"},
+    "MR":   {"label": "MR Contábil",   "color": "#6366F1", "products": "E-books \u2022 Mat. Ricos"},
+    "EMP":  {"label": "Empresarial",   "color": "#F59E0B", "products": "Tron DP"},
+    "C01":  {"label": "Contábil 01",   "color": "#10B981", "products": "Box \u2022 TGC \u2022 Ordix"},
+    "C00":  {"label": "Contábil 00",   "color": "#8B5CF6", "hidden": True},
+    "INST": {"label": "Institucional", "color": "#64748B"},
 }
 
 # Campanhas da conta Rio Verde
@@ -976,9 +976,14 @@ def build_js_block(all_dates, all_data, adsets, adset_metrics, budgets, creative
     camp_lines = []
     for code, meta in CAMPAIGN_META.items():
         b = budgets.get(code, 0)
+        extra = ""
+        if meta.get("products"):
+            extra += f", products: {json.dumps(meta['products'])}"
+        if meta.get("hidden"):
+            extra += ", hidden: true"
         camp_lines.append(
             f"  {code}: {{ label: {json.dumps(meta['label'])}, "
-            f"color: {json.dumps(meta['color'])}, budget: {b} }},"
+            f"color: {json.dumps(meta['color'])}, budget: {b}{extra} }},"
         )
     campaigns_js = "var CAMPAIGNS = {\n" + "\n".join(camp_lines) + "\n};"
 
