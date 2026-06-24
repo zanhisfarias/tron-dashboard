@@ -8285,12 +8285,6 @@ function _rdRenderEmailTable(metrics) {
 // META ADS — COMPARATIVO POR CAMPANHA
 // ══════════════════════════════════════════════════════════
 
-var _mccExpanded = {};
-
-function toggleMccRow(code) {
-  _mccExpanded[code] = !_mccExpanded[code];
-  renderMetaCampComparison();
-}
 
 function renderMetaCampComparison() {
   var el = document.getElementById('metaCampCompTable');
@@ -8347,15 +8341,9 @@ function renderMetaCampComparison() {
   var cplVals = sorted.map(function(c) { return stats[c].cpl; }).filter(function(v) { return v !== null; });
   var avgCPL  = cplVals.length ? cplVals.reduce(function(a, b) { return a + b; }, 0) / cplVals.length : null;
 
-  // SVG arrow
-  var arrowOpen   = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(90deg);transition:transform .15s"><polyline points="9 18 15 12 9 6"/></svg>';
-  var arrowClosed = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s"><polyline points="9 18 15 12 9 6"/></svg>';
-
-  var rows = [];
-  sorted.forEach(function(c) {
-    var s      = stats[c];
-    var cam    = CAMPAIGNS[c];
-    var isOpen = !!_mccExpanded[c];
+  var rows = sorted.map(function(c) {
+    var s   = stats[c];
+    var cam = CAMPAIGNS[c];
 
     var cplColor = '#E5E7EB';
     if (s.cpl !== null && avgCPL !== null) {
@@ -8363,70 +8351,34 @@ function renderMetaCampComparison() {
     }
 
     var budgetCell = cam.budget > 0
-      ? '<td class="py-2.5 px-2 text-right text-xs" style="color:#9CA3AF">' + F(cam.budget) + '</td>'
-      : '<td class="py-2.5 px-2 text-right text-xs" style="color:#4B5563">—</td>';
+      ? '<td class="py-2.5 px-2 text-right text-xs" style="color:#9CA3AF;vertical-align:top">' + F(cam.budget) + '</td>'
+      : '<td class="py-2.5 px-2 text-right text-xs" style="color:#4B5563;vertical-align:top">—</td>';
 
-    // Main row
-    rows.push(
-      '<tr style="border-top:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="toggleMccRow(\'' + c + '\')">' +
-        '<td class="py-2.5 pr-3" style="min-width:160px">' +
-          '<div class="flex items-center gap-1.5">' +
-            '<span style="width:8px;height:8px;border-radius:50%;background:' + cam.color + ';flex-shrink:0;display:inline-block"></span>' +
-            '<span class="text-xs font-semibold" style="color:#E5E7EB">' + cam.label + '</span>' +
-            '<span style="color:' + cam.color + ';opacity:0.7;line-height:0;margin-left:2px">' + (isOpen ? arrowOpen : arrowClosed) + '</span>' +
-          '</div>' +
-        '</td>' +
-        budgetCell +
-        '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#E5E7EB">' + F(s.spend) + '</td>' +
-        '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#9CA3AF">' + N(s.clicks) + '</td>' +
-        '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:#60A5FA">' + N(s.leads) + '</td>' +
-        '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:' + cplColor + '">' + (s.cpl !== null ? F(s.cpl) : '—') + '</td>' +
-      '</tr>'
-    );
-
-    // Expanded detail row
-    if (isOpen) {
-      var products = cam.products
-        ? cam.products.split(' \u2022 ')
-        : [];
-      var activeCr = (typeof CREATIVES !== 'undefined')
-        ? CREATIVES.filter(function(cr) { return cr.camp === c && cr.status === 'active'; })
-        : [];
-      var uniqueNames = [];
-      activeCr.forEach(function(cr) { if (uniqueNames.indexOf(cr.name) === -1) uniqueNames.push(cr.name); });
-
-      var prodHtml = '';
-      if (products.length) {
-        prodHtml = '<div style="margin-bottom:8px">' +
-          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;margin-bottom:5px">Produtos</div>' +
-          products.map(function(p) {
-            return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">' +
-              '<span style="width:4px;height:4px;border-radius:50%;background:' + cam.color + ';flex-shrink:0;display:inline-block"></span>' +
-              '<span style="font-size:11px;font-weight:600;color:#E5E7EB">' + p.trim() + '</span>' +
-            '</div>';
-          }).join('') +
+    // Products list always visible
+    var prodHtml = '';
+    if (cam.products) {
+      prodHtml = cam.products.split(' \u2022 ').map(function(p) {
+        return '<div style="display:flex;align-items:center;gap:4px;margin-top:3px">' +
+          '<span style="width:3px;height:3px;border-radius:50%;background:' + cam.color + ';opacity:0.7;flex-shrink:0;display:inline-block"></span>' +
+          '<span style="font-size:10px;color:#9CA3AF">' + p.trim() + '</span>' +
         '</div>';
-      }
-
-      var crHtml = '';
-      if (uniqueNames.length) {
-        crHtml = '<div>' +
-          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;margin-bottom:5px">Criativos ativos</div>' +
-          '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
-          uniqueNames.map(function(n) {
-            return '<span style="font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#C4C9D8;white-space:nowrap">' + n + '</span>';
-          }).join('') +
-          '</div></div>';
-      }
-
-      rows.push(
-        '<tr style="background:rgba(0,0,0,0.2)">' +
-          '<td colspan="6" style="padding:10px 16px 12px 28px;border-top:1px solid rgba(255,255,255,0.04)">' +
-            prodHtml + crHtml +
-          '</td>' +
-        '</tr>'
-      );
+      }).join('');
     }
+
+    return '<tr style="border-top:1px solid rgba(255,255,255,0.05)">' +
+      '<td class="py-2.5 pr-3" style="min-width:160px">' +
+        '<div class="flex items-center gap-1.5">' +
+          '<span style="width:8px;height:8px;border-radius:50%;background:' + cam.color + ';flex-shrink:0;display:inline-block"></span>' +
+          '<span class="text-xs font-semibold" style="color:#E5E7EB">' + cam.label + '</span>' +
+        '</div>' +
+        prodHtml +
+      '</td>' +
+      budgetCell +
+      '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#E5E7EB;vertical-align:top">' + F(s.spend) + '</td>' +
+      '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#9CA3AF;vertical-align:top">' + N(s.clicks) + '</td>' +
+      '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:#60A5FA;vertical-align:top">' + N(s.leads) + '</td>' +
+      '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:' + cplColor + ';vertical-align:top">' + (s.cpl !== null ? F(s.cpl) : '—') + '</td>' +
+    '</tr>';
   });
 
   // Totals row
