@@ -2050,7 +2050,7 @@ const IS_MOBILE = window.innerWidth < 768;
 var CAMPAIGNS = {
   MR:  { label: "MR Cont\u00e1bil", color: "#6366F1", budget: 130, products: "E-books \u2022 Mat. Ricos" },
   EMP: { label: "Empresarial",      color: "#F59E0B", budget: 630, products: "Tron DP" },
-  C01: { label: "Cont\u00e1bil 01", color: "#10B981", budget: 760, products: "Box \u2022 TGC \u2022 Ordix" },
+  C01: { label: "Cont\u00e1bil 01", color: "#10B981", budget: 760, products: "Ordix \u2022 Box \u2022 TGC" },
   C00: { label: "Cont\u00e1bil 00", color: "#8B5CF6", budget: 100, hidden: true },
   INST: { label: "Institucional",   color: "#64748B", budget: 0 },
 };
@@ -8285,6 +8285,13 @@ function _rdRenderEmailTable(metrics) {
 // META ADS — COMPARATIVO POR CAMPANHA
 // ══════════════════════════════════════════════════════════
 
+var _mccExpanded = {};
+
+function toggleMccRow(code) {
+  _mccExpanded[code] = !_mccExpanded[code];
+  renderMetaCampComparison();
+}
+
 function renderMetaCampComparison() {
   var el = document.getElementById('metaCampCompTable');
   if (!el || typeof ALL_DATA === 'undefined' || typeof CAMPAIGNS === 'undefined') return;
@@ -8300,7 +8307,7 @@ function renderMetaCampComparison() {
   // Aggregate per campaign code
   var codes = Object.keys(CAMPAIGNS);
   var stats = {};
-  codes.forEach(function(c) { stats[c] = { leads: 0, spend: 0, impr: 0, clicks: 0 }; });
+  codes.forEach(function(c) { stats[c] = { leads: 0, spend: 0, clicks: 0 }; });
 
   allDates.forEach(function(d) {
     if (d < from || d > to) return;
@@ -8311,7 +8318,6 @@ function renderMetaCampComparison() {
       if (!row) return;
       stats[c].leads  += row.leads  || 0;
       stats[c].spend  += row.spend  || 0;
-      stats[c].impr   += row.impr   || 0;
       stats[c].clicks += row.clicks || 0;
     });
   });
@@ -8319,12 +8325,10 @@ function renderMetaCampComparison() {
   // Derived metrics
   codes.forEach(function(c) {
     var s = stats[c];
-    s.cpl = s.leads > 0 ? s.spend / s.leads         : null;
-    s.ctr = s.impr  > 0 ? s.clicks / s.impr * 100   : 0;
-    s.cpm = s.impr  > 0 ? s.spend  / s.impr * 1000  : 0;
+    s.cpl = s.leads > 0 ? s.spend / s.leads : null;
   });
 
-  // Filter to campaigns with spend, exclude hidden (C00), sort by spend desc
+  // Filter to campaigns with spend, exclude hidden, sort by spend desc
   var sorted = codes.filter(function(c) { return stats[c].spend > 0 && !CAMPAIGNS[c].hidden; })
     .sort(function(a, b) { return stats[b].spend - stats[a].spend; });
 
@@ -8338,70 +8342,101 @@ function renderMetaCampComparison() {
     return 'R$\u00a0' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
   var N = function(v) { return Math.round(v || 0).toLocaleString('pt-BR'); };
-  var P = function(v) { return (v || 0).toFixed(2) + '%'; };
 
-  // Average CPL across campaigns (for coloring)
+  // Average CPL for coloring
   var cplVals = sorted.map(function(c) { return stats[c].cpl; }).filter(function(v) { return v !== null; });
   var avgCPL  = cplVals.length ? cplVals.reduce(function(a, b) { return a + b; }, 0) / cplVals.length : null;
 
-  var rows = sorted.map(function(c) {
-    var s   = stats[c];
-    var cam = CAMPAIGNS[c];
+  // SVG arrow
+  var arrowOpen   = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(90deg);transition:transform .15s"><polyline points="9 18 15 12 9 6"/></svg>';
+  var arrowClosed = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s"><polyline points="9 18 15 12 9 6"/></svg>';
+
+  var rows = [];
+  sorted.forEach(function(c) {
+    var s      = stats[c];
+    var cam    = CAMPAIGNS[c];
+    var isOpen = !!_mccExpanded[c];
+
     var cplColor = '#E5E7EB';
     if (s.cpl !== null && avgCPL !== null) {
       cplColor = s.cpl <= avgCPL * 0.85 ? '#10B981' : (s.cpl >= avgCPL * 1.3 ? '#EF4444' : '#FBBF24');
     }
-    var ctrColor = s.ctr >= 1.0 ? '#10B981' : (s.ctr < 0.5 ? '#EF4444' : '#FBBF24');
+
     var budgetCell = cam.budget > 0
       ? '<td class="py-2.5 px-2 text-right text-xs" style="color:#9CA3AF">' + F(cam.budget) + '</td>'
       : '<td class="py-2.5 px-2 text-right text-xs" style="color:#4B5563">—</td>';
-    // Active creatives for this campaign
-    var activeCr = (typeof CREATIVES !== 'undefined')
-      ? CREATIVES.filter(function(cr) { return cr.camp === c && cr.status === 'active'; })
-      : [];
-    var uniqueNames = [];
-    activeCr.forEach(function(cr) { if (uniqueNames.indexOf(cr.name) === -1) uniqueNames.push(cr.name); });
-    var crHtml = '';
-    if (uniqueNames.length) {
-      crHtml = '<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">';
-      uniqueNames.forEach(function(n) {
-        crHtml += '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:#9CA3AF;white-space:nowrap">' + n + '</span>';
-      });
-      crHtml += '</div>';
+
+    // Main row
+    rows.push(
+      '<tr style="border-top:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="toggleMccRow(\'' + c + '\')">' +
+        '<td class="py-2.5 pr-3" style="min-width:160px">' +
+          '<div class="flex items-center gap-1.5">' +
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + cam.color + ';flex-shrink:0;display:inline-block"></span>' +
+            '<span class="text-xs font-semibold" style="color:#E5E7EB">' + cam.label + '</span>' +
+            '<span style="color:' + cam.color + ';opacity:0.7;line-height:0;margin-left:2px">' + (isOpen ? arrowOpen : arrowClosed) + '</span>' +
+          '</div>' +
+        '</td>' +
+        budgetCell +
+        '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#E5E7EB">' + F(s.spend) + '</td>' +
+        '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#9CA3AF">' + N(s.clicks) + '</td>' +
+        '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:#60A5FA">' + N(s.leads) + '</td>' +
+        '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:' + cplColor + '">' + (s.cpl !== null ? F(s.cpl) : '—') + '</td>' +
+      '</tr>'
+    );
+
+    // Expanded detail row
+    if (isOpen) {
+      var products = cam.products
+        ? cam.products.split(' \u2022 ')
+        : [];
+      var activeCr = (typeof CREATIVES !== 'undefined')
+        ? CREATIVES.filter(function(cr) { return cr.camp === c && cr.status === 'active'; })
+        : [];
+      var uniqueNames = [];
+      activeCr.forEach(function(cr) { if (uniqueNames.indexOf(cr.name) === -1) uniqueNames.push(cr.name); });
+
+      var prodHtml = '';
+      if (products.length) {
+        prodHtml = '<div style="margin-bottom:8px">' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;margin-bottom:5px">Produtos</div>' +
+          products.map(function(p) {
+            return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">' +
+              '<span style="width:4px;height:4px;border-radius:50%;background:' + cam.color + ';flex-shrink:0;display:inline-block"></span>' +
+              '<span style="font-size:11px;font-weight:600;color:#E5E7EB">' + p.trim() + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }
+
+      var crHtml = '';
+      if (uniqueNames.length) {
+        crHtml = '<div>' +
+          '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;margin-bottom:5px">Criativos ativos</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
+          uniqueNames.map(function(n) {
+            return '<span style="font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#C4C9D8;white-space:nowrap">' + n + '</span>';
+          }).join('') +
+          '</div></div>';
+      }
+
+      rows.push(
+        '<tr style="background:rgba(0,0,0,0.2)">' +
+          '<td colspan="6" style="padding:10px 16px 12px 28px;border-top:1px solid rgba(255,255,255,0.04)">' +
+            prodHtml + crHtml +
+          '</td>' +
+        '</tr>'
+      );
     }
-    var prodHtml = cam.products
-      ? '<div style="margin-top:2px;font-size:9px;font-weight:600;color:' + cam.color + ';opacity:0.85">' + cam.products + '</div>'
-      : '';
-    return '<tr style="border-top:1px solid rgba(255,255,255,0.05)">' +
-      '<td class="py-2.5 pr-3" style="min-width:160px">' +
-        '<div class="flex items-center gap-2">' +
-          '<span style="width:8px;height:8px;border-radius:50%;background:' + cam.color + ';flex-shrink:0;display:inline-block"></span>' +
-          '<span class="text-xs font-semibold" style="color:#E5E7EB">' + cam.label + '</span>' +
-        '</div>' +
-        prodHtml +
-        crHtml +
-      '</td>' +
-      budgetCell +
-      '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:#E5E7EB">' + F(s.spend) + '</td>' +
-      '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:#60A5FA">' + N(s.leads) + '</td>' +
-      '<td class="py-2.5 px-2 text-right text-xs font-bold" style="color:' + cplColor + '">' + (s.cpl !== null ? F(s.cpl) : '—') + '</td>' +
-      '<td class="py-2.5 px-2 text-right text-xs" style="color:#9CA3AF">' + N(s.impr) + '</td>' +
-      '<td class="py-2.5 px-2 text-right text-xs font-semibold" style="color:' + ctrColor + '">' + P(s.ctr) + '</td>' +
-      '<td class="py-2.5 px-2 text-right text-xs" style="color:#9CA3AF">' + F(s.cpm) + '</td>' +
-    '</tr>';
   });
 
   // Totals row
-  var tot = { leads: 0, spend: 0, impr: 0, clicks: 0 };
+  var tot = { leads: 0, spend: 0, clicks: 0 };
   sorted.forEach(function(c) {
     tot.leads  += stats[c].leads;
     tot.spend  += stats[c].spend;
-    tot.impr   += stats[c].impr;
     tot.clicks += stats[c].clicks;
   });
   var totCPL = tot.leads > 0 ? tot.spend / tot.leads : null;
-  var totCTR = tot.impr  > 0 ? tot.clicks / tot.impr * 100 : 0;
-  var totCPM = tot.impr  > 0 ? tot.spend  / tot.impr * 1000 : 0;
 
   el.innerHTML =
     '<table class="w-full" style="border-collapse:collapse">' +
@@ -8410,11 +8445,9 @@ function renderMetaCampComparison() {
           '<th class="pb-2 text-left text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">Campanha</th>' +
           '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">Budget/d</th>' +
           '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">Gasto</th>' +
-          '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">Leads</th>' +
+          '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">Cliques</th>' +
+          '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#60A5FA">Leads</th>' +
           '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">CPL</th>' +
-          '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">Impressões</th>' +
-          '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">CTR</th>' +
-          '<th class="pb-2 px-2 text-right text-[10px] font-bold uppercase tracking-wider" style="color:#6B7280">CPM</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>' +
@@ -8423,11 +8456,9 @@ function renderMetaCampComparison() {
           '<td class="pt-2.5 pr-3 text-xs font-bold" style="color:#9CA3AF">Total</td>' +
           '<td class="pt-2.5 px-2 text-right text-xs" style="color:#6B7280">—</td>' +
           '<td class="pt-2.5 px-2 text-right text-xs font-bold" style="color:#E5E7EB">' + F(tot.spend) + '</td>' +
+          '<td class="pt-2.5 px-2 text-right text-xs font-semibold" style="color:#9CA3AF">' + N(tot.clicks) + '</td>' +
           '<td class="pt-2.5 px-2 text-right text-xs font-bold" style="color:#60A5FA">' + N(tot.leads) + '</td>' +
           '<td class="pt-2.5 px-2 text-right text-xs font-bold" style="color:#E5E7EB">' + (totCPL !== null ? F(totCPL) : '—') + '</td>' +
-          '<td class="pt-2.5 px-2 text-right text-xs" style="color:#9CA3AF">' + N(tot.impr) + '</td>' +
-          '<td class="pt-2.5 px-2 text-right text-xs font-bold" style="color:#E5E7EB">' + P(totCTR) + '</td>' +
-          '<td class="pt-2.5 px-2 text-right text-xs" style="color:#9CA3AF">' + F(totCPM) + '</td>' +
         '</tr>' +
       '</tbody>' +
     '</table>';

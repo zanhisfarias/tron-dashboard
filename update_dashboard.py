@@ -75,7 +75,7 @@ CAMPAIGN_IDS = {
 CAMPAIGN_META = {
     "MR":   {"label": "MR Contábil",   "color": "#6366F1", "products": "E-books \u2022 Mat. Ricos"},
     "EMP":  {"label": "Empresarial",   "color": "#F59E0B", "products": "Tron DP"},
-    "C01":  {"label": "Contábil 01",   "color": "#10B981", "products": "Box \u2022 TGC \u2022 Ordix"},
+    "C01":  {"label": "Contábil 01",   "color": "#10B981", "products": "Ordix \u2022 Box \u2022 TGC"},
     "C00":  {"label": "Contábil 00",   "color": "#8B5CF6", "hidden": True},
     "INST": {"label": "Institucional", "color": "#64748B"},
 }
