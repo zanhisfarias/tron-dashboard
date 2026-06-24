@@ -19,10 +19,10 @@ const CAMP_ID_TO_CODE = Object.fromEntries(
 );
 
 const CAMPAIGN_META = {
-  MR:   { label: 'MR Contábil',   color: '#6366F1' },
-  EMP:  { label: 'Empresarial',   color: '#F59E0B' },
-  C01:  { label: 'Contábil 01',   color: '#10B981' },
-  C00:  { label: 'Contábil 00',   color: '#8B5CF6' },
+  MR:   { label: 'MR Contábil',   color: '#6366F1', products: 'E-books \u2022 Mat. Ricos' },
+  EMP:  { label: 'Empresarial',   color: '#F59E0B', products: 'Tron DP' },
+  C01:  { label: 'Contábil 01',   color: '#10B981', products: 'Ordix \u2022 Box \u2022 TGC' },
+  C00:  { label: 'Contábil 00',   color: '#8B5CF6', hidden: true },
   INST: { label: 'Institucional', color: '#64748B' },
 };
 
