@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aula de Tráfego Pago — Meta Ads | Thaís</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul: #1877F2;
+      --azul-dark: #0d5fcf;
+      --azul-light: #e7f0fd;
+      --cinza: #f4f6fb;
+      --cinza-borda: #dde3ee;
+      --texto: #1a1a2e;
+      --subtexto: #4a4a6a;
+      --verde: #00c48c;
+      --amarelo: #ffb800;
+      --vermelho: #ff4c4c;
+      --roxo: #7c3aed;
+      --laranja: #f97316;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+      background: var(--cinza);
+      color: var(--texto);
+      line-height: 1.7;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #1877F2 0%, #0d5fcf 60%, #7c3aed 100%);
+      color: white;
+      padding: 48px 40px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 260px; height: 260px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 50%;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -40px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 50px;
+      padding: 5px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 18px;
+    }
+    header h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.88;
+      max-width: 560px;
+      margin: 0 auto 22px;
+    }
+    .header-meta {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .header-meta span {
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* LAYOUT */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* SUMÁRIO */
+    .sumario {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--cinza-borda);
+      padding: 32px 36px;
+      margin: 36px auto;
+      max-width: 1100px;
+      margin-left: 24px;
+      margin-right: 24px;
+    }
+    @media(min-width:1148px){ .sumario { margin-left: auto; margin-right: auto; } }
+    .sumario h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sumario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .sumario-grid a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--cinza);
+      text-decoration: none;
+      color: var(--texto);
+      font-size: 0.93rem;
+      font-weight: 500;
+      transition: background 0.18s, color 0.18s;
+      border: 1px solid transparent;
+    }
+    .sumario-grid a:hover {
+      background: var(--azul-light);
+      color: var(--azul);
+      border-color: var(--azul);
+    }
+    .sumario-grid a .num {
+      background: var(--azul);
+      color: white;
+      border-radius: 6px;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* SEÇÕES */
+    .section {
+      background: white;
+      border-radius: 18px;
+      border: 1px solid var(--cinza-borda);
+      padding: 40px 42px;
+      margin: 28px 24px;
+      max-width: 1100px;
+      scroll-margin-top: 24px;
+    }
+    @media(min-width:1148px){ .section { margin-left: auto; margin-right: auto; } }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 28px;
+      padding-bottom: 22px;
+      border-bottom: 2px solid var(--cinza);
+    }
+    .section-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .icon-blue { background: var(--azul-light); }
+    .icon-green { background: #e6faf3; }
+    .icon-yellow { background: #fff8e1; }
+    .icon-purple { background: #f3eeff; }
+    .icon-orange { background: #fff3e0; }
+    .icon-red { background: #fff0f0; }
+
+    .section-title { flex: 1; }
+    .section-title .step {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--azul);
+      margin-bottom: 4px;
+    }
+    .section-title h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--texto);
+      line-height: 1.25;
+    }
+    .section-title p {
+      color: var(--subtexto);
+      margin-top: 6px;
+      font-size: 0.97rem;
+    }
+
+    /* TIPOGRAFIAS */
+    h3 { font-size: 1.1rem; font-weight: 700; color: var(--texto); margin: 22px 0 10px; }
+    h4 { font-size: 0.97rem; font-weight: 700; color: var(--subtexto); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    p { color: var(--subtexto); margin-bottom: 12px; font-size: 0.97rem; }
+    ul, ol { padding-left: 20px; margin-bottom: 14px; }
+    li { color: var(--subtexto); margin-bottom: 6px; font-size: 0.96rem; }
+    li strong { color: var(--texto); }
+
+    /* CARDS PASSO A PASSO */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 18px;
+      background: var(--cinza);
+      border-radius: 12px;
+      border-left: 4px solid var(--azul);
+    }
+    .step-num {
+      background: var(--azul);
+      color: white;
+      border-radius: 50%;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-content strong { display: block; font-weight: 700; color: var(--texto); margin-bottom: 3px; }
+    .step-content span { font-size: 0.93rem; color: var(--subtexto); }
+
+    /* ALERT BOXES */
+    .alert {
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 0.94rem;
+    }
+    .alert-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .alert-info { background: var(--azul-light); border-left: 4px solid var(--azul); }
+    .alert-info p { color: #1a4fa0; margin: 0; }
+    .alert-success { background: #e6faf3; border-left: 4px solid var(--verde); }
+    .alert-success p { color: #00694d; margin: 0; }
+    .alert-warning { background: #fff8e1; border-left: 4px solid var(--amarelo); }
+    .alert-warning p { color: #7a5500; margin: 0; }
+    .alert-danger { background: #fff0f0; border-left: 4px solid var(--vermelho); }
+    .alert-danger p { color: #8b0000; margin: 0; }
+
+    /* LINKS */
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--azul);
+      color: white !important;
+      text-decoration: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: background 0.18s, transform 0.12s;
+      margin: 4px 4px 4px 0;
+    }
+    .link-btn:hover { background: var(--azul-dark); transform: translateY(-1px); }
+    .link-btn-outline {
+      background: transparent;
+      border: 2px solid var(--azul);
+      color: var(--azul) !important;
+    }
+    .link-btn-outline:hover { background: var(--azul-light); }
+
+    /* GRID CARDS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 18px 0;
+    }
+    .card {
+      border: 1.5px solid var(--cinza-borda);
+      border-radius: 14px;
+      padding: 20px;
+      background: white;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .card:hover { border-color: var(--azul); box-shadow: 0 4px 18px rgba(24,119,242,0.1); }
+    .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .card h3 { font-size: 1rem; margin: 0 0 8px; }
+    .card p { font-size: 0.88rem; margin: 0; }
+
+    /* TABELA */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 0.92rem;
+    }
+    thead th {
+      background: var(--azul);
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+    }
+    thead th:first-child { border-radius: 10px 0 0 0; }
+    thead th:last-child { border-radius: 0 10px 0 0; }
+    tbody tr:nth-child(even) { background: var(--cinza); }
+    tbody td { padding: 11px 16px; border-bottom: 1px solid var(--cinza-borda); color: var(--subtexto); }
+    tbody td strong { color: var(--texto); }
+
+    /* TAGS */
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      margin: 2px;
+    }
+    .tag-blue { background: var(--azul-light); color: var(--azul); }
+    .tag-green { background: #e6faf3; color: #00694d; }
+    .tag-yellow { background: #fff8e1; color: #7a5500; }
+    .tag-purple { background: #f3eeff; color: #5b21b6; }
+    .tag-orange { background: #fff3e0; color: #c2410c; }
+
+    /* NOMENCLATURA */
+    .nomenclatura {
+      background: #1a1a2e;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 22px 24px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.92rem;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+    .nomenclatura .linha { margin-bottom: 8px; }
+    .nomenclatura .label { color: #7dd3fc; font-weight: 700; }
+    .nomenclatura .valor { color: #86efac; }
+    .nomenclatura .separador { color: #f472b6; }
+
+    /* METRICAS */
+    .metricas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .metrica-card {
+      background: var(--cinza);
+      border-radius: 12px;
+      padding: 16px 18px;
+      border: 1.5px solid var(--cinza-borda);
+    }
+    .metrica-card .nome { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--azul); margin-bottom: 4px; }
+    .metrica-card .sigla { font-size: 1.4rem; font-weight: 800; color: var(--texto); margin-bottom: 4px; }
+    .metrica-card .desc { font-size: 0.82rem; color: var(--subtexto); }
+
+    /* DIVIDER */
+    .divider { border: none; border-top: 2px solid var(--cinza); margin: 28px 0; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 36px 24px 48px;
+      color: var(--subtexto);
+      font-size: 0.88rem;
+    }
+    footer strong { color: var(--azul); }
+
+    /* RESPONSIVE — TABLET */
+    @media(max-width: 768px) {
+      header { padding: 36px 24px 32px; }
+      header h1 { font-size: 2rem; }
+      header p { font-size: 1rem; }
+
+      .section { padding: 28px 24px; margin: 18px 16px; border-radius: 14px; }
+      .sumario { padding: 24px 20px; margin: 20px 16px; border-radius: 14px; }
+
+      .section-header { flex-direction: column; gap: 12px; }
+      .section-title h2 { font-size: 1.3rem; }
+
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+      .metricas-grid { grid-template-columns: 1fr 1fr; }
+      .sumario-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* RESPONSIVE — MOBILE */
+    @media(max-width: 480px) {
+      header { padding: 28px 18px 26px; }
+      header h1 { font-size: 1.55rem; }
+      header p { font-size: 0.92rem; }
+      header .badge { font-size: 11px; padding: 4px 13px; }
+
+      .section {
+        padding: 20px 16px;
+        margin: 10px 8px;
+        border-radius: 12px;
+        overflow-x: hidden;
+      }
+      .sumario { padding: 18px 14px; margin: 12px 8px; border-radius: 12px; }
+
+      .section-icon { width: 42px; height: 42px; font-size: 1.3rem; border-radius: 11px; }
+      .section-title h2 { font-size: 1.1rem; }
+      .section-title p { font-size: 0.88rem; }
+
+      h3 { font-size: 1rem; }
+      h4 { font-size: 0.88rem; }
+      p, li { font-size: 0.9rem; }
+
+      .cards-grid { grid-template-columns: 1fr; gap: 12px; }
+      .metricas-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .sumario-grid { grid-template-columns: 1fr; }
+      .sumario-grid a { font-size: 0.88rem; }
+
+      .metrica-card { padding: 13px 14px; }
+      .metrica-card .sigla { font-size: 1.2rem; }
+      .metrica-card .desc { font-size: 0.78rem; }
+
+      .step-item { padding: 13px 13px; gap: 12px; }
+      .step-num { width: 26px; height: 26px; font-size: 12px; }
+      .step-content strong { font-size: 0.92rem; }
+      .step-content span { font-size: 0.87rem; }
+
+      .alert { padding: 13px 14px; font-size: 0.88rem; }
+
+      .link-btn {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        margin: 5px 0;
+        font-size: 0.87rem;
+        padding: 11px 16px;
+      }
+
+      .nomenclatura { font-size: 0.8rem; padding: 16px 14px; }
+
+      .destaque { padding: 16px 16px; }
+      .destaque p { font-size: 0.9rem; }
+
+      .checklist li { font-size: 0.88rem; padding: 9px 12px; }
+
+      /* Tabelas scrolláveis no mobile */
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+      thead, tbody { display: table; width: 100%; min-width: 460px; }
+      thead th, tbody td { padding: 9px 11px; font-size: 0.84rem; }
+
+      footer { padding: 28px 18px 40px; font-size: 0.82rem; }
+    }
+
+    /* RESPONSIVE — EXTRA PEQUENO (< 360px) */
+    @media(max-width: 360px) {
+      header h1 { font-size: 1.35rem; }
+      .section { padding: 16px 12px; margin: 8px 6px; }
+      .metricas-grid { grid-template-columns: 1fr; }
+    }
+
+    /* PROGRESS BAR */
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 24px 0 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 10px;
+    }
+    .progress-seg {
+      height: 10px;
+      flex: 1;
+    }
+
+    /* CHECKLIST */
+    .checklist { list-style: none; padding: 0; }
+    .checklist li {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: var(--cinza);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.94rem;
+    }
+    .checklist li::before {
+      content: '☐';
+      font-size: 1.1rem;
+      color: var(--azul);
+      flex-shrink: 0;
+    }
+
+    /* DESTAQUE */
+    .destaque {
+      background: linear-gradient(135deg, var(--azul-light), #f0e8ff);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin: 18px 0;
+      border: 1.5px solid var(--azul);
+    }
+    .destaque h3 { color: var(--azul); margin-top: 0; }
+    .destaque p { margin: 0; color: var(--texto); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="badge">Aula Completa — Tráfego Pago Meta Ads</div>
+  <h1>Do Zero ao Primeiro Anúncio no ar</h1>
+  <p>Material de Apoio Completo</p>
+</header>
+
+<!-- SUMÁRIO -->
+<div class="sumario">
+  <h2>📋 Conteúdo da Aula</h2>
+  <div class="sumario-grid">
+    <a href="#s1"><span class="num">1</span> Introdução & Cenário do Mercado</a>
+    <a href="#s2"><span class="num">2</span> Criando a Conta do Zero</a>
+    <a href="#s3"><span class="num">3</span> Business Manager & Conta de Anúncios</a>
+    <a href="#s4"><span class="num">4</span> Habilitando a Conta para Anunciar</a>
+    <a href="#s5"><span class="num">5</span> Estratégia por Tipo de Negócio</a>
+    <a href="#s6"><span class="num">6</span> Como Colocar Verba na Conta</a>
+    <a href="#s7"><span class="num">7</span> Tipos de Campanha e Diferenças</a>
+    <a href="#s8"><span class="num">8</span> Nomenclatura de Campanhas</a>
+    <a href="#s9"><span class="num">9</span> Segmentação & Advantage+</a>
+    <a href="#s10"><span class="num">10</span> Criando os Anúncios (Design)</a>
+    <a href="#s11"><span class="num">11</span> Acompanhando os Resultados</a>
+  </div>
+</div>
+
+<!-- SEÇÃO 1 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-icon icon-blue">🚀</div>
+    <div class="section-title">
+      <div class="step">Módulo 1</div>
+      <h2>Introdução & Cenário do Mercado</h2>
+      <p>Por que aprender tráfego pago hoje é uma das habilidades mais valiosas do digital.</p>
+    </div>
+  </div>
+
+  <h3>Por que Tráfego Pago?</h3>
+  <p>Tráfego pago é a habilidade de comprar atenção qualificada para um negócio ou oferta. Enquanto o tráfego orgânico depende de tempo e algoritmo, o tráfego pago é <strong>previsível, escalável e mensurável</strong>.</p>
+
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <h3>Demanda crescente</h3>
+      <p>Mais de 10 milhões de anunciantes ativos no Facebook/Instagram. Toda empresa precisa de alguém que saiba fazer isso funcionar.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h3>Remuneração atrativa</h3>
+      <p>Gestores de tráfego pleno a sênior cobram entre R$ 2.500 e R$ 15.000+/mês. Freelancers cobram por % de verba gerenciada (geralmente 10 a 20%).</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌍</div>
+      <h3>Trabalho remoto</h3>
+      <p>100% remoto. Você pode gerenciar contas de qualquer lugar do mundo, com horários flexíveis.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛠️</div>
+      <h3>Habilidade técnica real</h3>
+      <p>Não é só "impulsionar post". É estratégia, dados, copywriting, design e psicologia do consumidor.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <p><strong>Meta Ads domina:</strong> Facebook e Instagram juntos representam o maior volume de investimento em mídia social no Brasil. Aprender Meta Ads é o ponto de partida mais inteligente para qualquer gestor de tráfego.</p>
+  </div>
+</div>
+
+<!-- SEÇÃO 2 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-icon icon-blue">👤</div>
+    <div class="section-title">
+      <div class="step">Módulo 2</div>
+      <h2>Criando a Conta do Zero</h2>
+      <p>Tudo começa com um perfil pessoal do Facebook. Sem ele, nada funciona.</p>
+    </div>
+  </div>
+
+  <h3>A Hierarquia da Meta — Entenda antes de criar</h3>
+  <div class="destaque">
+    <h3>🏗️ Estrutura completa</h3>
+    <p><strong>Perfil Pessoal Facebook</strong> → <strong>Meta Business Suite (BM)</strong> → <strong>Conta de Anúncios</strong> → <strong>Pixel/Dataset</strong> → <strong>Campanhas</strong></p>
+  </div>
+
+  <h3>Passo 1 — Criar ou usar o Perfil Pessoal</h3>
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Acesse facebook.com e crie uma conta</strong>
+        <span>Use nome real. A Meta exige identidade real. Contas com nomes falsos são suspensas com frequência.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Confirme o e-mail e o número de celular</strong>
+        <span>Ambas as verificações aumentam a confiabilidade da conta perante o algoritmo da Meta.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Ative a autenticação de dois fatores (2FA)</strong>
+        <span>Configurações → Segurança e login → Autenticação de dois fatores. Use o app Google Authenticator.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Complete o perfil básico</strong>
+        <span>Foto de perfil real, data de nascimento correta, pelo menos algumas interações no feed. Contas "vazias" geram desconfiança.</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="https://www.facebook.com/r.php" target="_blank" class="link-btn">➕ Criar conta no Facebook</a>
+
+  <div class="alert alert-warning">
+    <span class="alert-icon">⚠️</span>
+    <p><strong>IMPORTANTE:</strong> Nunca crie mais de 1 conta pessoal. A Meta detecta e bloqueia contas duplicadas. Se você já tem uma conta, use ela.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <h3>Passo 2 — Criar uma Página do Facebook (para o cliente)</h3>
+  <p>Para anunciar, você precisa de uma Página do Facebook vinculada. Uma página pessoal não serve para anúncios.</p>
+
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Acesse facebook.com/pages/create</strong>
+        <span>Escolha "Empresa ou marca" ou "Comunidade ou figura pública".</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Preencha nome, categoria e descrição</strong>
+        <span>Nome da empresa, categoria do segmento (ex: Restaurante, Loja de Roupas, Consultório Médico).</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Adicione foto de perfil e capa</strong>
+        <span>Logo do cliente como foto de perfil. Capa com identidade visual da marca.</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="https://www.facebook.com/pages/create" target="_blank" class="link-btn">📄 Criar Página do Facebook</a>
+</div>
+
+<!-- SEÇÃO 3 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-icon icon-purple">🏢</div>
+    <div class="section-title">
+      <div class="step">Módulo 3</div>
+      <h2>Meta Business Manager & Conta de Anúncios</h2>
+      <p>O Business Manager é o escritório central onde você gerencia tudo para todos os seus clientes.</p>
+    </div>
+  </div>
+
+  <h3>O que é o Meta Business Manager?</h3>
+  <p>É uma plataforma gratuita da Meta que permite gerenciar múltiplas páginas, contas de anúncios, pixels e acessos de equipe em um único lugar, de forma profissional e separada do perfil pessoal.</p>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">✅</span>
+    <p><strong>Regra de ouro:</strong> Cada gestor de tráfego deve ter 1 Business Manager próprio. Os clientes podem ter o deles. Você solicita acesso ao BM deles, ou cria uma conta de anúncios dentro do seu BM para gerenciar para eles.</p>
+  </div>
+
+  <h3>Criando o Business Manager</h3>
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Acesse business.facebook.com</strong>
+        <span>Faça login com seu perfil pessoal e clique em "Criar conta".</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Preencha nome da empresa, seu nome e e-mail</strong>
+        <span>Use o nome do seu negócio de gestor (ex: "Marketing — [Seu Nome]") ou o nome do cliente se estiver criando para ele.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Confirme o e-mail recebido</strong>
+        <span>A Meta envia um link de confirmação. Confirme antes de continuar.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Adicione a Página do Facebook ao BM</strong>
+        <span>Configurações → Páginas → Adicionar → "Adicionar uma Página" (se você é admin) ou "Solicitar acesso a uma Página".</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <strong>Crie a Conta de Anúncios dentro do BM</strong>
+        <span>Configurações → Contas de anúncios → Adicionar → "Criar uma conta de anúncios". Dê um nome, escolha o fuso horário e a moeda (R$ BRL).</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="https://business.facebook.com/overview" target="_blank" class="link-btn">🏢 Acessar Business Manager</a>
+  <a href="https://business.facebook.com/settings" target="_blank" class="link-btn link-btn-outline">⚙️ Configurações do BM</a>
+
+  <hr class="divider" />
+
+  <h3>Configurações essenciais do Business Manager</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <h3>Adicionar Pessoas</h3>
+      <p>Configurações → Pessoas → Adicionar. Dê acesso de "Funcionário" ou "Admin" ao cliente ou sócios.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Pixel / Dataset</h3>
+      <p>Configurações → Fontes de dados → Pixels. Crie 1 pixel por cliente/site para rastrear conversões.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h3>Conta do Instagram</h3>
+      <p>Configurações → Contas do Instagram. Vincule o IG do cliente para poder anunciar nele.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💳</div>
+      <h3>Forma de Pagamento</h3>
+      <p>Dentro da Conta de Anúncios → Formas de pagamento. Cadastre cartão de crédito ou PIX (boleto).</p>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO 4 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-icon icon-green">✅</div>
+    <div class="section-title">
+      <div class="step">Módulo 4</div>
+      <h2>Habilitando a Conta para Anunciar</h2>
+      <p>Uma conta nova passa por etapas antes de ter acesso total. Saiba o que fazer em cada uma.</p>
+    </div>
+  </div>
+
+  <h3>Checklist de uma conta apta para rodar</h3>
+  <ul class="checklist">
+    <li>Perfil pessoal criado com dados reais e 2FA ativo</li>
+    <li>Página do Facebook criada e vinculada ao BM</li>
+    <li>Business Manager criado e confirmado por e-mail</li>
+    <li>Conta de Anúncios criada com fuso horário e moeda corretos (BRL)</li>
+    <li>Conta do Instagram vinculada (se for anunciar no IG)</li>
+    <li>Forma de pagamento cadastrada e aprovada</li>
+    <li>Pixel criado e instalado no site (se houver conversão no site)</li>
+    <li>Termos e políticas de publicidade aceitos</li>
+  </ul>
+
+  <div class="alert alert-danger">
+    <span class="alert-icon">🚨</span>
+    <p><strong>Conta nova = limite de gasto baixo:</strong> Contas novas começam com limite diário muito baixo (às vezes R$ 15–50/dia). Esse limite sobe automaticamente conforme você paga as faturas sem problemas. Não tente gastar muito no início.</p>
+  </div>
+
+  <h3>Verificação de Identidade (quando solicitada)</h3>
+  <p>Em alguns casos, a Meta solicita verificação de identidade. Para isso:</p>
+  <ul>
+    <li>Acesse <strong>facebook.com/id</strong></li>
+    <li>Envie um documento oficial com foto (RG, CNH ou passaporte)</li>
+    <li>Aguarde entre 24h e 72h para aprovação</li>
+  </ul>
+
+  <a href="https://www.facebook.com/id" target="_blank" class="link-btn">🪪 Verificar Identidade</a>
+  <a href="https://www.facebook.com/policies/ads/" target="_blank" class="link-btn link-btn-outline">📜 Políticas de Anúncios</a>
+
+  <hr class="divider" />
+
+  <h3>Instalando o Pixel (Meta Pixel / Dataset)</h3>
+  <p>O pixel é um código JavaScript que você instala no site do cliente para rastrear o comportamento dos visitantes e medir conversões.</p>
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Crie o Pixel no BM</strong>
+        <span>Gerenciador de Eventos → Conectar fontes de dados → Web → Meta Pixel.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Escolha o método de instalação</strong>
+        <span>Integração via parceiro (WordPress, Shopify, Wix) ou instalação manual do código no &lt;head&gt; do site.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Configure os eventos padrão</strong>
+        <span>PageView, ViewContent, AddToCart, Purchase, Lead, CompleteRegistration. Use a Ferramenta de Configuração de Eventos.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Valide com o Meta Pixel Helper</strong>
+        <span>Extensão gratuita do Chrome. Mostra se o pixel está disparando corretamente.</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="https://business.facebook.com/events_manager" target="_blank" class="link-btn">📡 Gerenciador de Eventos</a>
+</div>
+
+<!-- SEÇÃO 5 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-icon icon-orange">🎯</div>
+    <div class="section-title">
+      <div class="step">Módulo 5</div>
+      <h2>Estratégia por Tipo de Negócio</h2>
+      <p>Não existe uma estratégia única. Cada negócio tem um objetivo diferente e pede um caminho diferente.</p>
+    </div>
+  </div>
+
+  <h3>Faça estas perguntas antes de criar qualquer campanha</h3>
+  <div class="alert alert-info">
+    <span class="alert-icon">🧠</span>
+    <p>Qual é o <strong>objetivo final</strong> do cliente? → Qual é o <strong>produto/serviço</strong>? → Qual é o <strong>ticket médio</strong>? → Qual é o <strong>processo de vendas</strong> (online ou presencial)? → Qual é o <strong>orçamento</strong>?</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo de Negócio</th>
+        <th>Objetivo da Campanha</th>
+        <th>Estratégia Recomendada</th>
+        <th>Funil</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>E-commerce</strong></td>
+        <td>Vendas / Conversões</td>
+        <td>Campanha de Vendas com catálogo + Remarketing</td>
+        <td>Awareness → Consideração → Conversão</td>
+      </tr>
+      <tr>
+        <td><strong>Infoproduto / Curso</strong></td>
+        <td>Leads ou Vendas diretas</td>
+        <td>Campanha de Leads (lead form) ou tráfego para página</td>
+        <td>VSL / Webinar → Oferta</td>
+      </tr>
+      <tr>
+        <td><strong>Serviço Local</strong> (clínica, salão, etc.)</td>
+        <td>Mensagens / Leads</td>
+        <td>Campanha de Mensagens (WhatsApp) ou Leads</td>
+        <td>Anúncio → WhatsApp → Agendamento</td>
+      </tr>
+      <tr>
+        <td><strong>Restaurante / Delivery</strong></td>
+        <td>Alcance / Engajamento</td>
+        <td>Campanha de Alcance geolocalizada + Engajamento</td>
+        <td>Visibilidade local → Pedido</td>
+      </tr>
+      <tr>
+        <td><strong>SaaS / B2B</strong></td>
+        <td>Leads qualificados</td>
+        <td>Lead form com qualificação ou tráfego para landing page</td>
+        <td>Conteúdo educacional → Lead → SDR</td>
+      </tr>
+      <tr>
+        <td><strong>Lançamento</strong></td>
+        <td>Leads + Vendas</td>
+        <td>Captação de leads → Remarketing no lançamento</td>
+        <td>Sequência de CPL → Carrinho</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>O Funil de Tráfego</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">📢</div>
+      <h3>Topo (TOF)</h3>
+      <p><strong>Awareness.</strong> Apresente a marca. Objetivo: Alcance, Reconhecimento, Visualizações de Vídeo. Público frio (interesse, Lookalike).</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤔</div>
+      <h3>Meio (MOF)</h3>
+      <p><strong>Consideração.</strong> Engaje quem já conhece. Objetivo: Tráfego, Engajamento, Leads. Público morno (quem interagiu).</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛒</div>
+      <h3>Fundo (BOF)</h3>
+      <p><strong>Conversão.</strong> Converta quem já está quente. Objetivo: Vendas, Mensagens, Conversões. Público quente (remarketing).</p>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO 6 -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-icon icon-green">💳</div>
+    <div class="section-title">
+      <div class="step">Módulo 6</div>
+      <h2>Como Colocar Verba na Conta</h2>
+      <p>Formas de pagamento disponíveis no Brasil e como configurar corretamente.</p>
+    </div>
+  </div>
+
+  <h3>Métodos de Pagamento disponíveis no Brasil</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">💳</div>
+      <h3>Cartão de Crédito</h3>
+      <p>Método mais simples e recomendado. Visa, Mastercard, Elo. Você é cobrado conforme gasta (pós-pago). Limite definido pelo banco.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏦</div>
+      <h3>Boleto / PIX</h3>
+      <p>Método pré-pago. Você adiciona crédito antes de anunciar. Demora até 72h para compensar. Bom quando o cliente não tem cartão internacional.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h3>Crédito de Conta</h3>
+      <p>Saldo que fica na conta (ex: cupons da Meta, ressarcimentos). Usado automaticamente antes do cartão.</p>
+    </div>
+  </div>
+
+  <h3>Configurando a Forma de Pagamento</h3>
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Acesse o Gerenciador de Anúncios</strong>
+        <span>ads.facebook.com → Configurações da conta → Formas de pagamento.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Clique em "Adicionar forma de pagamento"</strong>
+        <span>Escolha cartão de crédito ou boleto/PIX conforme a necessidade.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Defina o limite de gastos da conta (opcional)</strong>
+        <span>Na mesma tela, você pode definir um limite máximo de gastos para proteger o cliente de cobranças inesperadas.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning">
+    <span class="alert-icon">⚠️</span>
+    <p><strong>Limites de gasto:</strong> Contas novas têm limites automáticos que sobem com o tempo. A Meta cobra em <strong>limites de cobrança</strong> (ex: a cada R$ 50, R$ 200, R$ 500 gastos). Esse ciclo evolui com o histórico positivo de pagamento.</p>
+  </div>
+
+  <h3>Quanto de verba indicar para o cliente?</h3>
+  <table>
+    <thead>
+      <tr><th>Perfil</th><th>Verba Mínima Sugerida</th><th>Observação</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Negócio local pequeno</strong></td><td>R$ 600–1.500/mês</td><td>Campanha de mensagens ou alcance local</td></tr>
+      <tr><td><strong>E-commerce iniciante</strong></td><td>R$ 1.500–3.000/mês</td><td>Precisa de dados para o algoritmo aprender</td></tr>
+      <tr><td><strong>Serviço de ticket médio</strong></td><td>R$ 2.000–5.000/mês</td><td>Campanha de leads com follow-up</td></tr>
+      <tr><td><strong>Escala / Growth</strong></td><td>R$ 10.000+/mês</td><td>Múltiplas campanhas, testes constantes</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SEÇÃO 7 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-icon icon-blue">📊</div>
+    <div class="section-title">
+      <div class="step">Módulo 7</div>
+      <h2>Tipos de Campanha e Diferenças</h2>
+      <p>O objetivo da campanha diz à Meta o que otimizar. Escolher errado = dinheiro desperdiçado.</p>
+    </div>
+  </div>
+
+  <h3>A Estrutura de uma Campanha</h3>
+  <div class="destaque">
+    <h3>🏗️ 3 níveis obrigatórios</h3>
+    <p><strong>Campanha</strong> (objetivo) → <strong>Conjunto de Anúncios / Adset</strong> (público + orçamento + posicionamento) → <strong>Anúncio</strong> (criativo: imagem/vídeo/texto)</p>
+  </div>
+
+  <h3>Objetivos de Campanha disponíveis</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Objetivo</th>
+        <th>Para que serve</th>
+        <th>Quando usar</th>
+        <th>Otimiza por</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>🔊 Reconhecimento</strong></td>
+        <td>Alcançar o máximo de pessoas</td>
+        <td>Lançamento de marca, eventos, novidades</td>
+        <td>Impressões, Alcance, Frequência</td>
+      </tr>
+      <tr>
+        <td><strong>🚦 Tráfego</strong></td>
+        <td>Levar pessoas a um site, app ou link</td>
+        <td>Conteúdo, blog, página de vendas fria</td>
+        <td>Cliques no link, Landing Page Views</td>
+      </tr>
+      <tr>
+        <td><strong>❤️ Engajamento</strong></td>
+        <td>Curtidas, comentários, compartilhamentos, seguidores</td>
+        <td>Crescer o perfil, provas sociais</td>
+        <td>Engajamento com a publicação</td>
+      </tr>
+      <tr>
+        <td><strong>📋 Cadastros (Leads)</strong></td>
+        <td>Captar dados (nome, e-mail, telefone)</td>
+        <td>Listas, consultas, orçamentos</td>
+        <td>Formulários preenchidos, Leads</td>
+      </tr>
+      <tr>
+        <td><strong>📣 Promoção de App</strong></td>
+        <td>Instalar ou usar um aplicativo</td>
+        <td>Empresas com app próprio</td>
+        <td>Instalações, Eventos no app</td>
+      </tr>
+      <tr>
+        <td><strong>🛒 Vendas</strong></td>
+        <td>Conversões diretas (compras, cadastros)</td>
+        <td>E-commerce, produtos online</td>
+        <td>Compras, ROAS, CPA</td>
+      </tr>
+      <tr>
+        <td><strong>💬 Contatos (Mensagens)</strong></td>
+        <td>Iniciar conversa no WhatsApp, Messenger, DM</td>
+        <td>Negócios locais, serviços, alto ticket</td>
+        <td>Conversas iniciadas, Leads via chat</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <p><strong>Regra prática:</strong> Sempre escolha o objetivo mais próximo do que você quer que o usuário FAÇA de verdade. Se quer que ele compre → Vendas. Se quer que ele mande mensagem → Contatos. A Meta vai encontrar pessoas propensas a realizar essa ação específica.</p>
+  </div>
+
+  <h3>Orçamento: Diário vs. Vitalício</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">📅</div>
+      <h3>Orçamento Diário</h3>
+      <p>Você define quanto gasta <strong>por dia</strong>. A Meta pode gastar até 25% a mais em dias com mais oportunidades. Ideal para campanhas contínuas sem data de fim.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📆</div>
+      <h3>Orçamento Vitalício</h3>
+      <p>Você define o <strong>total</strong> para toda a campanha. A Meta distribui o gasto ao longo do período. Ideal para campanhas com data específica (lançamentos, promoções).</p>
+    </div>
+  </div>
+
+  <h3>CBO vs. ABO</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h3>CBO — Campaign Budget Optimization</h3>
+      <p>Orçamento definido <strong>na campanha</strong>. A Meta distribui automaticamente entre os adsets conforme performance. Recomendado para a maioria dos casos.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎮</div>
+      <h3>ABO — Ad Set Budget Optimization</h3>
+      <p>Orçamento definido <strong>em cada adset</strong>. Você controla manualmente. Bom para testes isolados onde você quer controlar o gasto por público.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO 8 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-icon icon-purple">🏷️</div>
+    <div class="section-title">
+      <div class="step">Módulo 8</div>
+      <h2>Nomenclatura de Campanhas, Adsets e Anúncios</h2>
+      <p>Uma boa nomenclatura é o que separa um gestor profissional do amador. Facilita análise e escalabilidade.</p>
+    </div>
+  </div>
+
+  <h3>Por que a nomenclatura importa?</h3>
+  <p>Quando você tem 10, 20 ou 50 campanhas rodando ao mesmo tempo, uma nomenclatura clara permite que qualquer pessoa entenda o que é cada campanha sem precisar abrir uma por uma. Também facilita filtros e relatórios.</p>
+
+  <h3>Modelo de Nomenclatura Recomendado</h3>
+
+  <h4>Nível Campanha</h4>
+  <div class="nomenclatura">
+    <div class="linha"><span class="label">[CLIENTE]</span><span class="separador"> | </span><span class="label">[OBJETIVO]</span><span class="separador"> | </span><span class="label">[FUNIL]</span><span class="separador"> | </span><span class="label">[DATA]</span></div>
+    <div class="linha"><span class="valor">NomeLoja | VEN | TOF | JUN25</span></div>
+    <div class="linha"><span class="valor">NomeLoja | LEADS | BOF | JUN25</span></div>
+    <div class="linha"><span class="valor">NomeLoja | MSG | MOF | JUN25</span></div>
+  </div>
+
+  <h4>Nível Adset (Conjunto de Anúncios)</h4>
+  <div class="nomenclatura">
+    <div class="linha"><span class="label">[PÚBLICO]</span><span class="separador"> | </span><span class="label">[SEGMENTAÇÃO]</span><span class="separador"> | </span><span class="label">[POSICIONAMENTO]</span><span class="separador"> | </span><span class="label">[ORÇAMENTO/DIA]</span></div>
+    <div class="linha"><span class="valor">FRIO | INT-Moda-Beleza | FEED | R$50</span></div>
+    <div class="linha"><span class="valor">LOOK | LOOKALIKE-1% | ALL | R$30</span></div>
+    <div class="linha"><span class="valor">REMARKETING | VISITANTES-30D | STORIES | R$20</span></div>
+  </div>
+
+  <h4>Nível Anúncio (Criativo)</h4>
+  <div class="nomenclatura">
+    <div class="linha"><span class="label">[FORMATO]</span><span class="separador"> | </span><span class="label">[DESCRIÇÃO]</span><span class="separador"> | </span><span class="label">[VERSÃO]</span><span class="separador"> | </span><span class="label">[DATA]</span></div>
+    <div class="linha"><span class="valor">VIDEO | Produto-Promo | V1 | JUN25</span></div>
+    <div class="linha"><span class="valor">IMG | Depoimento-Maria | V2 | JUN25</span></div>
+    <div class="linha"><span class="valor">CAROUSEL | Catalogo-Verao | V1 | JUN25</span></div>
+  </div>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">✅</span>
+    <p><strong>Dica profissional:</strong> Crie seu padrão e siga ele à risca. O importante não é usar exatamente este modelo, mas ter <strong>consistência</strong>. Documente o padrão num Google Docs e compartilhe com a equipe/cliente.</p>
+  </div>
+
+  <h3>Siglas úteis para nomenclatura</h3>
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin:14px 0;">
+    <span class="tag tag-blue">VEN = Vendas</span>
+    <span class="tag tag-blue">LEADS = Cadastros</span>
+    <span class="tag tag-blue">MSG = Mensagens</span>
+    <span class="tag tag-blue">ENG = Engajamento</span>
+    <span class="tag tag-blue">TRF = Tráfego</span>
+    <span class="tag tag-green">TOF = Topo do Funil</span>
+    <span class="tag tag-green">MOF = Meio do Funil</span>
+    <span class="tag tag-green">BOF = Fundo do Funil</span>
+    <span class="tag tag-purple">FRIO = Público Frio</span>
+    <span class="tag tag-purple">LOOK = Lookalike</span>
+    <span class="tag tag-purple">RMK = Remarketing</span>
+    <span class="tag tag-orange">INT = Interesse</span>
+    <span class="tag tag-orange">COMP = Comportamento</span>
+    <span class="tag tag-yellow">CBO = Orch. Campanha</span>
+    <span class="tag tag-yellow">ABO = Orch. Adset</span>
+  </div>
+</div>
+
+<!-- SEÇÃO 9 -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-icon icon-orange">🎯</div>
+    <div class="section-title">
+      <div class="step">Módulo 9</div>
+      <h2>Segmentação & Advantage+</h2>
+      <p>Como definir para quem seus anúncios serão mostrados — e quando deixar a IA da Meta trabalhar por você.</p>
+    </div>
+  </div>
+
+  <h3>Tipos de Público</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">❄️</div>
+      <h3>Público Frio (Novo)</h3>
+      <p>Pessoas que nunca ouviram falar da marca. Segmentado por <strong>interesses, comportamentos e dados demográficos</strong>. Custo mais alto por conversão.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌡️</div>
+      <h3>Lookalike (Semelhante)</h3>
+      <p>A Meta encontra pessoas <strong>parecidas com seus melhores clientes</strong>. Precisa de uma fonte: lista de clientes, compradores, seguidores. Altamente eficiente.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔥</div>
+      <h3>Remarketing (Quente)</h3>
+      <p>Pessoas que já interagiram: <strong>visitaram o site, visualizaram produto, adicionaram ao carrinho, seguem o perfil</strong>. Maior taxa de conversão.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📂</div>
+      <h3>Público Personalizado</h3>
+      <p>Criado a partir de dados seus: <strong>lista de e-mails, base de clientes, engajamento com vídeo, visitantes do site</strong>. A base do remarketing.</p>
+    </div>
+  </div>
+
+  <h3>Segmentação Manual — Interesses e Comportamentos</h3>
+  <p>No nível do Adset, você pode definir:</p>
+  <ul>
+    <li><strong>Localização:</strong> País, Estado, Cidade, raio de km de um endereço</li>
+    <li><strong>Idade:</strong> de 18 a 65+</li>
+    <li><strong>Gênero:</strong> Todos, Masculino, Feminino</li>
+    <li><strong>Interesses:</strong> Categorias que a Meta infere do comportamento (ex: Fitness, Moda, Tecnologia)</li>
+    <li><strong>Comportamentos:</strong> Padrões de compra, uso de dispositivo, etc.</li>
+    <li><strong>Idioma:</strong> Filtra por idioma configurado no dispositivo</li>
+  </ul>
+
+  <div class="alert alert-warning">
+    <span class="alert-icon">⚠️</span>
+    <p><strong>Atenção com superposição:</strong> Público muito restrito (menos de 100k pessoas) pode elevar o CPM e limitar a entrega. Público muito amplo sem direção certa desperdiça verba. O equilíbrio ideal fica entre 500k e 5M de pessoas para a maioria dos negócios.</p>
+  </div>
+
+  <hr class="divider" />
+
+  <h3>Advantage+ — A IA de Segmentação da Meta</h3>
+  <p>A Meta vem migrando para um modelo onde a IA faz cada vez mais o trabalho de segmentação. Entenda os principais recursos:</p>
+
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h3>Advantage+ Audience</h3>
+      <p>Substitui a segmentação manual por IA. Você dá uma "sugestão de público" e a Meta expande automaticamente para encontrar quem vai converter melhor. Funciona muito bem com pixel maduro.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📍</div>
+      <h3>Advantage+ Placements</h3>
+      <p>A Meta escolhe automaticamente em quais posicionamentos (Feed, Stories, Reels, Marketplace, Messenger, etc.) colocar seu anúncio para ter melhor resultado. Recomendado na maioria dos casos.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛍️</div>
+      <h3>Advantage+ Shopping</h3>
+      <p>Campanha totalmente automatizada para e-commerce. Combina públicos frios e remarketing em uma só campanha, otimizando automaticamente. Exige pixel e catálogo configurados.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎨</div>
+      <h3>Advantage+ Creative</h3>
+      <p>A Meta pode ajustar automaticamente elementos do criativo (enquadramento, brilho, contraste, adicionar música) para melhorar a performance.</p>
+    </div>
+  </div>
+
+  <div class="destaque">
+    <h3>🧠 Filosofia atual da Meta</h3>
+    <p>A Meta está caminhando para um modelo de "menos segmentação manual, mais confiança no algoritmo". Com um pixel maduro (mais de 50 conversões/semana), as campanhas Advantage+ tendem a superar as manuais. Para contas novas, ainda faz sentido dar mais direção manual enquanto o pixel aprende.</p>
+  </div>
+
+  <h3>Período de Aprendizado</h3>
+  <p>Cada novo adset passa por uma <strong>fase de aprendizado</strong> onde o algoritmo testa para quem mostrar o anúncio. Durante essa fase:</p>
+  <ul>
+    <li>Os resultados são instáveis e o custo pode ser maior</li>
+    <li>A Meta precisa de <strong>~50 eventos de otimização em 7 dias</strong> para sair da fase de aprendizado</li>
+    <li>Evite fazer mudanças durante esse período — qualquer edição reinicia o aprendizado</li>
+    <li>Se o adset não sair do aprendizado em 7 dias, reavalie o orçamento ou o público</li>
+  </ul>
+</div>
+
+<!-- SEÇÃO 10 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-icon icon-yellow">🎨</div>
+    <div class="section-title">
+      <div class="step">Módulo 10</div>
+      <h2>Criando os Anúncios — Design e Copy</h2>
+      <p>O criativo é o maior alavancador de resultados. Um bom anúncio pode multiplicar seus resultados por 5x.</p>
+    </div>
+  </div>
+
+  <h3>Formatos de Anúncio disponíveis</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">🖼️</div>
+      <h3>Imagem Única</h3>
+      <p>Feed e Stories. Simples e direto. Proporção 1:1 para Feed, 9:16 para Stories. Ideal para ofertas claras e diretas.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎬</div>
+      <h3>Vídeo</h3>
+      <p>O formato de maior alcance orgânico. Reels (9:16), Feed (4:5 ou 1:1). Os primeiros 3 segundos são decisivos. Legendas são essenciais (85% assiste sem som).</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎠</div>
+      <h3>Carrossel</h3>
+      <p>Múltiplos cards (2 a 10). Ideal para mostrar produtos, funcionalidades ou contar uma história em etapas. Alta taxa de engajamento.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Coleção</h3>
+      <p>Imagem/vídeo principal + grade de produtos abaixo. Exclusivo para mobile. Ideal para e-commerce com catálogo.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📋</div>
+      <h3>Lead Form</h3>
+      <p>Formulário nativo dentro do Facebook/Instagram. O usuário não sai do app. Dados pré-preenchidos com o perfil. Alta taxa de conversão.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h3>Stories / Reels</h3>
+      <p>Formato 9:16 (vertical). Imersivo, tela cheia. Reels têm alcance orgânico maior. Manter elementos importantes longe das bordas (há sobreposição de botões).</p>
+    </div>
+  </div>
+
+  <h3>Dimensões Técnicas Essenciais</h3>
+  <table>
+    <thead>
+      <tr><th>Posicionamento</th><th>Proporção</th><th>Resolução Recomendada</th><th>Formato</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Feed (quadrado)</td><td>1:1</td><td>1080 x 1080 px</td><td>JPG, PNG, MP4</td></tr>
+      <tr><td>Feed (retrato)</td><td>4:5</td><td>1080 x 1350 px</td><td>JPG, PNG, MP4</td></tr>
+      <tr><td>Stories / Reels</td><td>9:16</td><td>1080 x 1920 px</td><td>JPG, PNG, MP4</td></tr>
+      <tr><td>Carrossel</td><td>1:1</td><td>1080 x 1080 px</td><td>JPG, PNG, MP4</td></tr>
+      <tr><td>Feed Horizontal</td><td>16:9</td><td>1280 x 720 px</td><td>MP4</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Ferramentas de Design Gratuitas e Pagas</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">🟣</div>
+      <h3>Canva</h3>
+      <p>Gratuito e pago. Templates prontos para anúncios Meta. Fácil para iniciantes. <a href="https://canva.com" target="_blank" style="color:var(--azul)">canva.com</a></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🟡</div>
+      <h3>Adobe Express</h3>
+      <p>Gratuito com conta Adobe. Templates profissionais. Boa integração com outros apps da Adobe.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔵</div>
+      <h3>CapCut</h3>
+      <p>Gratuito para edição de vídeo. Templates de Reels e Stories. Muito popular para conteúdo de alto desempenho.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚫</div>
+      <h3>Adobe Premiere / Photoshop</h3>
+      <p>Pago. Para profissionais. Máximo controle sobre imagem e vídeo.</p>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <h3>Anatomia de um Anúncio que Converte</h3>
+
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Hook (Gancho) — primeiros 3 segundos ou primeira linha do texto</strong>
+        <span>Deve parar o scroll. Use pergunta, número, emoção forte, ou afirmação inesperada. Ex: "Você sabia que 90% das pessoas cometem esse erro na hora de...?"</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Problema + Identificação</strong>
+        <span>Mostre que você entende a dor do seu público. Faça a pessoa se identificar com a situação descrita.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Solução + Benefícios</strong>
+        <span>Apresente seu produto/serviço como a solução. Foque nos benefícios (o que o cliente ganha), não nas características (o que é o produto).</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Prova Social</strong>
+        <span>Depoimento, números, avaliações, antes e depois. Reduz a resistência do público frio.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <strong>CTA — Call to Action (Chamada para Ação)</strong>
+        <span>Diga exatamente o que você quer que a pessoa faça: "Clique agora", "Envie uma mensagem", "Compre aqui", "Saiba mais". Seja específico.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Componentes de texto no Gerenciador</h3>
+  <ul>
+    <li><strong>Texto principal:</strong> Aparece acima da imagem/vídeo. Os primeiros 125 caracteres são os mais lidos. Pode ser longo (storytelling) ou curto (direto ao ponto).</li>
+    <li><strong>Título:</strong> Aparece abaixo da imagem. Destaque, benefício principal ou CTA. Até 40 caracteres para não cortar.</li>
+    <li><strong>Descrição:</strong> Linha complementar abaixo do título. Nem sempre aparece. Use para reforçar a oferta.</li>
+    <li><strong>URL de destino:</strong> Para onde o usuário vai ao clicar. Use UTMs para rastrear as fontes no Google Analytics.</li>
+    <li><strong>Botão de CTA:</strong> Opções: Saiba Mais, Comprar Agora, Inscreva-se, Entre em Contato, Enviar Mensagem, Download, etc.</li>
+  </ul>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <p><strong>Teste, sempre:</strong> Nunca rode apenas 1 anúncio por adset. Crie pelo menos 3 a 5 variações de criativo. Deixe rodar por 7 a 14 dias e pause os que performam pior. Esse processo contínuo de testes é o que escala resultados.</p>
+  </div>
+</div>
+
+<!-- SEÇÃO 11 -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-icon icon-green">📊</div>
+    <div class="section-title">
+      <div class="step">Módulo 11</div>
+      <h2>Acompanhando os Resultados</h2>
+      <p>Dados sem interpretação não valem nada. Aprenda quais métricas olhar e o que fazer com elas.</p>
+    </div>
+  </div>
+
+  <h3>Métricas Essenciais do Gestor de Tráfego</h3>
+  <div class="metricas-grid">
+    <div class="metrica-card">
+      <div class="nome">Custo por Resultado</div>
+      <div class="sigla">CPR</div>
+      <div class="desc">Quanto você pagou por cada ação desejada (lead, venda, mensagem). A métrica mais importante.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Retorno sobre Gasto</div>
+      <div class="sigla">ROAS</div>
+      <div class="desc">Receita gerada ÷ Valor gasto. ROAS 3 = para cada R$1 investido, R$3 de receita.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Custo por Clique</div>
+      <div class="sigla">CPC</div>
+      <div class="desc">Quanto custa cada clique. CPC alto com baixa conversão indica problema na landing page.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Taxa de Clique</div>
+      <div class="sigla">CTR</div>
+      <div class="desc">Cliques ÷ Impressões. Mede a atratividade do criativo. Acima de 1,5% é bom. Abaixo de 0,8% reavalie.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Custo por Mil Impressões</div>
+      <div class="sigla">CPM</div>
+      <div class="desc">Quanto custa mil exibições. CPM alto = audiência cara ou alta concorrência.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Taxa de Conversão</div>
+      <div class="sigla">CVR</div>
+      <div class="desc">Conversões ÷ Cliques no link. Mede a eficiência da landing page/página de destino.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Frequência</div>
+      <div class="sigla">FREQ</div>
+      <div class="desc">Impressões ÷ Alcance. Quantas vezes a mesma pessoa viu seu anúncio. Acima de 4-5x → renovar criativo.</div>
+    </div>
+    <div class="metrica-card">
+      <div class="nome">Custo por Lead</div>
+      <div class="sigla">CPL</div>
+      <div class="desc">Quanto você pagou por cada cadastro/lead gerado. Compare com o valor de um cliente para saber se é viável.</div>
+    </div>
+  </div>
+
+  <h3>Como navegar no Gerenciador de Anúncios</h3>
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Acesse ads.facebook.com</strong>
+        <span>Selecione a conta de anúncios correta no topo esquerdo.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Ajuste o período de análise</strong>
+        <span>Canto superior direito. Geralmente analisa-se: Últimos 7 dias, Últimos 14 dias, Últimos 30 dias. Evite conclusões com menos de 7 dias de dados.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Customize as colunas</strong>
+        <span>Clique em "Colunas" → "Personalizar colunas" → Adicione as métricas que importam para cada cliente. Salve como preset.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Analise por nível: Campanha → Adset → Anúncio</strong>
+        <span>Veja qual campanha está trazendo resultado, depois qual adset, depois qual criativo. Assim você sabe o que pausar e o que escalar.</span>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <strong>Use Detalhamentos (Breakdowns)</strong>
+        <span>Colunas → Detalhamento → Por idade/gênero, Posicionamento, Hora do dia. Descubra qual segmento performa melhor.</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="https://www.facebook.com/adsmanager" target="_blank" class="link-btn">📊 Abrir Gerenciador de Anúncios</a>
+
+  <hr class="divider" />
+
+  <h3>Decisões baseadas em dados — O que fazer com cada situação</h3>
+  <table>
+    <thead>
+      <tr><th>Situação</th><th>O que pode estar errado</th><th>O que fazer</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>CTR baixo (&lt; 0,8%)</strong></td>
+        <td>Criativo pouco atrativo, hook fraco</td>
+        <td>Teste novos criativos, mude o hook</td>
+      </tr>
+      <tr>
+        <td><strong>CTR alto, CVR baixo</strong></td>
+        <td>Problema na landing page, oferta, ou público errado</td>
+        <td>Otimize a página, revise a oferta</td>
+      </tr>
+      <tr>
+        <td><strong>CPM muito alto</strong></td>
+        <td>Público muito restrito, alta concorrência</td>
+        <td>Amplie o público, teste Advantage+</td>
+      </tr>
+      <tr>
+        <td><strong>Frequência &gt; 5</strong></td>
+        <td>Público saturado, anúncio repetitivo</td>
+        <td>Renove o criativo, amplie o público</td>
+      </tr>
+      <tr>
+        <td><strong>Campanha em aprendizado por mais de 7 dias</strong></td>
+        <td>Orçamento baixo ou poucas conversões</td>
+        <td>Aumente o orçamento ou mude o evento de otimização</td>
+      </tr>
+      <tr>
+        <td><strong>ROAS abaixo do break-even</strong></td>
+        <td>Oferta, público, criativo ou página</td>
+        <td>Audit completo do funil, teste cada variável</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Ferramentas Complementares</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <h3>Meta Business Suite</h3>
+      <p>Visão geral de alcance, engajamento e publicações orgânicas + pagas. Ótimo para relatórios ao cliente. <a href="https://business.facebook.com" target="_blank" style="color:var(--azul)">business.facebook.com</a></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔬</div>
+      <h3>Gerenciador de Eventos</h3>
+      <p>Monitora se o pixel está disparando corretamente. Mostra os eventos em tempo real. <a href="https://business.facebook.com/events_manager" target="_blank" style="color:var(--azul)">Events Manager</a></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Google Analytics 4</h3>
+      <p>Complementa os dados do Meta. Mostra comportamento no site após o clique. Use UTMs nos anúncios para rastrear.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📋</div>
+      <h3>Planilha de Resultados</h3>
+      <p>Crie uma planilha Google Sheets para registro histórico. Semanal. Compare períodos e mostre evolução ao cliente.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">🏆</span>
+    <p><strong>Relatório para o cliente:</strong> Mensalmente, envie um relatório simples com: Investimento total, Resultados (leads/vendas), Custo por resultado, ROAS (se e-commerce), e 2 a 3 insights do que aprendeu e o que vai testar no próximo mês. Mostre que você pensa estrategicamente, não só operacionalmente.</p>
+  </div>
+</div>
+
+<!-- LINKS RÁPIDOS FINAIS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-blue">🔗</div>
+    <div class="section-title">
+      <div class="step">Referências</div>
+      <h2>Links Essenciais — Acesso Rápido</h2>
+      <p>Todos os links que você vai precisar no dia a dia.</p>
+    </div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">🏢</div>
+      <h3>Meta Business Suite</h3>
+      <a href="https://business.facebook.com" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Gerenciador de Anúncios</h3>
+      <a href="https://www.facebook.com/adsmanager" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <h3>Configurações do BM</h3>
+      <a href="https://business.facebook.com/settings" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">📡</div>
+      <h3>Gerenciador de Eventos</h3>
+      <a href="https://business.facebook.com/events_manager" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">📄</div>
+      <h3>Criar Página Facebook</h3>
+      <a href="https://www.facebook.com/pages/create" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">📜</div>
+      <h3>Políticas de Publicidade</h3>
+      <a href="https://www.facebook.com/policies/ads/" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">🆘</div>
+      <h3>Central de Ajuda Meta</h3>
+      <a href="https://www.facebook.com/business/help" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎓</div>
+      <h3>Meta Blueprint (Cursos)</h3>
+      <a href="https://www.facebookblueprint.com" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h3>Biblioteca de Anúncios</h3>
+      <a href="https://www.facebook.com/ads/library" target="_blank" class="link-btn" style="font-size:0.82rem; padding:7px 14px;">Acessar</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Material de Aula — <strong>Tráfego Pago Meta Ads</strong></p>
+  <p style="margin-top:6px;">Aula de Thaís · 27 de Junho de 2026 · 9h às 12h · Zoom Meeting</p>
+  <p style="margin-top:16px; font-size:0.8rem; opacity:0.6;">Este material é de uso exclusivo e pode ser atualizado conforme mudanças nas políticas e ferramentas da Meta.</p>
+</footer>
+
+</body>
+</html>

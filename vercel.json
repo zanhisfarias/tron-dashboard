@@ -18,6 +18,8 @@
     { "src": "/api/cancel-post",    "dest": "/api/cancel-post.js" },
     { "src": "/api/always-on",      "dest": "/api/always-on.js" },
     { "src": "/api/cron-publish",   "dest": "/api/cron-publish.js" },
+    { "src": "/aula-trafego-pago",      "dest": "/aula-trafego-pago.html" },
+    { "src": "/aula-trafego-pago.html", "dest": "/aula-trafego-pago.html" },
     { "src": "/Logo/(.*)",          "dest": "/Logo/$1" },
     { "src": "/(.*\\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|woff2?|ttf))", "dest": "/$1" },
     { "src": "/(.*)",               "dest": "/index.html" }
