@@ -1200,13 +1200,24 @@
 
   <!-- Tabela de Campanhas -->
   <div class="card p-4 md:p-5" style="background:#050f14;border-color:rgba(0,226,139,0.15)">
-    <div class="text-[11px] font-bold uppercase tracking-widest mb-3" style="color:#00E28B">Campanhas Ativas</div>
+    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+      <div class="text-[11px] font-bold uppercase tracking-widest" style="color:#00E28B" id="gads-table-title">Todas as Campanhas</div>
+      <div class="flex gap-2">
+        <button onclick="filterGadsCamps('all')"     id="gads-filter-all"     class="period-btn active"  style="--ds-rgb:0,226,139">Todas</button>
+        <button onclick="filterGadsCamps('enabled')" id="gads-filter-enabled" class="period-btn"         style="--ds-rgb:0,226,139">Ativas</button>
+        <button onclick="filterGadsCamps('paused')"  id="gads-filter-paused"  class="period-btn"         style="--ds-rgb:0,226,139">Pausadas</button>
+      </div>
+    </div>
+    <div id="gads-zero-banner" style="display:none;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#F59E0B" class="mb-3 px-3 py-2 rounded-lg text-[11px] font-bold">
+      ⚠️ Sem investimento ativo em julho — todas as campanhas estão pausadas.
+    </div>
     <div style="overflow-x:auto">
-      <table class="tbl" style="min-width:640px">
+      <table class="tbl" style="min-width:680px">
         <thead>
           <tr>
             <th style="text-align:left">Campanha</th>
             <th>Tipo</th>
+            <th>Status</th>
             <th>Impr.</th>
             <th>Cliques</th>
             <th>CTR</th>
@@ -1217,7 +1228,7 @@
           </tr>
         </thead>
         <tbody id="gads-camps-body">
-          <tr><td colspan="9" class="text-center py-4" style="color:#6B7280;font-size:11px">Aguardando aprovação do token Google Ads…</td></tr>
+          <tr><td colspan="10" class="text-center py-4" style="color:#6B7280;font-size:11px">Carregando campanhas…</td></tr>
         </tbody>
       </table>
     </div>
@@ -5807,6 +5818,72 @@ function loadGoogleData() {
     });
 }
 
+var _gadsFilter = 'all';
+var _gadsCampaigns = [];
+
+var GADS_TYPE_LABEL = {
+  SEARCH: 'Search', DISPLAY: 'Display', PERFORMANCE_MAX: 'PMax',
+  SHOPPING: 'Shopping', VIDEO: 'Vídeo', DISCOVERY: 'Discovery',
+  DEMAND_GEN: 'Demand Gen', SMART: 'Smart', LOCAL: 'Local', HOTEL: 'Hotel'
+};
+
+function filterGadsCamps(filter) {
+  _gadsFilter = filter;
+  ['all','enabled','paused'].forEach(function(f) {
+    var btn = document.getElementById('gads-filter-' + f);
+    if (btn) btn.classList.toggle('active', f === filter);
+  });
+  renderGadsCampsTable();
+}
+
+function renderGadsCampsTable() {
+  var tbody = document.getElementById('gads-camps-body');
+  if (!tbody) return;
+  var fmt = function(n, dec) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 }); };
+  var brl = function(n) { return 'R$\u00a0' + fmt(n, 2); };
+
+  var camps = _gadsCampaigns.slice();
+  if (_gadsFilter === 'enabled') camps = camps.filter(function(c) { return c.status === 'ENABLED'; });
+  if (_gadsFilter === 'paused')  camps = camps.filter(function(c) { return c.status !== 'ENABLED'; });
+
+  // Ordenar: ENABLED primeiro, depois por gasto desc, depois por nome
+  camps.sort(function(a, b) {
+    if (a.status === 'ENABLED' && b.status !== 'ENABLED') return -1;
+    if (a.status !== 'ENABLED' && b.status === 'ENABLED') return 1;
+    return b.spend - a.spend || a.name.localeCompare(b.name);
+  });
+
+  var title = document.getElementById('gads-table-title');
+  if (title) title.textContent = 'Campanhas (' + camps.length + ')';
+
+  if (camps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4" style="color:#6B7280;font-size:11px">Nenhuma campanha encontrada</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = camps.map(function(c) {
+    var isEnabled = c.status === 'ENABLED';
+    var statusDot  = isEnabled
+      ? '<span style="color:#10B981;font-weight:700">&#9679;</span>'
+      : '<span style="color:#6B7280;font-weight:700">&#9679;</span>';
+    var statusBadge = isEnabled
+      ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(16,185,129,0.12);color:#10B981">Ativa</span>'
+      : '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(107,114,128,0.12);color:#6B7280">Pausada</span>';
+    return '<tr' + (isEnabled ? '' : ' style="opacity:0.65"') + '>' +
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + c.name + '">' + statusDot + ' ' + c.name + '</td>' +
+      '<td style="text-align:center;font-size:10px;color:#9CA3AF">' + (GADS_TYPE_LABEL[c.type] || c.type || '—') + '</td>' +
+      '<td style="text-align:center">' + statusBadge + '</td>' +
+      '<td style="text-align:right">' + fmt(c.impr) + '</td>' +
+      '<td style="text-align:right">' + fmt(c.clicks) + '</td>' +
+      '<td style="text-align:right">' + fmt(c.ctr, 2) + '%</td>' +
+      '<td style="text-align:right;color:#00E28B">' + brl(c.spend) + '</td>' +
+      '<td style="text-align:right">' + fmt(c.convs, 1) + '</td>' +
+      '<td style="text-align:right">' + (c.cpc ? brl(c.cpc) : '—') + '</td>' +
+      '<td style="text-align:right;color:#F59E0B">' + (c.cpl ? brl(c.cpl) : '—') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
 function renderGoogleDashboard(d) {
   if (!d) return;
   var t   = d.totals || {};
@@ -5821,51 +5898,46 @@ function renderGoogleDashboard(d) {
   set('gkpi-cpa',       t.cpl   ? brl(t.cpl)   : '—');
   set('gkpi-spend',     brl(t.spend));
   set('gkpi-cpc',       t.cpc   ? brl(t.cpc)   : '—');
-  set('gkpi-imprshare', t.imprShare ? fmt(t.imprShare * 100, 1) + '%' : '—');
+
+  // Impression share: média ponderada pelas campanhas com dados
+  var campsWithShare = (d.campaigns || []).filter(function(c) { return c.imprShare > 0; });
+  var avgShare = campsWithShare.length
+    ? campsWithShare.reduce(function(acc, c) { return acc + c.imprShare; }, 0) / campsWithShare.length
+    : 0;
+  set('gkpi-imprshare', avgShare ? fmt(avgShare * 100, 1) + '%' : '—');
 
   var badge = document.getElementById('gads-badge');
-  if (badge) { badge.textContent = 'Ao vivo'; badge.style.background = 'rgba(0,226,139,0.15)'; badge.style.color = '#00E28B'; }
+  var custIds = (d.customer_ids || []).map(function(c) { return c.id; }).join(', ');
+  if (badge) {
+    badge.textContent = 'Ao vivo · #' + (custIds || d.mcc_id || '');
+    badge.style.background = 'rgba(0,226,139,0.15)';
+    badge.style.color = '#00E28B';
+  }
+
+  // Banner de conta pausada
+  var zeroBanner = document.getElementById('gads-zero-banner');
+  if (zeroBanner) zeroBanner.style.display = (!t.spend && d.campaigns && d.campaigns.length > 0) ? '' : 'none';
 
   // Tabela de campanhas
-  var tbody = document.getElementById('gads-camps-body');
-  if (tbody && d.campaigns) {
-    var typeLabel = { SEARCH: 'Search', DISPLAY: 'Display', PERFORMANCE_MAX: 'PMax', SHOPPING: 'Shopping', VIDEO: 'Video', DISCOVERY: 'Discovery' };
-    tbody.innerHTML = d.campaigns.length === 0
-      ? '<tr><td colspan="9" class="text-center py-4" style="color:#6B7280;font-size:11px">Nenhuma campanha encontrada no período</td></tr>'
-      : d.campaigns.map(function(c) {
-          var statusDot = c.status === 'ENABLED'
-            ? '<span style="color:#10B981;font-weight:700">&#9679;</span>'
-            : '<span style="color:#6B7280;font-weight:700">&#9679;</span>';
-          return '<tr>' +
-            '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + statusDot + ' ' + c.name + '</td>' +
-            '<td style="text-align:center;font-size:10px;color:#9CA3AF">' + (typeLabel[c.type] || c.type || '—') + '</td>' +
-            '<td style="text-align:right">' + fmt(c.impr) + '</td>' +
-            '<td style="text-align:right">' + fmt(c.clicks) + '</td>' +
-            '<td style="text-align:right">' + fmt(c.ctr, 2) + '%</td>' +
-            '<td style="text-align:right;color:#00E28B">' + brl(c.spend) + '</td>' +
-            '<td style="text-align:right">' + fmt(c.convs, 1) + '</td>' +
-            '<td style="text-align:right">' + brl(c.cpc) + '</td>' +
-            '<td style="text-align:right;color:#F59E0B">' + (c.cpl ? brl(c.cpl) : '—') + '</td>' +
-            '</tr>';
-        }).join('');
-  }
+  _gadsCampaigns = d.campaigns || [];
+  _gadsFilter    = 'all';
+  ['all','enabled','paused'].forEach(function(f) {
+    var btn = document.getElementById('gads-filter-' + f);
+    if (btn) btn.classList.toggle('active', f === 'all');
+  });
+  renderGadsCampsTable();
 
   // Gráfico de tendência diária
   renderGoogleTrendChart(d.daily_data, d.all_dates);
 
-  // Atualiza bubble chart com dados reais
+  // Bubble chart CPC × CTR
   if (_googleBubble && d.campaigns && d.campaigns.length) {
-    var maxImpr = Math.max.apply(null, d.campaigns.map(function(c) { return c.impr; }).concat([1]));
-    var palette = [
-      ['rgba(66,133,244','rgba(66,133,244'],
-      ['rgba(52,168,83','rgba(52,168,83'],
-      ['rgba(251,188,5','rgba(251,188,5'],
-      ['rgba(234,67,53','rgba(234,67,53'],
-      ['rgba(105,201,208','rgba(105,201,208'],
-      ['rgba(139,92,246','rgba(139,92,246']
-    ];
-    _googleBubble.data.datasets = d.campaigns.slice(0, 6).map(function(c, i) {
-      var col = palette[i % palette.length][0];
+    var withData = d.campaigns.filter(function(c) { return c.impr > 0; });
+    var toPlot   = withData.length ? withData : d.campaigns.slice(0, 6);
+    var maxImpr  = Math.max.apply(null, toPlot.map(function(c) { return c.impr; }).concat([1]));
+    var palette  = ['rgba(66,133,244','rgba(52,168,83','rgba(251,188,5','rgba(234,67,53','rgba(105,201,208','rgba(139,92,246'];
+    _googleBubble.data.datasets = toPlot.slice(0, 6).map(function(c, i) {
+      var col = palette[i % palette.length];
       return {
         label: c.name.length > 22 ? c.name.slice(0, 22) + '…' : c.name,
         data: [{ x: +c.cpc.toFixed(2), y: +c.ctr.toFixed(2), r: Math.max(5, Math.round(c.impr / maxImpr * 28)) }],
@@ -5877,20 +5949,20 @@ function renderGoogleDashboard(d) {
     _googleBubble.update();
   }
 
-  // Atualiza polar chart com tipos de campanha
+  // Polar chart — distribuição por tipo de campanha (por quantidade, já que conversões=0)
   if (_googlePolar && d.campaigns && d.campaigns.length) {
     var byType = {};
     d.campaigns.forEach(function(c) {
-      var k = c.type || 'OTHER';
-      byType[k] = (byType[k] || 0) + (c.convs || 0);
+      var k = GADS_TYPE_LABEL[c.type] || c.type || 'Outros';
+      byType[k] = (byType[k] || 0) + 1;
     });
     var tLabels = Object.keys(byType);
     var tVals   = Object.values(byType);
     var tColors = ['rgba(66,133,244','rgba(52,168,83','rgba(251,188,5','rgba(234,67,53','rgba(105,201,208','rgba(139,92,246'];
-    _googlePolar.data.labels                       = tLabels;
-    _googlePolar.data.datasets[0].data             = tVals;
-    _googlePolar.data.datasets[0].backgroundColor  = tLabels.map(function(_, i) { return tColors[i % tColors.length] + ',0.25)'; });
-    _googlePolar.data.datasets[0].borderColor       = tLabels.map(function(_, i) { return tColors[i % tColors.length] + ',0.6)'; });
+    _googlePolar.data.labels                      = tLabels;
+    _googlePolar.data.datasets[0].data            = tVals;
+    _googlePolar.data.datasets[0].backgroundColor = tLabels.map(function(_, i) { return tColors[i % tColors.length] + ',0.25)'; });
+    _googlePolar.data.datasets[0].borderColor     = tLabels.map(function(_, i) { return tColors[i % tColors.length] + ',0.6)'; });
     _googlePolar.update();
   }
 }
