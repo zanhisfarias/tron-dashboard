@@ -43,19 +43,34 @@ async function gaql(accessToken, customerId, loginId, query) {
   return res.json();
 }
 
-// Lista contas filhas de uma conta MCC
+// Lista contas acessíveis pelo token (retorna IDs sem o MCC pai)
+async function listAccessibleCustomers(accessToken, devToken) {
+  const res = await fetch(`${ADS_BASE}/customers:listAccessibleCustomers`, {
+    method: 'GET',
+    headers: {
+      'Authorization':   'Bearer ' + accessToken,
+      'developer-token': devToken,
+    },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  // resourceNames format: "customers/1234567890"
+  return (data.resourceNames || []).map(r => r.replace('customers/', ''));
+}
+
+// Lista contas filhas não-manager de um MCC via customer_client
 async function listChildCustomers(accessToken, mccId, devToken) {
   const headers = {
-    'Authorization':   'Bearer ' + accessToken,
-    'developer-token': devToken,
+    'Authorization':     'Bearer ' + accessToken,
+    'developer-token':   devToken,
     'login-customer-id': mccId,
-    'Content-Type':    'application/json',
+    'Content-Type':      'application/json',
   };
   const query = `
     SELECT customer_client.id, customer_client.descriptive_name, customer_client.manager
     FROM customer_client
     WHERE customer_client.level = 1
-      AND customer_client.status = 'ENABLED'
   `;
   const res = await fetch(`${ADS_BASE}/customers/${mccId}/googleAds:search`, {
     method: 'POST',
@@ -63,7 +78,11 @@ async function listChildCustomers(accessToken, mccId, devToken) {
     body: JSON.stringify({ query }),
     signal: AbortSignal.timeout(15000),
   });
-  if (!res.ok) return [];
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error('[google-ads] listChildCustomers error:', res.status, txt.slice(0, 200));
+    return [];
+  }
   const data = await res.json();
   return (data.results || [])
     .filter(r => !r.customerClient?.manager)
@@ -89,11 +108,21 @@ module.exports = async (req, res) => {
     const accessToken = await getAccessToken();
     const devToken    = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
 
-    // Descobre se é MCC — tenta listar filhas; se retornar vazio usa o próprio ID
+    // 1. Tenta via customer_client (lista filhas do MCC)
     let customerIds = await listChildCustomers(accessToken, MCC_ID, devToken);
+
+    // 2. Fallback: listAccessibleCustomers (todos os IDs com acesso pelo token)
+    if (customerIds.length === 0) {
+      const allIds = await listAccessibleCustomers(accessToken, devToken);
+      customerIds = allIds
+        .filter(id => id !== MCC_ID)
+        .map(id => ({ id, name: '' }));
+    }
+
+    // 3. Último recurso: usa o próprio ID
     if (customerIds.length === 0) customerIds = [{ id: MCC_ID, name: '' }];
 
-    // Para cada conta filha, usa o MCC como login-customer-id
+    // login-customer-id = MCC em todas as chamadas
     const loginId = MCC_ID;
 
     const campQuery = `
@@ -129,6 +158,7 @@ module.exports = async (req, res) => {
     `;
 
     // ── Busca em todas as contas filhas em paralelo ────────────────
+    const accountErrors = [];
     const results = await Promise.all(customerIds.map(async ({ id, name }) => {
       try {
         const [campResult, dailyResult] = await Promise.all([
@@ -138,6 +168,7 @@ module.exports = async (req, res) => {
         return { id, name, campResult, dailyResult };
       } catch (e) {
         console.error(`[google-ads] erro na conta ${id}:`, e.message);
+        accountErrors.push({ id, name, error: e.message });
         return { id, name, campResult: { results: [] }, dailyResult: { results: [] } };
       }
     }));
@@ -204,8 +235,9 @@ module.exports = async (req, res) => {
         all_dates:    allDates,
         since,
         until,
-        customer_ids: customerIds,
-        mcc_id:       MCC_ID,
+        customer_ids:   customerIds,
+        mcc_id:         MCC_ID,
+        account_errors: accountErrors,
       },
       updated_at: updatedAt,
       loading:    false,
