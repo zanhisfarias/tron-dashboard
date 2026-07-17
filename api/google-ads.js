@@ -108,22 +108,27 @@ module.exports = async (req, res) => {
     const accessToken = await getAccessToken();
     const devToken    = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
 
-    // 1. Tenta via customer_client (lista filhas do MCC)
-    let customerIds = await listChildCustomers(accessToken, MCC_ID, devToken);
+    // 1. Tenta via customer_client (lista filhas do MCC com login-customer-id = MCC)
+    let customerIds  = await listChildCustomers(accessToken, MCC_ID, devToken);
+    let useLoginId   = customerIds.length > 0; // true = acesso via MCC, false = direto
 
-    // 2. Fallback: listAccessibleCustomers (todos os IDs com acesso pelo token)
+    // 2. Fallback: listAccessibleCustomers (acesso direto pelo token, sem MCC)
     if (customerIds.length === 0) {
       const allIds = await listAccessibleCustomers(accessToken, devToken);
-      customerIds = allIds
-        .filter(id => id !== MCC_ID)
-        .map(id => ({ id, name: '' }));
+      // inclui o próprio MCC apenas se não houver outras contas
+      const leafIds = allIds.filter(id => id !== MCC_ID);
+      customerIds = (leafIds.length > 0 ? leafIds : allIds).map(id => ({ id, name: '' }));
+      useLoginId = false; // acesso direto — não usar login-customer-id
     }
 
-    // 3. Último recurso: usa o próprio ID
-    if (customerIds.length === 0) customerIds = [{ id: MCC_ID, name: '' }];
+    // 3. Último recurso
+    if (customerIds.length === 0) {
+      customerIds = [{ id: MCC_ID, name: '' }];
+      useLoginId = false;
+    }
 
-    // login-customer-id = MCC em todas as chamadas
-    const loginId = MCC_ID;
+    // login-customer-id = MCC apenas quando contas foram encontradas via customer_client
+    const loginId = useLoginId ? MCC_ID : null;
 
     const campQuery = `
       SELECT
