@@ -18,6 +18,7 @@
     { "src": "/api/cancel-post",    "dest": "/api/cancel-post.js" },
     { "src": "/api/always-on",      "dest": "/api/always-on.js" },
     { "src": "/api/cron-publish",   "dest": "/api/cron-publish.js" },
+    { "src": "/api/google-ads",     "dest": "/api/google-ads.js" },
     { "src": "/aula-trafego-pago",      "dest": "/aula-trafego-pago.html" },
     { "src": "/aula-trafego-pago.html", "dest": "/aula-trafego-pago.html" },
     { "src": "/Logo/(.*)",          "dest": "/Logo/$1" },
