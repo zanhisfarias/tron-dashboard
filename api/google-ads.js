@@ -43,11 +43,38 @@ async function gaql(accessToken, customerId, loginId, query) {
   return res.json();
 }
 
+// Lista contas filhas de uma conta MCC
+async function listChildCustomers(accessToken, mccId, devToken) {
+  const headers = {
+    'Authorization':   'Bearer ' + accessToken,
+    'developer-token': devToken,
+    'login-customer-id': mccId,
+    'Content-Type':    'application/json',
+  };
+  const query = `
+    SELECT customer_client.id, customer_client.descriptive_name, customer_client.manager
+    FROM customer_client
+    WHERE customer_client.level = 1
+      AND customer_client.status = 'ENABLED'
+  `;
+  const res = await fetch(`${ADS_BASE}/customers/${mccId}/googleAds:search`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.results || [])
+    .filter(r => !r.customerClient?.manager)
+    .map(r => ({ id: String(r.customerClient.id), name: r.customerClient.descriptiveName || '' }));
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
 
-  const CUSTOMER_ID = process.env.GOOGLE_ADS_CUSTOMER_ID || '3898746298';
+  const MCC_ID = process.env.GOOGLE_ADS_CUSTOMER_ID || '3898746298';
 
   if (!process.env.GOOGLE_ADS_REFRESH_TOKEN || !process.env.GOOGLE_ADS_DEVELOPER_TOKEN) {
     return res.status(500).json({ error: 'Google Ads: credenciais não configuradas', loading: false });
@@ -60,9 +87,15 @@ module.exports = async (req, res) => {
 
   try {
     const accessToken = await getAccessToken();
-    const loginId     = null; // acesso direto, sem MCC
+    const devToken    = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
 
-    // ── Query 1: métricas por campanha no período ──────────────────
+    // Descobre se é MCC — tenta listar filhas; se retornar vazio usa o próprio ID
+    let customerIds = await listChildCustomers(accessToken, MCC_ID, devToken);
+    if (customerIds.length === 0) customerIds = [{ id: MCC_ID, name: '' }];
+
+    // Para cada conta filha, usa o MCC como login-customer-id
+    const loginId = MCC_ID;
+
     const campQuery = `
       SELECT
         campaign.id,
@@ -82,7 +115,6 @@ module.exports = async (req, res) => {
       ORDER BY metrics.cost_micros DESC
     `;
 
-    // ── Query 2: dados diários para gráfico de tendência ──────────
     const dailyQuery = `
       SELECT
         segments.date,
@@ -96,45 +128,56 @@ module.exports = async (req, res) => {
       ORDER BY segments.date ASC
     `;
 
-    const [campResult, dailyResult] = await Promise.all([
-      gaql(accessToken, CUSTOMER_ID, loginId, campQuery),
-      gaql(accessToken, CUSTOMER_ID, loginId, dailyQuery),
-    ]);
+    // ── Busca em todas as contas filhas em paralelo ────────────────
+    const results = await Promise.all(customerIds.map(async ({ id, name }) => {
+      try {
+        const [campResult, dailyResult] = await Promise.all([
+          gaql(accessToken, id, loginId, campQuery),
+          gaql(accessToken, id, loginId, dailyQuery),
+        ]);
+        return { id, name, campResult, dailyResult };
+      } catch (e) {
+        console.error(`[google-ads] erro na conta ${id}:`, e.message);
+        return { id, name, campResult: { results: [] }, dailyResult: { results: [] } };
+      }
+    }));
 
-    // ── Processa campanhas ─────────────────────────────────────────
-    const campaigns = (campResult.results || []).map(row => {
-      const c = row.campaign;
-      const m = row.metrics;
-      const spend  = (m.costMicros   || 0) / 1_000_000;
-      const clicks = parseInt(m.clicks       || 0, 10);
-      const convs  = parseFloat(m.conversions || 0);
-      const impr   = parseInt(m.impressions   || 0, 10);
-      return {
-        id:            c.id,
-        name:          c.name,
-        status:        c.status,
-        type:          c.advertisingChannelType,
-        spend,
-        clicks,
-        impr,
-        convs,
-        ctr:           m.ctr ? m.ctr * 100 : 0,
-        cpc:           (m.averageCpc || 0) / 1_000_000,
-        cpl:           convs ? spend / convs : 0,
-        imprShare:     m.searchImpressionShare || 0,
-      };
-    });
+    // ── Processa campanhas de todas as contas ──────────────────────
+    const campaigns = results.flatMap(({ id: cid, name: cname, campResult }) =>
+      (campResult.results || []).map(row => {
+        const c = row.campaign;
+        const m = row.metrics;
+        const spend  = (m.costMicros   || 0) / 1_000_000;
+        const clicks = parseInt(m.clicks       || 0, 10);
+        const convs  = parseFloat(m.conversions || 0);
+        const impr   = parseInt(m.impressions   || 0, 10);
+        return {
+          id:         c.id,
+          name:       c.name,
+          account:    cname || cid,
+          status:     c.status,
+          type:       c.advertisingChannelType,
+          spend, clicks, impr, convs,
+          ctr:        m.ctr ? m.ctr * 100 : 0,
+          cpc:        (m.averageCpc || 0) / 1_000_000,
+          cpl:        convs ? spend / convs : 0,
+          imprShare:  m.searchImpressionShare || 0,
+        };
+      })
+    ).sort((a, b) => b.spend - a.spend);
 
-    // ── Processa dados diários ─────────────────────────────────────
+    // ── Agrega dados diários de todas as contas ────────────────────
     const dailyMap = {};
-    for (const row of (dailyResult.results || [])) {
-      const d = row.segments.date;
-      const m = row.metrics;
-      if (!dailyMap[d]) dailyMap[d] = { spend: 0, clicks: 0, impr: 0, convs: 0 };
-      dailyMap[d].spend  += (m.costMicros   || 0) / 1_000_000;
-      dailyMap[d].clicks += parseInt(m.clicks       || 0, 10);
-      dailyMap[d].impr   += parseInt(m.impressions   || 0, 10);
-      dailyMap[d].convs  += parseFloat(m.conversions || 0);
+    for (const { dailyResult } of results) {
+      for (const row of (dailyResult.results || [])) {
+        const d = row.segments.date;
+        const m = row.metrics;
+        if (!dailyMap[d]) dailyMap[d] = { spend: 0, clicks: 0, impr: 0, convs: 0 };
+        dailyMap[d].spend  += (m.costMicros   || 0) / 1_000_000;
+        dailyMap[d].clicks += parseInt(m.clicks       || 0, 10);
+        dailyMap[d].impr   += parseInt(m.impressions   || 0, 10);
+        dailyMap[d].convs  += parseFloat(m.conversions || 0);
+      }
     }
     const allDates = Object.keys(dailyMap).sort();
 
@@ -157,11 +200,12 @@ module.exports = async (req, res) => {
       data: {
         campaigns,
         totals,
-        daily_data:  dailyMap,
-        all_dates:   allDates,
+        daily_data:   dailyMap,
+        all_dates:    allDates,
         since,
         until,
-        customer_id: CUSTOMER_ID,
+        customer_ids: customerIds,
+        mcc_id:       MCC_ID,
       },
       updated_at: updatedAt,
       loading:    false,
