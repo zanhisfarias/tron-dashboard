@@ -1172,9 +1172,9 @@
       <div class="mt-1 text-[10px]" style="color:rgba(0,226,139,0.45)">Formulários + calls</div>
     </div>
     <div class="card p-4 col-span-1" style="background:#050f14;border-color:rgba(0,226,139,0.15)">
-      <div class="text-[11px] font-bold uppercase tracking-widest mb-2" style="color:#00E28B">Taxa de conv.</div>
-      <div class="text-2xl font-black text-white" id="gkpi-convrate">—</div>
-      <div class="mt-1 text-[10px]" style="color:rgba(0,226,139,0.45)">Conv / Cliques</div>
+      <div class="text-[11px] font-bold uppercase tracking-widest mb-2" style="color:#00E28B">CTR</div>
+      <div class="text-2xl font-black text-white" id="gkpi-ctr">—</div>
+      <div class="mt-1 text-[10px]" style="color:rgba(0,226,139,0.45)">Taxa de clique</div>
     </div>
     <div class="card p-4 col-span-1" style="background:#050f14;border-color:rgba(0,226,139,0.15)">
       <div class="text-[11px] font-bold uppercase tracking-widest mb-2" style="color:#00E28B">Custo / Conv.</div>
@@ -1209,7 +1209,7 @@
       </div>
     </div>
     <div id="gads-zero-banner" style="display:none;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#F59E0B" class="mb-3 px-3 py-2 rounded-lg text-[11px] font-bold">
-      ⚠️ Sem investimento ativo em julho — todas as campanhas estão pausadas.
+      ⚠️ Sem gasto no período — verifique o faturamento da conta Google Ads (#7520105096).
     </div>
     <div style="overflow-x:auto">
       <table class="tbl" style="min-width:680px">
@@ -1249,9 +1249,46 @@
       <div style="height:220px"><canvas id="googleRadarChart"></canvas></div>
     </div>
     <div class="card p-4 md:p-5" style="background:#050f14;border-color:rgba(0,226,139,0.15)">
-      <div class="text-[11px] font-bold uppercase tracking-widest mb-1" style="color:#00E28B">Conversões por Tipo de Campanha</div>
-      <div class="text-[10px] mb-4" style="color:rgba(0,226,139,0.45)">Search · Display · PMax · Discovery · YouTube</div>
-      <div style="height:220px"><canvas id="googleShareChart"></canvas></div>
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-[11px] font-bold uppercase tracking-widest" style="color:#00E28B">Campanha Ativa — Ordix</div>
+        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full" style="background:rgba(16,185,129,0.12);color:#10B981" id="gads-camp-badge">● Ativa</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <div class="p-3 rounded-lg" style="background:#0a1c24;border:1px solid rgba(0,226,139,0.12)">
+          <div class="text-[10px] mb-1" style="color:rgba(0,226,139,0.5)">Orçamento diário</div>
+          <div class="text-sm font-bold text-white">R$ 100,00</div>
+          <div class="text-[10px]" style="color:rgba(0,226,139,0.4)">R$ 3.000/mês</div>
+        </div>
+        <div class="p-3 rounded-lg" style="background:#0a1c24;border:1px solid rgba(0,226,139,0.12)">
+          <div class="text-[10px] mb-1" style="color:rgba(0,226,139,0.5)">Gasto no período</div>
+          <div class="text-sm font-bold text-white" id="gads-camp-spend">—</div>
+          <div class="text-[10px]" style="color:rgba(0,226,139,0.4)" id="gads-camp-pct">0% do orçamento</div>
+        </div>
+        <div class="p-3 rounded-lg" style="background:#0a1c24;border:1px solid rgba(0,226,139,0.12)">
+          <div class="text-[10px] mb-1" style="color:rgba(0,226,139,0.5)">Palavras-chave</div>
+          <div class="text-sm font-bold text-white">13 phrase · 4 exact</div>
+          <div class="text-[10px]" style="color:rgba(107,114,128,0.7)">9 negativas</div>
+        </div>
+        <div class="p-3 rounded-lg" style="background:#0a1c24;border:1px solid rgba(0,226,139,0.12)">
+          <div class="text-[10px] mb-1" style="color:rgba(0,226,139,0.5)">Anúncio RSA</div>
+          <div class="text-sm font-bold text-white">15 títulos · 4 desc.</div>
+          <div class="text-[10px]" style="color:#10B981">● Ativo · Ordix/Fiscal-NCM</div>
+        </div>
+      </div>
+      <!-- Barra de progresso do orçamento mensal -->
+      <div>
+        <div class="flex justify-between text-[10px] mb-1" style="color:rgba(0,226,139,0.5)">
+          <span>Utilização — Orçamento Mensal</span>
+          <span id="gads-budget-pct-label">0%</span>
+        </div>
+        <div class="w-full rounded-full h-1.5" style="background:rgba(0,226,139,0.1)">
+          <div id="gads-budget-bar" class="h-1.5 rounded-full" style="background:#00E28B;width:0%;transition:width 0.6s ease"></div>
+        </div>
+        <div class="flex justify-between text-[10px] mt-1" style="color:rgba(107,114,128,0.6)">
+          <span id="gads-budget-spent-label">R$ 0,00 gastos</span>
+          <span>Meta: R$ 3.000,00</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -5894,10 +5931,20 @@ function renderGoogleDashboard(d) {
   set('gkpi-impr',      fmt(t.impr));
   set('gkpi-clicks',    fmt(t.clicks));
   set('gkpi-conv',      fmt(t.convs, 1));
-  set('gkpi-convrate',  fmt(t.convRate, 1) + '%');
+  set('gkpi-ctr',       t.ctr   ? fmt(t.ctr, 2) + '%' : '—');
   set('gkpi-cpa',       t.cpl   ? brl(t.cpl)   : '—');
   set('gkpi-spend',     brl(t.spend));
   set('gkpi-cpc',       t.cpc   ? brl(t.cpc)   : '—');
+
+  // Card campanha Ordix — gasto vs orçamento mensal R$3.000
+  var MONTHLY_BUDGET = 3000;
+  var spendPct = Math.min((t.spend / MONTHLY_BUDGET) * 100, 100);
+  set('gads-camp-spend', brl(t.spend));
+  set('gads-camp-pct',   fmt(spendPct, 1) + '% do orçamento');
+  set('gads-budget-pct-label', fmt(spendPct, 1) + '%');
+  set('gads-budget-spent-label', brl(t.spend) + ' gastos');
+  var bar = document.getElementById('gads-budget-bar');
+  if (bar) bar.style.width = spendPct.toFixed(1) + '%';
 
   // Impression share: média ponderada pelas campanhas com dados
   var campsWithShare = (d.campaigns || []).filter(function(c) { return c.imprShare > 0; });
@@ -5949,22 +5996,6 @@ function renderGoogleDashboard(d) {
     _googleBubble.update();
   }
 
-  // Polar chart — distribuição por tipo de campanha (por quantidade, já que conversões=0)
-  if (_googlePolar && d.campaigns && d.campaigns.length) {
-    var byType = {};
-    d.campaigns.forEach(function(c) {
-      var k = GADS_TYPE_LABEL[c.type] || c.type || 'Outros';
-      byType[k] = (byType[k] || 0) + 1;
-    });
-    var tLabels = Object.keys(byType);
-    var tVals   = Object.values(byType);
-    var tColors = ['rgba(66,133,244','rgba(52,168,83','rgba(251,188,5','rgba(234,67,53','rgba(105,201,208','rgba(139,92,246'];
-    _googlePolar.data.labels                      = tLabels;
-    _googlePolar.data.datasets[0].data            = tVals;
-    _googlePolar.data.datasets[0].backgroundColor = tLabels.map(function(_, i) { return tColors[i % tColors.length] + ',0.25)'; });
-    _googlePolar.data.datasets[0].borderColor     = tLabels.map(function(_, i) { return tColors[i % tColors.length] + ',0.6)'; });
-    _googlePolar.update();
-  }
 }
 
 function renderGoogleTrendChart(dailyData, allDates) {
